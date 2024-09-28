@@ -18,17 +18,19 @@
             android:layout_width="130dp"
             android:layout_height="130dp"
             app:srcCompat="@drawable/logo1"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:contentDescription=""/>
 
         <TextView
             android:id="@+id/logo_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="BATTLE RUNNER"
             android:textStyle="italic"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:textColor="@color/white"
             android:layout_gravity="center"
+            android:gravity="center"
             android:fontFamily="@font/pretendard_extrabold"/>
 
     </LinearLayout>
