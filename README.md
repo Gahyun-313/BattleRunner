@@ -1,4 +1,2 @@
 ﻿# BattleRunner
 
-디자인
-https://www.figma.com/design/NG09hmR9Psi5yzeMObdpvZ/%EB%B0%B0%ED%8B%80%EB%9F%AC%EB%84%88?node-id=0-1&node-type=canvas&t=ghzBS6CQpZsBfBPZ-0
