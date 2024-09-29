@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Battle Runner</string>
+    <string name="app_name">BATTLE RUNNER</string>
+    <string name="icon">logo icon</string>
 </resources>
