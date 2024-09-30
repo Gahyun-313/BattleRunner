@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/white"
             android:contentDescription="@string/icon"
-            android:src="@drawable/kakao_login"
+            android:src="@drawable/login_kakao"
             android:layout_weight="0"
             android:padding="0dp">
         </ImageButton>
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/white"
             android:contentDescription="@string/icon"
-            android:src="@drawable/google_login"
+            android:src="@drawable/login_google"
             android:layout_weight="0">
         </ImageButton>
 
