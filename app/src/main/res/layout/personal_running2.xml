@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <FrameLayout
+        android:id="@+id/popup"
+        android:layout_width="370dp"
+        android:layout_height="620dp"
+        android:background="@drawable/border"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:text="깐풍기님과의 배틀 결과"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:id="@+id/map_placeholder"
+            android:layout_width="340dp"
+            android:layout_height="390dp"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="#A9A9A9" >
+
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="450dp"
+            android:text="단무지님의 승리"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="485dp"
+            android:gravity="center"
+            android:text="축하드립니다!"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/info_layout"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:backgroundTint="#485FF0"
+            android:background="@drawable/rounded_border"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center">
+
+
+            <TextView
+                android:id="@+id/today_distance"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="거리  10.19km"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+
+            <TextView
+                android:id="@+id/today_time"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="시간  13:34:99"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="end|top"
+            android:layout_margin="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="2dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/close" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
