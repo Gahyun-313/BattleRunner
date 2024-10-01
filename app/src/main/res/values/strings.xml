@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">BATTLE RUNNER</string>
     <string name="icon">logo icon</string>
+    <string name="matching_title">배틀 상대 매칭</string>
+    <string name="matching_subtitle">함께 뛸 러너가 매칭되기 전이에요!</string>
+    <string name="matching_search">ID로 검색하기</string>
+    <string name="matching_search_btn">신청</string>
+    <string name="apply_submit_btn">배틀 신청</string>
+    <string name="month_record">이달의 기록</string>
+    <string name="apply_receive_deny">거절</string>
+    <string name="apply_receive_allow">수락</string>
+    <string name="search_hint">ID로 검색하기</string>
 </resources>

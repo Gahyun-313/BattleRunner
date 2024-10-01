@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomSearchView" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/blue0</item> <!-- 검색어 텍스트 색상 -->
+        <item name="android:textColorPrimary">@color/white</item> <!-- 검색어 텍스트 색상 -->
+        <item name="android:textColorHint">@color/white</item> <!-- 힌트 색상 -->
+        <item name="colorControlNormal">@color/white</item> <!-- 기본 아이콘 색상 -->
+    </style>
+</resources>
