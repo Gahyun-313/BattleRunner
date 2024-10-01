@@ -11,4 +11,5 @@
     <string name="apply_receive_allow">수락</string>
     <string name="search_hint">ID로 검색하기</string>
     <string name="user_profile_image">user profile image</string>
+    <string name="today_running">오늘의 러닝</string>
 </resources>
