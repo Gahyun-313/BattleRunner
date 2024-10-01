@@ -47,6 +47,7 @@
         android:layout_weight="0.08"/>
 
     <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginHorizontal="15dp"

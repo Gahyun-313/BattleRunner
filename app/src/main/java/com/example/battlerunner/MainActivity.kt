@@ -12,5 +12,6 @@ class MainActivity : AppCompatActivity() {
         // 여기서 binding을 바로 초기화
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
     }
 }
