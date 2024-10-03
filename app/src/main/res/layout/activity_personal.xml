@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <TextView
@@ -15,15 +16,18 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:fontFamily="@font/pretendard_extrabold"
-        android:paddingTop="35dp"/>
+        android:paddingTop="35dp"
+        android:paddingBottom="25dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="30dp"
+        android:paddingBottom="8dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/today_running"
             android:textSize="23sp"
@@ -31,8 +35,101 @@
             android:layout_gravity="center"
             android:gravity="start"
             android:fontFamily="@font/pretendard_extrabold"
-            android:layout_marginHorizontal="30dp"/>
+            android:layout_weight="1"/>
+
+        <Button
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/orange0"
+            android:text="GOAL"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
     </LinearLayout>
 
+    <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="20dp"
+        android:text="@string/app_name"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="현재 기록"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/pretendard_extrabold"
+            android:paddingHorizontal="15dp"/>
+
+        <!--거리, 시간 : 데이터 부분 가변형으로 수정 필요-->
+        <TextView
+            android:id="@+id/today_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="거리  10.19 km"
+            android:textColor="#000000"
+            android:textSize="22sp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/today_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="시간  13:34:99"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:layout_gravity="center"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="40dp">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/blue0"
+                android:text="시작"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:fontFamily="@font/pretendard_medium"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="10dp"
+                style="?android:attr/buttonBarButtonStyle"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/grey_dark2"
+                android:text="종료"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:fontFamily="@font/pretendard_medium"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="10dp"
+                style="?android:attr/buttonBarButtonStyle"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

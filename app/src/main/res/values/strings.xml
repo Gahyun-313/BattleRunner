@@ -12,4 +12,7 @@
     <string name="search_hint">ID로 검색하기</string>
     <string name="user_profile_image">user profile image</string>
     <string name="today_running">오늘의 러닝</string>
+    <string name="today_running_record">오늘의 러닝 기록</string>
+    <string name="battle_end">수고하셨습니다!</string>
+    <string name="battle_request">배틀 신청이 도착했습니다</string>
 </resources>

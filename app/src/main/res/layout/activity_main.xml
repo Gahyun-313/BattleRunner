@@ -6,4 +6,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
 
+    <include
+        android:id="@+id/personal"
+        layout="@layout/activity_personal" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

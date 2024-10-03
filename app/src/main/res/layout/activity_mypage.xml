@@ -22,13 +22,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:cardCornerRadius="16dp"
         android:background="#FFFFFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_background"
-        app:layout_constraintBottom_toTopOf="@id/divider_personal"
-        android:elevation="8dp"> <!-- 둥근 모서리 적용 -->
+        app:layout_constraintBottom_toTopOf="@id/divider_personal">
+        <!-- 둥근 모서리 적용 -->
 
         <LinearLayout
             android:layout_width="match_parent"
