@@ -8,6 +8,6 @@
 
     <include
         android:id="@+id/personal"
-        layout="@layout/activity_personal" />
+        layout="@layout/activity_login" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
