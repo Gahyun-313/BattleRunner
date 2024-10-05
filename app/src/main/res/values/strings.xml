@@ -15,4 +15,6 @@
     <string name="today_running_record">오늘의 러닝 기록</string>
     <string name="battle_end">수고하셨습니다!</string>
     <string name="battle_request">배틀 신청이 도착했습니다</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,26 +1,58 @@
 package com.example.battlerunner
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
-import android.view.WindowManager
-import androidx.core.view.WindowInsetsControllerCompat
+import android.util.Log
+import android.view.MenuItem
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.battlerunner.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
+
+
+    val homeFragment = HomeFragment()
+    val battleFragment = BattleFragment()
+    val myPageFragment = MyPageFragment()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 여기서 binding을 바로 초기화
         val binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 
+        setFragment(homeFragment)
+
+        binding.bottomNavigationMenu.setOnItemSelectedListener{
+            when(it.itemId) {
+                R.id.home -> setFragment(homeFragment)
+                R.id.battle -> setFragment(battleFragment)
+                R.id.myPage -> setFragment(myPageFragment)
+            }
+            true
+        }
+
+
     }
+
+    // 프래그먼트 전환 함수
+    private fun setFragment (fragment: Fragment) {
+        Log.d("MainActivity", "{$fragment}")
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.fragmentContainer, fragment)   // 첫 번째 인자에 두 번째 인자를 보여준다는 뜻
+
+            // 프래그먼트에 따른 상태바 색상 변경
+            if (fragment == myPageFragment) {
+                window.statusBarColor = ContextCompat.getColor(this@MainActivity, R.color.blue0)
+            } else {
+                window.statusBarColor = ContextCompat.getColor(this@MainActivity, R.color.white)
+            }
+            commit()
+        }
+    }
+
 }
+
 

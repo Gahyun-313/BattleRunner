@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/battle"
+        android:title="battle"
+        android:icon="@drawable/home_bar_battle" />
+
+    <item
+        android:id="@+id/home"
+        android:title="personal"
+        android:icon="@drawable/home_bar_home" />
+
+    <item
+        android:id="@+id/myPage"
+        android:title="myPage"
+        android:icon="@drawable/home_bar_menu" />
+
+</menu>
