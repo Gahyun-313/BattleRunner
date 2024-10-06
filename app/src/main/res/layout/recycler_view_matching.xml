@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:text="id_gganpunggi01"
+            android:text="@string/userID"
             android:layout_weight="1"
             tools:ignore="NestedWeights"
             android:textSize="18sp"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:text="닉네임"
+            android:text="@string/userName"
             android:layout_weight="1"
             android:textSize="18sp"
             android:textColor="@color/grey_dark"
@@ -48,7 +48,7 @@
         android:layout_gravity="center_vertical"
         android:background="@drawable/button"
         android:backgroundTint="@color/orange0"
-        android:text="@string/matching_search_btn"
+        android:text="@string/matching_searchBtn"
         android:textColor="@color/white"
         android:textSize="17sp"
         android:textStyle="bold"/>

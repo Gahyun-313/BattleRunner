@@ -15,12 +15,13 @@
         android:layout_gravity="right"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="fitCenter"
-        android:src="@drawable/close" />
+        android:src="@drawable/close"
+        android:contentDescription="@string/battleEnd_closeBtn"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="깐풍기님과의 배틀 결과"
+        android:text="@string/battleEnd_title"
         android:textSize="23sp"
         android:textColor="@color/black"
         android:gravity="start"
@@ -40,7 +41,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="단무지님의 승리"
+        android:text="@string/battleEnd_win"
         android:textSize="23sp"
         android:textColor="@color/black"
         android:layout_gravity="center"
@@ -50,7 +51,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/battle_end"
+        android:text="@string/battleEnd_line_lose"
         android:textColor="@color/grey_dark"
         android:textSize="17sp"
         android:textStyle="bold"
@@ -72,7 +73,7 @@
             android:id="@+id/today_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="달린 거리  10.19 km"
+            android:text="@string/personalEnd_distance"
             android:textColor="@color/white"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="18sp"
@@ -82,7 +83,7 @@
             android:id="@+id/today_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="소요 시간  13:34:99"
+            android:text="@string/personalEnd_time"
             android:textColor="@color/white"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="18sp"

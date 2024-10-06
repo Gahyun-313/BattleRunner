@@ -7,6 +7,7 @@
     android:layout_gravity="center">
 
     <ImageButton
+        android:id="@+id/closeBtn"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginTop="15dp"
@@ -19,7 +20,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/today_running_record"
+        android:text="@string/personalEnd_title"
         android:textSize="23sp"
         android:textColor="@color/black"
         android:gravity="start"
@@ -53,7 +54,7 @@
             android:id="@+id/today_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="달린 거리  10.19 km"
+            android:text="@string/personalEnd_distance"
             android:textColor="@color/white"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="18sp"
@@ -63,7 +64,7 @@
             android:id="@+id/today_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="소요 시간  13:34:99"
+            android:text="@string/personalEnd_time"
             android:textColor="@color/white"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="18sp"
@@ -74,7 +75,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/battle_end"
+        android:text="@string/personalEnd_line"
         android:textColor="@color/grey_dark"
         android:textSize="17sp"
         android:textStyle="bold"

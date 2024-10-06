@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="gganpunggi01"
+        android:text="@string/userID"
         android:textSize="17sp"
         android:textColor="@color/grey_dark2"
         android:gravity="start"
@@ -37,7 +37,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="깐풍기"
+        android:text="@string/userName"
         android:textSize="23sp"
         android:textColor="@color/black"
         android:layout_gravity="center"
@@ -53,7 +53,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/month_record"
+            android:text="@string/battleApply_monthRecord"
             android:textColor="@color/grey_dark2"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="17sp"
@@ -62,7 +62,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="10.19 km"
+            android:text="@string/km"
             android:textColor="@color/grey_dark2"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="17sp"
@@ -71,7 +71,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="13:34:99"
+            android:text="@string/temp_time"
             android:textColor="@color/grey_dark2"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="17sp"
@@ -84,7 +84,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/button"
         android:backgroundTint="@color/blue0"
-        android:text="배틀 신청"
+        android:text="@string/battleApply_applyBtn"
         android:textColor="@color/white"
         android:textSize="23sp"
         android:fontFamily="@font/pretendard_extrabold"

@@ -13,7 +13,7 @@
         tools:ignore="UselessParent">
 
         <TextView
-            android:id="@+id/logo_text"
+            android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
@@ -33,9 +33,10 @@
             android:paddingBottom="8dp">
 
             <TextView
+                android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="깐풍기님과의 배틀"
+                android:text="@string/battle_title"
                 android:textSize="23sp"
                 android:textColor="@color/black"
                 android:layout_gravity="center"
@@ -49,11 +50,12 @@
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/button"
                 android:backgroundTint="@color/orange0"
-                android:text="finish"
+                android:text="@string/battle_finish"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="15sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                style="?android:attr/buttonBarButtonStyle"/>
         </LinearLayout>
 
         <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
@@ -74,7 +76,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="현재 기록"
+                android:text="@string/battle_record"
                 android:textColor="@color/black"
                 android:textSize="17sp"
                 android:textStyle="bold"
@@ -86,7 +88,7 @@
                 android:id="@+id/today_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="거리  10.19 km"
+                android:text="@string/battle_distance"
                 android:textColor="#000000"
                 android:textSize="22sp"
                 android:layout_gravity="center"/>
@@ -95,7 +97,7 @@
                 android:id="@+id/today_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="시간  13:34:99"
+                android:text="@string/battle_time"
                 android:textColor="@color/black"
                 android:textSize="22sp"
                 android:layout_gravity="center"/>
@@ -113,19 +115,20 @@
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/button"
                     android:backgroundTint="@color/blue0"
-                    android:text="시작"
+                    android:text="@string/startBtn"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:fontFamily="@font/pretendard_medium"
                     android:layout_weight="1"
-                    android:layout_marginHorizontal="10dp"/>
+                    android:layout_marginHorizontal="10dp"
+                    style="?android:attr/buttonBarButtonStyle" />
                 <Button
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/button"
                     android:backgroundTint="@color/grey_dark2"
-                    android:text="종료"
+                    android:text="@string/endBtn"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:fontFamily="@font/pretendard_medium"
