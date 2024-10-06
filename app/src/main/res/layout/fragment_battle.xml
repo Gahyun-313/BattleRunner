@@ -13,17 +13,19 @@
         tools:ignore="UselessParent">
 
         <TextView
-            android:id="@+id/logo"
+            android:id="@+id/logo_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
             android:textStyle="italic"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textColor="@color/blue0"
+            android:background="@color/white"
             android:layout_gravity="center"
-            android:gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingBottom="25dp"/>
+            android:paddingTop="10dp"
+            android:paddingBottom="25dp"
+            android:paddingLeft="20dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"

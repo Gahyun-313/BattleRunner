@@ -18,12 +18,14 @@
             android:layout_height="wrap_content"
             android:text="@string/app_name"
             android:textStyle="italic"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textColor="@color/blue0"
+            android:background="@color/white"
             android:layout_gravity="center"
-            android:gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingVertical="35dp"/>
+            android:paddingTop="5dp"
+            android:paddingBottom="25dp"
+            android:paddingLeft="20dp"/>
 
         <TextView
             android:layout_width="match_parent"
