@@ -22,7 +22,7 @@
             android:background="@color/white"
             android:layout_gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingTop="10dp"
+            android:paddingTop="15dp"
             android:paddingBottom="25dp"
             android:paddingLeft="20dp"/>
 
@@ -123,6 +123,7 @@
                     android:layout_marginHorizontal="10dp"
                     style="?android:attr/buttonBarButtonStyle"/>
                 <Button
+                    android:id="@+id/finishBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"

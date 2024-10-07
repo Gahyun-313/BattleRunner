@@ -11,7 +11,6 @@ import com.example.battlerunner.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
 
-
     val homeFragment = HomeFragment()
     val battleFragment = BattleFragment()
     val myPageFragment = MyPageFragment()
@@ -19,12 +18,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // binding을 여기서 바로 초기화
         val binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 
+        //프래그먼트, 홈바를 각각 home으로 시작하도록 설정
         setFragment(homeFragment)
+        binding.bottomNavigationMenu.selectedItemId = R.id.home
 
+        //홈바 클릭에 따른 프래그먼트 화면 전환
         binding.bottomNavigationMenu.setOnItemSelectedListener{
             when(it.itemId) {
                 R.id.home -> setFragment(homeFragment)

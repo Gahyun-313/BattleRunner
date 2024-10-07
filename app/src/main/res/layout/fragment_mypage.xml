@@ -24,7 +24,7 @@
             android:background="@color/blue0"
             android:layout_gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingTop="10dp"
+            android:paddingTop="15dp"
             android:paddingBottom="25dp"
             android:paddingLeft="20dp"/>
 
