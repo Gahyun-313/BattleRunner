@@ -1,5 +1,6 @@
 package com.example.battlerunner
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -11,10 +12,10 @@ import com.example.battlerunner.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
 
-
     val homeFragment = HomeFragment()
     val battleFragment = BattleFragment()
     val myPageFragment = MyPageFragment()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,20 +26,18 @@ class MainActivity : AppCompatActivity() {
 
         setFragment(homeFragment)
 
-        binding.bottomNavigationMenu.setOnItemSelectedListener{
-            when(it.itemId) {
+        binding.bottomNavigationMenu.setOnItemSelectedListener {
+            when (it.itemId) {
                 R.id.home -> setFragment(homeFragment)
                 R.id.battle -> setFragment(battleFragment)
                 R.id.myPage -> setFragment(myPageFragment)
             }
             true
         }
-
-
     }
 
     // 프래그먼트 전환 함수
-    private fun setFragment (fragment: Fragment) {
+    private fun setFragment(fragment: Fragment) {
         Log.d("MainActivity", "{$fragment}")
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragmentContainer, fragment)   // 첫 번째 인자에 두 번째 인자를 보여준다는 뜻
@@ -53,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-}
+    }
+
 
 
