@@ -56,12 +56,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_userName"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_userID"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -71,22 +73,26 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/myPage_age"
-                        android:layout_marginRight="20dp"/>
+                        android:layout_marginEnd="20dp"
+                        android:gravity="center_vertical"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="@string/myPage_sex" />
+                        android:text="@string/myPage_sex"
+                        android:gravity="center_vertical"/>
                 </LinearLayout>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:text="@string/myPage_record"
-                    android:layout_weight="1"/>
+                    android:text="@string/myPage_grade"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_longestDistance"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
 
             </LinearLayout>
         </LinearLayout>
@@ -100,29 +106,38 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_lite"/>
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_personalRunning"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/white"/>
+            android:background="@color/white"
+            android:text="@string/myPage_weekGoal"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/white"/>
+            android:background="@color/white"
+            android:text="@string/myPage_calendar"/>
 
         <!--배틀 기록-->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/grey_lite"/>
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_battle"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/white"/>
+            android:background="@color/white"
+            android:text="@string/myPage_record"/>
 
         <!--여백-->
         <Button

@@ -75,9 +75,14 @@
     <string name="myPage_userID">userID</string>
     <string name="myPage_userName">이름</string>
     <string name="myPage_longestDistance">최장거리</string>
-    <string name="myPage_record">전적</string>
+    <string name="myPage_grade">전적</string>
     <string name="myPage_sex">성별</string>
     <string name="myPage_age">나이</string>
+    <string name="myPage_personalRunning">개인 러닝</string>
+    <string name="myPage_weekGoal">이번주 목표</string>
+    <string name="myPage_calendar">캘린더</string>
+    <string name="myPage_battle">배틀</string>
+    <string name="myPage_record">기록</string>
 
     
 </resources>
