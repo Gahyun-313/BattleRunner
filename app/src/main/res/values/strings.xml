@@ -83,6 +83,8 @@
     <string name="myPage_calendar">캘린더</string>
     <string name="myPage_battle">배틀</string>
     <string name="myPage_record">기록</string>
+    <string name="myPage_logout_text">로그인/로그아웃</string>
+    <string name="myPage_logout">로그아웃</string>
 
 
 </resources>

@@ -34,7 +34,7 @@
             android:layout_height="0dp"
             android:layout_marginHorizontal="15dp"
             android:orientation="horizontal"
-            android:layout_weight="3"
+            android:layout_weight="3.3"
             android:background="@drawable/button">
 
             <ImageView
@@ -57,13 +57,15 @@
                     android:layout_height="0dp"
                     android:text="@string/myPage_userName"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_userID"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -74,25 +76,29 @@
                         android:layout_height="match_parent"
                         android:text="@string/myPage_age"
                         android:layout_marginEnd="20dp"
-                        android:gravity="center_vertical"/>
+                        android:gravity="center_vertical"
+                        android:textSize="15sp"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/myPage_sex"
-                        android:gravity="center_vertical"/>
+                        android:gravity="center_vertical"
+                        android:textSize="15sp"/>
                 </LinearLayout>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_grade"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:text="@string/myPage_longestDistance"
                     android:layout_weight="1"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"/>
 
             </LinearLayout>
         </LinearLayout>
@@ -105,7 +111,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="0.7"
             android:background="@color/grey_lite"
             android:text="@string/myPage_personalRunning"
             android:gravity="center_vertical"
@@ -115,35 +121,58 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white"
-            android:text="@string/myPage_weekGoal"/>
+            android:text="@string/myPage_weekGoal"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white"
-            android:text="@string/myPage_calendar"/>
+            android:text="@string/myPage_calendar"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"/>
 
         <!--배틀 기록-->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="0.7"
             android:background="@color/grey_lite"
             android:text="@string/myPage_battle"
             android:gravity="center_vertical"
-            android:paddingHorizontal="20dp"/>
+            android:paddingHorizontal="20dp"
+            />
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white"
-            android:text="@string/myPage_record"/>
+            android:text="@string/myPage_record"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"/>
 
-        <!--여백-->
-        <Button
+        <!--카카오톡 로그아웃-->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
-            android:background="@color/white"/>
+            android:layout_weight="0.7"
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_logout_text"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
+        <Button
+            android:id="@+id/LogoutBtn"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:text="@string/myPage_logout"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:textColor="@color/red0" />
+
+        <!--여백-->
+
     </LinearLayout>
 </FrameLayout>

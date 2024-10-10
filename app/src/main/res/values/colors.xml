@@ -14,5 +14,6 @@
     <color name="grey_lite">#cdcdcd</color>
     <color name="grey_dark">#8c8c8c</color>
     <color name="grey_dark2">#383838</color>
+    <color name="red0">#DF0101</color>
 
 </resources>
