@@ -48,8 +48,13 @@
         <activity
             android:name=".BattleEndActivity"
             android:exported="false" />
+
         <activity
             android:name=".PersonalEndActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LoginActivity"
             android:exported="false" />
 
     </application>
