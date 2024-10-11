@@ -23,23 +23,23 @@
             android:background="@color/white"
             android:layout_gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingTop="10dp"
-            android:paddingBottom="25dp"
-            android:paddingLeft="20dp"/>
+            android:paddingTop="15dp"
+            android:paddingBottom="5dp"
+            android:paddingStart="20dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingHorizontal="30dp"
-            android:paddingBottom="8dp">
+            android:paddingBottom="3dp">
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/battle_title"
-                android:textSize="23sp"
+                android:textSize="21sp"
                 android:textColor="@color/black"
                 android:layout_gravity="center"
                 android:gravity="start"
@@ -47,6 +47,7 @@
                 android:layout_weight="1"/>
 
             <Button
+                android:id="@+id/BattlefinishBtn"
                 android:layout_width="70dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center_vertical"
@@ -72,8 +73,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingVertical="10dp">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
@@ -83,7 +83,8 @@
                 android:textSize="17sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/pretendard_extrabold"
-                android:paddingHorizontal="15dp"/>
+                android:paddingHorizontal="15dp"
+                android:paddingTop="10dp"/>
 
             <!--거리, 시간 : 데이터 부분 가변형으로 수정 필요-->
             <TextView
@@ -92,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/battle_distance"
                 android:textColor="#000000"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:layout_gravity="center"/>
 
             <TextView
@@ -101,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/battle_time"
                 android:textColor="@color/black"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:layout_gravity="center"/>
 
             <LinearLayout
@@ -125,6 +126,7 @@
                     android:layout_marginHorizontal="10dp"
                     style="?android:attr/buttonBarButtonStyle" />
                 <Button
+                    android:id="@+id/finishBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"

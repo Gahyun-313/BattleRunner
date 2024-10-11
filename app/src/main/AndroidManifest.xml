@@ -5,9 +5,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-
-
-
         android:allowBackup="true"
         android:name=".GlobalApplication"
 
@@ -17,23 +14,19 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.BattleRunner">
+
+        <!-- 스플래시 액티비티 추가 및 앱의 첫 화면으로 설정 -->
         <activity
-            android:name=".LoginActivity"/>
-
-
-
-        <activity
-
-            android:name=".MainActivity"
-
-            android:exported="true">
-
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
             <intent-filter>
@@ -46,6 +39,19 @@
                     android:scheme="kakao16005e7a061659542eeaf1f020717f46" />
             </intent-filter>
         </activity>
+
+        <!-- 스플래시 화면 후 표시될 메인 액티비티 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".BattleEndActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PersonalEndActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

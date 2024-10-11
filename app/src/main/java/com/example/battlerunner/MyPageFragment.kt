@@ -10,29 +10,21 @@ import android.widget.Button
 import android.widget.Toast
 import com.kakao.sdk.user.UserApiClient
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+// TODO [갤러리에서 가져온 사진 넣기] https://velog.io/@ouowinnie/AndroidKotlin-%EA%B0%A4%EB%9F%AC%EB%A6%AC-%EC%9D%B4%EB%AF%B8%EC%A7%80-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0-Edit-Profile
 
-/**
- * A simple [Fragment] subclass.
- * Use the [MyPageFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+//private const val ARG_PARAM1 = "param1"
+
 class MyPageFragment : Fragment(R.layout.fragment_mypage) {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
+    // [ onCreate ] 프래그먼트 생성될 때 호출됨. arguments로 받은 데이터에서 값 가져올 수 있음
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        // arguments?.let {
+        //   param1 = it.getString(ARG_PARAM1)
+        // }
     }
 
+    // [ onCreateView ] UI 초기화 메서드
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -53,7 +45,11 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
                     // 로그아웃 수행
                     UserApiClient.instance.logout { logoutError ->
                         if (logoutError != null) {
-                            Toast.makeText(requireContext(), "로그아웃 실패: ${logoutError.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "로그아웃 실패: ${logoutError.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             Toast.makeText(requireContext(), "로그아웃 성공", Toast.LENGTH_SHORT).show()
                             val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -66,25 +62,5 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         }
 
         return view
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MypageFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MyPageFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }

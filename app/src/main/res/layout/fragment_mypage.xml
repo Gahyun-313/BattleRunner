@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".HomeFragment"
     android:background="@color/blue0">
 
@@ -140,22 +139,27 @@
             android:background="@color/white"
             android:text="@string/myPage_record"/>
 
-
-        <!--여백-->
-        <Button
+        <!--카카오톡 로그아웃-->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/white"/>
-
+            android:layout_weight="0.7"
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_logout_text"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
         <Button
             android:id="@+id/kakao_logout_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="로그아웃"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/kakao_unlink_button"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:text="@string/myPage_logout"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:textColor="@color/red0" />
+
+        <!--여백-->
+
     </LinearLayout>
 </FrameLayout>
