@@ -6,31 +6,36 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.Toast
-//import com.kakao.sdk.auth.LoginClient
-import com.kakao.sdk.auth.model.OAuthToken
+// import com.kakao.sdk.auth.LoginClient // 카카오 로그인 클라이언트 불러오기
+import com.kakao.sdk.auth.model.OAuthToken // 카카오 OAuthToken 모델 불러오기
 import com.kakao.sdk.common.util.Utility
-import com.kakao.sdk.common.model.AuthErrorCause.*
-import com.kakao.sdk.user.UserApiClient
+import com.kakao.sdk.common.model.AuthErrorCause.* // 인증 오류 원인 불러오기
+import com.kakao.sdk.user.UserApiClient // 사용자 API 클라이언트 불러오기
 
+// LoginActivity 클래스 정의, AppCompatActivity를 상속
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.activity_login) // 로그인 화면 레이아웃 설정
 
         // 로그인 정보 확인
         UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
             if (error != null) {
+                // 로그인 실패 시 메시지 표시
                 Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
             } else if (tokenInfo != null) {
+                // 로그인 성공 시 메시지 표시 후 메인 화면으로 이동
                 Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                finish()
+                finish() // 현재 액티비티 종료
             }
         }
 
+        // 로그인 콜백 정의
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) {
+                // 에러 종류에 따른 대응 처리
                 when {
                     error.toString() == AccessDenied.toString() -> {
                         Toast.makeText(this, "접근이 거부 됨(동의 취소)", Toast.LENGTH_SHORT).show()
@@ -61,21 +66,23 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             } else if (token != null) {
+                // 로그인 성공 시 메시지 표시 후 메인 화면으로 이동
                 Toast.makeText(this, "로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                finish()
+                finish() // 현재 액티비티 종료
             }
         }
 
-        //카카오 로그인 버튼
+        // 카카오 로그인 버튼 클릭 이벤트 처리
         findViewById<ImageButton>(R.id.kakao_login_btn).setOnClickListener {
+            // 카카오톡 로그인이 가능한지 확인 후 로그인 시도
             if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
                 UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
             } else {
+                // 카카오톡 로그인 불가능 시 카카오 계정으로 로그인 시도
                 UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
             }
         }
     }
 }
-
