@@ -25,7 +25,13 @@
     <string name="temp_time">13:34:49</string>
 
     <!-- activity_login.xml -->
-    <string name="login_signup">회원가입</string>
+    <string name="login_temp">temp</string>
+    <string name="login_login">로그인</string>
+
+    <!-- activity_login2.xml -->
+    <string name="login2_signup">회원가입</string>
+    <string name="login2_id">ID</string>
+    <string name="login2_password">비밀번호</string>
 
     <!-- fragment_home.xml -->
     <string name="home_title">오늘의 러닝</string>

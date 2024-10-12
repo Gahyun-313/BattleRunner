@@ -19,11 +19,22 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login) // 로그인 화면 레이아웃 설정
 
-        // 회원가입 버튼 클릭 이벤트 처리
-        findViewById<Button>(R.id.signup_btn).setOnClickListener {
-            Toast.makeText(this, "회원가입 버튼 클릭", Toast.LENGTH_SHORT).show()
+        // temp 버튼 클릭 이벤트 처리
+        findViewById<Button>(R.id.login_btn).setOnClickListener {
+            Toast.makeText(this, "temp", Toast.LENGTH_SHORT).show()
 
+            // MainActivity 이동
             val intent = Intent(this@LoginActivity, MainActivity::class.java)
+            startActivity(intent)
+            finish() // LoginActivity 종료
+        }
+
+        // 로그인 버튼 클릭 이벤트 처리
+        findViewById<Button>(R.id.login_btn).setOnClickListener {
+            Toast.makeText(this, "로그인 버튼 클릭", Toast.LENGTH_SHORT).show()
+
+            // Login2Activity 이동
+            val intent = Intent(this@LoginActivity, Login2Activity::class.java)
             startActivity(intent)
             finish()
         }
