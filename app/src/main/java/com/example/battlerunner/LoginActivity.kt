@@ -68,9 +68,8 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        val kakaoLoginButton = findViewById<ImageButton>(R.id.kakao_login_btn) // 로그인 버튼
-
-        kakaoLoginButton.setOnClickListener {
+        //카카오 로그인 버튼
+        findViewById<ImageButton>(R.id.kakao_login_btn).setOnClickListener {
             if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
                 UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
             } else {

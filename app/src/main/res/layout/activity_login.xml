@@ -29,6 +29,20 @@
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
+        <Button
+            android:layout_width="300dp"
+            android:layout_height="48dp"
+            android:background="@color/blue0"
+            android:text="@string/login_signup"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="16sp"
+            android:textColor="@color/white"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_weight="0"/>
+
         <ImageButton
             android:id="@+id/kakao_login_btn"
             android:layout_width="wrap_content"

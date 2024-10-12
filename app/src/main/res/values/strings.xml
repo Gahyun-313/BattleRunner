@@ -24,6 +24,9 @@
     <string name="temp_distance">10.19</string>
     <string name="temp_time">13:34:49</string>
 
+    <!-- activity_login.xml -->
+    <string name="login_signup">회원가입</string>
+
     <!-- fragment_home.xml -->
     <string name="home_title">오늘의 러닝</string>
     <string name="home_GOAL">GOAL</string>
