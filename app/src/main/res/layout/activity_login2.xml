@@ -8,6 +8,17 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="50dp">
+    <Button
+        android:id="@+id/goBackBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="B"
+        android:textSize="20sp"
+        android:background="@drawable/button"
+        android:backgroundTint="@color/blue0"
+        android:textColor="@color/white"
+        android:layout_gravity="left"
+        android:layout_marginBottom="60dp"/>
 
     <EditText
         android:id="@+id/editTextId"
@@ -17,7 +28,10 @@
         android:hint="@string/login2_id"
         android:inputType="text"
         android:textSize="17sp"
-        android:fontFamily="@font/pretendard_medium"/>
+        android:fontFamily="@font/pretendard_medium"
+        android:autofillHints="ID"
+        android:paddingHorizontal="15dp"/>
+
     <EditText
         android:id="@+id/editTextPassword"
         android:layout_width="match_parent"
@@ -26,16 +40,30 @@
         android:hint="@string/login2_password"
         android:inputType="textPassword"
         android:textSize="17sp"
-        android:fontFamily="@font/pretendard_medium" />
+        android:fontFamily="@font/pretendard_medium"
+        android:autofillHints="password"
+        android:paddingHorizontal="15dp"/>
+
     <Button
-        android:id="@+id/signupBtn"
+        android:id="@+id/loginBtn"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginVertical="20dp"
-        android:text="@string/login2_signup"
+        android:text="로그인"
         android:textSize="17sp"
         android:fontFamily="@font/pretendard_medium"
         android:background="@drawable/button"
         android:backgroundTint="@color/blue0"
         android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/signupBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginVertical="20dp"
+        android:text="@string/login2_signup"
+        android:textSize="17sp"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:textColor="@color/blue0" />
+
 </LinearLayout>
