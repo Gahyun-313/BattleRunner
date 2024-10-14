@@ -1,12 +1,15 @@
 package com.example.battlerunner
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.kakao.sdk.user.UserApiClient
 
@@ -16,12 +19,14 @@ import com.kakao.sdk.user.UserApiClient
 
 class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
+    private lateinit var dbHelper: DBHelper
+    private lateinit var userIdTextView: TextView
+    private lateinit var userNickTextView: TextView
+
     // [ onCreate ] 프래그먼트 생성될 때 호출됨. arguments로 받은 데이터에서 값 가져올 수 있음
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // arguments?.let {
-        //   param1 = it.getString(ARG_PARAM1)
-        // }
+
     }
 
     // [ onCreateView ] UI 초기화 메서드
@@ -32,7 +37,34 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_mypage, container, false)
 
+        // DBHelper 초기화
+        dbHelper = DBHelper(requireContext())
+        // TextView 초기화
+        userIdTextView = view.findViewById(R.id.userId)
+        userNickTextView = view.findViewById(R.id.userName)
+
+        // SharedPreferences에서 userId 가져오기
+        val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        val userId = sharedPref.getString("userId", null) // 사용자의 ID
+
+        Log.d("UserID", "User ID: $userId")
+
+        // DB에서 사용자 정보 가져오기
+        val userInfo = dbHelper.getUserInfo(userId)
+
+        // 사용자 정보가 존재하면 UI에 표시
+        if (userInfo != null) {
+            userIdTextView.text = userInfo.first  // ID 설정
+            userNickTextView.text = userInfo.second  // 닉네임 설정
+        } else {
+            // 사용자 정보가 없을 때 처리
+            userIdTextView.text = "ID not found"
+            userNickTextView.text = "Nick not found"
+        }
+
+        // Todo: kakao logout -> 일반 logout 변경
         val kakaoLogoutButton = view.findViewById<Button>(R.id.kakao_logout_button)
+        // 로그아웃 버튼 클릭시
         kakaoLogoutButton.setOnClickListener {
             UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
                 if (error != null) {

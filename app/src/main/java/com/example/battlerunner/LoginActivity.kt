@@ -19,7 +19,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login) // 로그인 화면 레이아웃 설정
 
-        // temp 버튼 클릭 이벤트 처리
+        // temp 버튼 클릭 이벤트 처리 - 메인 액티비티 확인용 임시 이동 버튼
         findViewById<Button>(R.id.login_btn).setOnClickListener {
             Toast.makeText(this, "temp", Toast.LENGTH_SHORT).show()
 

@@ -8,10 +8,10 @@
 
     <Button
         android:id="@+id/goBackBtn"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:text="B"
-        android:textSize="20sp"
+        android:layout_width="70dp"
+        android:layout_height="40dp"
+        android:text="Back"
+        android:textSize="13sp"
         android:background="@drawable/button"
         android:backgroundTint="@color/blue0"
         android:textColor="@color/white"
@@ -40,6 +40,7 @@
             android:textColor="@color/black"
             android:gravity="center_vertical"/>
         <Button
+            android:id="@+id/btnCheckId"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@drawable/button"
@@ -51,7 +52,7 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/ID"
+        android:id="@+id/editTextId"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:paddingLeft="10dp"
@@ -70,7 +71,7 @@
         android:textColor="@color/black"
         android:gravity="center_vertical"/>
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/editTextPassword"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:paddingLeft="10dp"
@@ -89,7 +90,7 @@
         android:textColor="@color/black"
         android:gravity="center_vertical"/>
     <EditText
-        android:id="@+id/passwordCheck"
+        android:id="@+id/editTextRePassword"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:paddingLeft="10dp"
@@ -108,7 +109,7 @@
         android:textColor="@color/black"
         android:gravity="center_vertical"/>
     <EditText
-        android:id="@+id/nickname"
+        android:id="@+id/editTextNick"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:paddingLeft="10dp"
@@ -119,7 +120,7 @@
         android:inputType="text" />
 
     <Button
-        android:id="@+id/finishBtn"
+        android:id="@+id/btnRegister"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:text="완료"
