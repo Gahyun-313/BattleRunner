@@ -47,8 +47,6 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
         val userId = sharedPref.getString("userId", null) // 사용자의 ID
 
-        Log.d("UserID", "User ID: $userId")
-
         // DB에서 사용자 정보 가져오기
         val userInfo = dbHelper.getUserInfo(userId)
 

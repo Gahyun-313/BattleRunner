@@ -33,6 +33,8 @@ class LoginActivity : AppCompatActivity() {
         findViewById<Button>(R.id.login_btn).setOnClickListener {
             Toast.makeText(this, "로그인 버튼 클릭", Toast.LENGTH_SHORT).show()
 
+            // Todo : SharedPreferences 에서 저장된 로그인 정보 확인 후, 있다면 저장된 정보를 갖고 Main 넘어가기 - 없다면 Login2 이동
+            
             // Login2Activity 이동
             val intent = Intent(this@LoginActivity, Login2Activity::class.java)
             startActivity(intent)
