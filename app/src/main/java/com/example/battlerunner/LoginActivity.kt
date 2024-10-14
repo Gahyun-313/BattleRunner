@@ -41,6 +41,8 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
+        // https://blog.naver.com/sfchamster/223379488728
+
         // 카카오 로그인 버튼 클릭 이벤트 처리
         findViewById<ImageButton>(R.id.kakao_login_btn).setOnClickListener {
 

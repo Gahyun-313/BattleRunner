@@ -33,8 +33,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 1
         // users 테이블에 데이터 삽입
         val result = MyDB.insert("users", null, contentValues)
 
-        // 데이터베이스 연결을 닫음
-        MyDB.close()
+        // 데이터베이스 연결을 닫음 -> 너무 빨리 닫으면 에러 나므로 실행 중인 액티비티 종료 후에 닫도록 하자.
+        //MyDB.close()
 
         // 삽입 성공 여부 반환 (삽입 실패 시 -1 반환)
         return result != -1L
