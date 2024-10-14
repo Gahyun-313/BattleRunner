@@ -1,6 +1,7 @@
 package com.example.battlerunner
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -103,10 +104,21 @@ class SignUpActivity : AppCompatActivity() {
 
                             // 가입 성공 시
                             if (insert == true) {
-                                Toast.makeText(this@SignUpActivity, "가입되었습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SignUpActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
+
+                                // 회원가입 성공 후, 로그인 정보 갖고 Main 넘어가기
+
+                                // SharedPreferences에 userId 저장
+                                val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                                val editor = sharedPref.edit()
+                                editor.putString("userId", user)  // 로그인한 사용자 ID를 저장
+                                editor.apply()
+
                                 // MainActivity 이동
-                                val intent = Intent(applicationContext, MainActivity::class.java)
+                                val intent = Intent(this, MainActivity::class.java)
                                 startActivity(intent)
+
                             }
                             // 가입 실패 시
                             else {
