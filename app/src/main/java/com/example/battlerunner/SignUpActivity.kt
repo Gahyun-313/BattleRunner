@@ -8,14 +8,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.Toast
 import java.util.regex.Pattern
-import kotlin.math.log
 
 class SignUpActivity : AppCompatActivity() {
 
-    var DB:DBHelper?=null
+    // DBHelper 싱글턴 인스턴스를 저장할 변수
+    private lateinit var dbHelper: DBHelper
+
     // xml 내의 뷰를 다룰 변수 선언
     lateinit var editTextId: EditText
     lateinit var editTextPassword: EditText
@@ -23,14 +23,16 @@ class SignUpActivity : AppCompatActivity() {
     lateinit var editTextNick: EditText
     lateinit var btnRegister: Button
     lateinit var btnCheckId: Button
-    var CheckId:Boolean=false
+    var checkId: Boolean = false
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
-        DB = DBHelper(this)
+        // DBHelper 싱글턴 인스턴스를 가져와 초기화
+        dbHelper = DBHelper.getInstance(this)
+
         // 각 변수에 xml 내의 뷰 연결
         editTextId = findViewById(R.id.editTextId)
         editTextPassword = findViewById(R.id.editTextPassword)
@@ -41,7 +43,6 @@ class SignUpActivity : AppCompatActivity() {
 
         // 이전으로 돌아가기 버튼 클릭 이벤트 처리
         findViewById<Button>(R.id.goBackBtn).setOnClickListener {
-            // Login2Activity 이동
             val intent = Intent(this@SignUpActivity, Login2Activity::class.java)
             startActivity(intent)
             finish()
@@ -52,21 +53,18 @@ class SignUpActivity : AppCompatActivity() {
             val user = editTextId.text.toString()
             val idPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{6,15}$"
 
-            if (user == "") {
+            if (user.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
-            }
-            else {
+            } else {
                 if (Pattern.matches(idPattern, user)) {
-                    val checkUsername = DB!!.checkUser(user)
-                    if(checkUsername == false){
-                        CheckId = true
+                    val checkUsername = dbHelper.checkUser(user)
+                    if (checkUsername) {
+                        checkId = true
                         Toast.makeText(this@SignUpActivity, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
-                    }
-                    else {
+                    } else {
                         Toast.makeText(this@SignUpActivity, "이미 존재하는 아이디입니다.", Toast.LENGTH_SHORT).show()
                     }
-                }
-                else {
+                } else {
                     Toast.makeText(this@SignUpActivity, "아이디 형식이 옳지 않습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -74,54 +72,40 @@ class SignUpActivity : AppCompatActivity() {
 
         // 회원가입 완료 버튼 클릭 시
         btnRegister.setOnClickListener {
-
             val user = editTextId.text.toString()
             val pass = editTextPassword.text.toString()
             val repass = editTextRePassword.text.toString()
             val nick = editTextNick.text.toString()
-            val pwPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{8,15}$" //password 조건 설정
+            val pwPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{8,15}$" // 비밀번호 조건 설정
 
             // 사용자 입력이 비었을 때
-            if (user == "" || pass == "" || repass == "" || nick == "") {
+            if (user.isEmpty() || pass.isEmpty() || repass.isEmpty() || nick.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "회원정보를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
-            }
-            else {
+            } else {
                 // 아이디 중복 확인이 됐을 때
-                if (CheckId == true) {
+                if (checkId) {
                     // 비밀번호 형식이 맞을 때
                     if (Pattern.matches(pwPattern, pass)) {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
-                            val insert = DB!!.insertData(user, pass, nick)
+                            val insert = dbHelper.insertData(user, pass, nick)
 
                             // insert 잘 됐는지 확인
                             if (insert) {
-                                Log.d("DBInsert", "Data inserted successfully")
-                                Log.d("DBInsert", "{$user, $nick}")
-                            } else {
-                                Log.d("DBInsert", "Data insertion failed")
-                            }
-
-                            // 가입 성공 시
-                            if (insert == true) {
+                                Log.d("DBInsert", "Data inserted successfully: {$user, $nick}")
                                 Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
-                                Toast.makeText(this@SignUpActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
-
-                                // 회원가입 성공 후, 로그인 정보 갖고 Main 넘어가기
 
                                 // SharedPreferences에 userId 저장
                                 val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
                                 val editor = sharedPref.edit()
-                                editor.putString("userId", user)  // 로그인한 사용자 ID를 저장
+                                editor.putString("userId", user)  // userId에 사용자 ID 저장
                                 editor.apply()
 
                                 // MainActivity 이동
                                 val intent = Intent(this, MainActivity::class.java)
                                 startActivity(intent)
-
-                            }
-                            // 가입 실패 시
-                            else {
+                                finish()  // 현재 Activity 종료
+                            } else {
                                 Toast.makeText(this@SignUpActivity, "가입 실패하였습니다.", Toast.LENGTH_SHORT).show()
                             }
                         } else {

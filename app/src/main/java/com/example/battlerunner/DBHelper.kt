@@ -1,103 +1,107 @@
 package com.example.battlerunner
 
-import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 
-class DBHelper(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 1) {
-    // users 테이블 생성
-    override fun onCreate(MyDB: SQLiteDatabase?) {
-        // users 테이블을 생성하는 SQL문 실행
-        MyDB!!.execSQL("create Table users(id TEXT primary key, password TEXT, nick TEXT)")
-    }
+// SQLiteOpenHelper를 상속받은 DBHelper 클래스 (싱글턴 패턴 적용)
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, DBNAME, null, 1) {
 
-    // 정보 갱신
-    override fun onUpgrade(MyDB: SQLiteDatabase?, i: Int, i1: Int) {
-        // 기존의 users 테이블이 존재하면 삭제하고 다시 생성하도록 설정
-        MyDB!!.execSQL("drop Table if exists users")
-    }
+    // 컴패니언 객체: 클래스 인스턴스를 앱 전체에서 하나만 생성하도록 함
+    companion object {
+        const val DBNAME = "Login.db"  // 데이터베이스 이름
 
-    // id, password, nick 삽입 (성공시 true, 실패시 false)
-    fun insertData (id: String?, password: String?, nick: String?): Boolean {
-        // 데이터베이스에 쓰기 권한을 요청
-        val MyDB = this.writableDatabase
+        // 싱글턴 인스턴스를 저장할 변수
+        @Volatile private var instance: DBHelper? = null
 
-        // 사용자 정보를 담기 위한 ContentValues 객체 생성
-        val contentValues = ContentValues()
-        contentValues.put("id", id)
-        contentValues.put("password", password)
-        contentValues.put("nick", nick)
-
-        // users 테이블에 데이터 삽입
-        val result = MyDB.insert("users", null, contentValues)
-
-        // 데이터베이스 연결을 닫음 -> 너무 빨리 닫으면 에러 나므로 실행 중인 액티비티 종료 후에 닫도록 하자.
-        //MyDB.close()
-
-        // 삽입 성공 여부 반환 (삽입 실패 시 -1 반환)
-        return result != -1L
-    }
-
-    // 사용자 아이디가 없으면 false, 이미 존재하면 true
-    @SuppressLint("Recycle")
-    fun checkUser(id: String?): Boolean {
-        // 데이터베이스에 읽기 권한을 요청
-        val MyDB = this.readableDatabase
-
-        // 사용자 존재 여부 확인
-        var res = true
-        val cursor = MyDB.rawQuery("Select * from users where id =?", arrayOf(id))
-
-        // 사용자가 존재하지 않으면 false 반환
-        if (cursor.count <= 0) res = false
-
-        // 결과 반환
-        return res
-    }
-
-    // 해당 id, password가 있는지 확인 (없다면 false)
-    fun checkUserpass(id: String, password: String) : Boolean {
-        // 데이터베이스에 쓰기 권한을 요청
-        val MyDB = this.writableDatabase
-
-        // 사용자 정보와 비밀번호가 일치하는지 확인
-        var res = true
-        val cursor = MyDB.rawQuery(
-            "Select * from users where id = ? and password = ?",
-            arrayOf(id, password)
-        )
-
-        // 일치하는 데이터가 없으면 false 반환
-        if (cursor.count <= 0) res = false
-
-        // 결과 반환
-        return res
-    }
-
-    fun getUserInfo(id: String?): Pair<String?, String?>? {
-        // 데이터베이스를 읽기 모드로 열기
-        val MyDB = this.readableDatabase
-
-        // 사용자 ID로 'users' 테이블에서 id와 nick(닉네임)을 조회하는 쿼리 실행
-        val cursor = MyDB.rawQuery("Select id, nick from users where id = ?", arrayOf(id))
-
-        // 조회된 결과가 있으면
-        return if (cursor.moveToFirst()) {
-            val userId = cursor.getString(0) // 첫 번째 컬럼(id)의 값을 가져옴
-            val userNick = cursor.getString(1) // 두 번째 컬럼(nick)의 값을 가져옴
-            cursor.close() // 커서 닫기
-            Pair(userId, userNick) // 조회된 id와 nick을 Pair로 반환
-        } else {
-            cursor.close()
-            null // null 반환 (사용자 정보 없음)
+        // DBHelper 인스턴스를 반환하는 메서드 (싱글턴)
+        fun getInstance(context: Context): DBHelper {
+            // instance가 null일 때 동기화하여 생성, 이미 있으면 기존 instance 반환
+            return instance ?: synchronized(this) {
+                instance ?: DBHelper(context.applicationContext).also { instance = it }
+            }
         }
     }
 
+    // 데이터베이스 테이블 생성
+    override fun onCreate(db: SQLiteDatabase?) {
+        db!!.execSQL("CREATE TABLE users(id TEXT PRIMARY KEY, password TEXT, nick TEXT)")  // users 테이블 생성
+    }
 
-    // DB name을 Login.db로 설정
-    companion object {
-        const val DBNAME = "Login.db"  // 데이터베이스 이름 설정
+    // 데이터베이스 버전이 업그레이드되었을 때 호출
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db!!.execSQL("DROP TABLE IF EXISTS users")  // 기존 users 테이블을 삭제하고 재생성
+    }
+
+    // 데이터 삽입 메서드
+    fun insertData(id: String?, password: String?, nick: String?): Boolean {
+        val db = writableDatabase  // 쓰기 권한으로 데이터베이스 열기
+        val contentValues = ContentValues().apply {
+            put("id", id)
+            put("password", password)
+            put("nick", nick)
+        }
+        val result = db.insert("users", null, contentValues)  // users 테이블에 데이터 삽입
+        return result != -1L  // 삽입 성공 여부 반환
+    }
+
+    // ID가 존재하는지 확인하는 메서드
+    fun checkUser(id: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM users WHERE id = ?", arrayOf(id))
+        val exists = cursor.count > 0  // 일치하는 데이터가 있는지 확인
+        cursor.close()  // 커서 닫기
+        return exists  // 결과 반환
+    }
+
+    // 데이터베이스에서 ID를 가져오는 메서드
+    fun getId(): String? {
+        val db = readableDatabase  // 읽기 권한으로 데이터베이스 열기
+        val cursor = db.rawQuery("SELECT id FROM users LIMIT 1", null)  // 첫 번째 사용자 ID를 조회하는 쿼리 실행
+        var id: String? = null
+        if (cursor.moveToFirst()) {
+            id = cursor.getString(cursor.getColumnIndexOrThrow("id"))  // 조회된 ID를 가져옴
+            Log.d("DBHelper", "User ID: $id")  // 로그로 ID 출력
+        }
+        cursor.close()  // 커서 닫기
+        return id  // 가져온 ID 반환
+    }
+
+    // 데이터베이스에서 비밀번호를 가져오는 메서드
+    fun getPassword(): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT password FROM users LIMIT 1", null)
+        var password: String? = null
+        if (cursor.moveToFirst()) {
+            password = cursor.getString(cursor.getColumnIndexOrThrow("password"))
+        }
+        cursor.close()  // 커서 닫기
+        return password  // 비밀번호 반환
+    }
+
+    // 사용자 정보(ID, 닉네임)를 가져오는 메서드
+    fun getUserInfo(userId: String?): Pair<String, String>? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT id, nick FROM users WHERE id = ?", arrayOf(userId))
+
+        var userInfo: Pair<String, String>? = null
+        if (cursor.moveToFirst()) {
+            val id = cursor.getString(cursor.getColumnIndexOrThrow("id"))
+            val nick = cursor.getString(cursor.getColumnIndexOrThrow("nick"))
+            userInfo = Pair(id, nick)
+        }
+        cursor.close()  // 커서 닫기
+        return userInfo  // 사용자 정보 반환
+    }
+
+    // ID와 비밀번호가 일치하는지 확인하는 메서드
+    fun checkUserpass(id: String, password: String): Boolean {
+        val db = writableDatabase
+        val cursor = db.rawQuery("SELECT * FROM users WHERE id = ? AND password = ?", arrayOf(id, password))
+        val exists = cursor.count > 0  // 일치하는 데이터가 있는지 확인
+        cursor.close()  // 커서 닫기
+        return exists  // 결과 반환
     }
 }

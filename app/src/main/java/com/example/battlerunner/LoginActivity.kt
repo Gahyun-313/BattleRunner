@@ -1,26 +1,32 @@
 package com.example.battlerunner
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
 // import com.kakao.sdk.auth.LoginClient // 카카오 로그인 클라이언트 불러오기
 import com.kakao.sdk.auth.model.OAuthToken // 카카오 OAuthToken 모델 불러오기
-import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.common.model.AuthErrorCause.* // 인증 오류 원인 불러오기
 import com.kakao.sdk.user.UserApiClient // 사용자 API 클라이언트 불러오기
 
 // LoginActivity 클래스 정의, AppCompatActivity를 상속
 class LoginActivity : AppCompatActivity() {
+
+    // DBHelper 싱글턴 인스턴스를 저장할 변수
+    private lateinit var dbHelper: DBHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login) // 로그인 화면 레이아웃 설정
 
+        // DBHelper 싱글턴 인스턴스를 가져와 초기화
+        dbHelper = DBHelper.getInstance(this)
+
         // temp 버튼 클릭 이벤트 처리 - 메인 액티비티 확인용 임시 이동 버튼
-        findViewById<Button>(R.id.login_btn).setOnClickListener {
+        findViewById<Button>(R.id.temp_btn).setOnClickListener {
             Toast.makeText(this, "temp", Toast.LENGTH_SHORT).show()
 
             // MainActivity 이동
@@ -31,14 +37,47 @@ class LoginActivity : AppCompatActivity() {
 
         // 로그인 버튼 클릭 이벤트 처리
         findViewById<Button>(R.id.login_btn).setOnClickListener {
-            Toast.makeText(this, "로그인 버튼 클릭", Toast.LENGTH_SHORT).show()
 
-            // Todo : SharedPreferences 에서 저장된 로그인 정보 확인 후, 있다면 저장된 정보를 갖고 Main 넘어가기 - 없다면 Login2 이동
-            
-            // Login2Activity 이동
-            val intent = Intent(this@LoginActivity, Login2Activity::class.java)
-            startActivity(intent)
-            finish()
+            // Todo : SharedPreferences 에서 저장된 로그인 정보 확인
+            // Todo : 저장된 정보가 있다면 해당 정보로 서버에 로그인 요청
+
+            // (임시) 자체 DB에 저장된 정보로 자동 로그인-------------------------------------
+
+            // DB에서 ID를 가져옴
+            val userId = dbHelper.getId()
+            if (userId == null) {
+
+                Toast.makeText(this@LoginActivity, "User ID is null", Toast.LENGTH_SHORT).show()
+
+                // ID가 없을 경우 Login2Activity 이동
+                val intent = Intent(this@LoginActivity, Login2Activity::class.java)
+                startActivity(intent)
+                finish()
+
+            } else {
+                // ID가 있으면 비밀번호도 가져옴
+                val userPassword = dbHelper.getPassword()
+                if (userPassword != null) {
+                    // 가져온 ID와 비밀번호로 사용자 인증
+                    val checkUserpass = dbHelper.checkUserpass(userId, userPassword)
+                    if (checkUserpass) {
+                        // 인증 성공 시 사용자 세션 정보 저장
+                        val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                        sharedPref.edit().putString("userId", userId).apply()
+                        Toast.makeText(this@LoginActivity, "로그인 되었습니다.", Toast.LENGTH_SHORT).show()
+
+                        // MainActivity로 이동
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()  // 현재 액티비티 종료
+                    } else {
+                        // 인증 실패 시 경고 메시지 출력
+                        Toast.makeText(this@LoginActivity, "ID 또는 비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            }
+            // --------------------------------------------------------------------------
         }
 
         // https://blog.naver.com/sfchamster/223379488728
