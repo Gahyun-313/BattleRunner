@@ -25,14 +25,12 @@ class LoginActivity : AppCompatActivity() {
         // DBHelper 싱글턴 인스턴스를 가져와 초기화
         dbHelper = DBHelper.getInstance(this)
 
-        // temp 버튼 클릭 이벤트 처리 - 메인 액티비티 확인용 임시 이동 버튼
+        // (임시) temp 버튼 클릭 이벤트 처리
         findViewById<Button>(R.id.temp_btn).setOnClickListener {
-            Toast.makeText(this, "temp", Toast.LENGTH_SHORT).show()
-
             // MainActivity 이동
             val intent = Intent(this@LoginActivity, MainActivity::class.java)
             startActivity(intent)
-            finish() // LoginActivity 종료
+            finish()
         }
 
         // 로그인 버튼 클릭 이벤트 처리
@@ -46,9 +44,6 @@ class LoginActivity : AppCompatActivity() {
             // DB에서 ID를 가져옴
             val userId = dbHelper.getId()
             if (userId == null) {
-
-                Toast.makeText(this@LoginActivity, "User ID is null", Toast.LENGTH_SHORT).show()
-
                 // ID가 없을 경우 Login2Activity 이동
                 val intent = Intent(this@LoginActivity, Login2Activity::class.java)
                 startActivity(intent)
@@ -58,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
                 // ID가 있으면 비밀번호도 가져옴
                 val userPassword = dbHelper.getPassword()
                 if (userPassword != null) {
-                    // 가져온 ID와 비밀번호로 사용자 인증
+                    // 가져온 ID와 비밀번호로 사용자 인증 (로그인)
                     val checkUserpass = dbHelper.checkUserpass(userId, userPassword)
                     if (checkUserpass) {
                         // 인증 성공 시 사용자 세션 정보 저장
@@ -69,7 +64,7 @@ class LoginActivity : AppCompatActivity() {
                         // MainActivity로 이동
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
-                        finish()  // 현재 액티비티 종료
+                        finish()
                     } else {
                         // 인증 실패 시 경고 메시지 출력
                         Toast.makeText(this@LoginActivity, "ID 또는 비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()

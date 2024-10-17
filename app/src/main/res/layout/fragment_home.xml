@@ -58,13 +58,14 @@
         </LinearLayout>
 
         <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
-        <Button
-            android:id="@+id/button"
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginHorizontal="20dp"
-            android:text="@string/app_name"/>
+            android:layout_marginHorizontal="20dp" />
+
 
         <LinearLayout
             android:layout_width="match_parent"

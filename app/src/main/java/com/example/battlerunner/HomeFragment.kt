@@ -1,5 +1,6 @@
 package com.example.battlerunner
 
+import MapFragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -46,6 +47,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java)
             startActivity(intent)  // 여기에서 바로 시작
         }
+
+        // MapFragment 추가하기
+        val mapFragment = MapFragment()
+        childFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, mapFragment)
+            .commit()
 
     }
 
