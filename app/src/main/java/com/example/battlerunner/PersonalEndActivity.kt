@@ -1,6 +1,6 @@
 package com.example.battlerunner
 
-import MapFragment
+import com.example.battlerunner.MapFragment
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.databinding.ActivityPersonalEndBinding
