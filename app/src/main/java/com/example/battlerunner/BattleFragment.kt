@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.battlerunner.databinding.FragmentBattleBinding
-import MapFragment
+import com.example.battlerunner.MapFragment
 
 class BattleFragment : Fragment(R.layout.fragment_battle) {
 

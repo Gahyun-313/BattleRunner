@@ -1,6 +1,6 @@
 package com.example.battlerunner
 
-import MapFragment
+import com.example.battlerunner.MapFragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
