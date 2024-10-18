@@ -53,9 +53,9 @@ class Login2Activity : AppCompatActivity() {
         }
 
         // 로그인 버튼 클릭
-        btnLogin!!.setOnClickListener {
-            val user = editTextId!!.text.toString() // 이게 ID임
-            val pass = editTextPassword!!.text.toString()
+        btnLogin.setOnClickListener {
+            val user = editTextId.text.toString() // 이게 ID임
+            val pass = editTextPassword.text.toString()
 
             // 빈칸 제출시 Toast
             if (user == "" || pass == "") {
@@ -63,7 +63,7 @@ class Login2Activity : AppCompatActivity() {
             }
             else {
                 // DB에서 사용자 인증 (로그인 정보 확인)
-                val checkUserpass = dbHelper!!.checkUserpass(user, pass)
+                val checkUserpass = dbHelper.checkUserpass(user, pass)
 
                 // id 와 password 일치시 (로그인 성공 시)
                 if (checkUserpass == true) {

@@ -104,16 +104,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         handler.removeCallbacks(timerRunnable)  // 타이머 콜백 제거
     }
 
-    // 프래그먼트를 새 인스턴스로 생성할 때 사용
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    // param1과 param2를 저장하는 부분 (현재 사용하지 않음)
-                    // putString(ARG_PARAM1, param1)
-                    // putString(ARG_PARAM2, param2)
-                }
-            }
-    }
+//    // 프래그먼트를 새 인스턴스로 생성할 때 사용
+//    companion object {
+//        @JvmStatic
+//        fun newInstance(param1: String, param2: String) =
+//            HomeFragment().apply {
+//                arguments = Bundle().apply {
+//                    // param1과 param2를 저장하는 부분 (현재 사용하지 않음)
+//                    // putString(ARG_PARAM1, param1)
+//                    // putString(ARG_PARAM2, param2)
+//                }
+//            }
+//    }
 }

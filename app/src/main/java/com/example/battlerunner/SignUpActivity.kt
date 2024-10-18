@@ -57,9 +57,10 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this@SignUpActivity, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
             } else {
                 if (Pattern.matches(idPattern, user)) {
-                    val checkUsername = dbHelper.checkUser(user)
-                    if (checkUsername) {
-                        checkId = true
+                    val checkUsername = dbHelper.checkUser(user) // 중복 아이디 존재: true, 미존재: false
+                    Log.d("check user name", "$checkUsername")
+                    if (!checkUsername) { // 중복 아이디 미존재
+                        checkId = true // 중복 확인 완료
                         Toast.makeText(this@SignUpActivity, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@SignUpActivity, "이미 존재하는 아이디입니다.", Toast.LENGTH_SHORT).show()

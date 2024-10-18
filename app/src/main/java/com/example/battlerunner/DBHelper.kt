@@ -7,11 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 
 // SQLiteOpenHelper를 상속받은 DBHelper 클래스 (싱글턴 패턴 적용)
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, DBNAME, null, 1) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 1) {
 
     // 컴패니언 객체: 클래스 인스턴스를 앱 전체에서 하나만 생성하도록 함
     companion object {
-        const val DBNAME = "Login.db"  // 데이터베이스 이름
 
         // 싱글턴 인스턴스를 저장할 변수
         @Volatile private var instance: DBHelper? = null
@@ -32,6 +31,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
 
     // 데이터베이스 버전이 업그레이드되었을 때 호출
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        Log.d("DBHelper", "onUpgrade 호출됨: oldVersion = $oldVersion, newVersion = $newVersion")
         db!!.execSQL("DROP TABLE IF EXISTS users")  // 기존 users 테이블을 삭제하고 재생성
     }
 
@@ -50,8 +50,15 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // ID가 존재하는지 확인하는 메서드
     fun checkUser(id: String): Boolean {
         val db = readableDatabase
+        val trimmedId = id.trim()  // 공백 제거
         val cursor = db.rawQuery("SELECT * FROM users WHERE id = ?", arrayOf(id))
         val exists = cursor.count > 0  // 일치하는 데이터가 있는지 확인
+        /*
+        *   0 <- 0  : 없으면 false 반환
+        *   1 <- 1+ : 있으면 true 반환
+        */
+
+        Log.d("DBHelper", "checkUser: cursor count = ${cursor.count}")  // 로그 추가
         cursor.close()  // 커서 닫기
         return exists  // 결과 반환
     }
