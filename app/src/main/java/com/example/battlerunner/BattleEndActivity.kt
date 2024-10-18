@@ -1,9 +1,10 @@
 package com.example.battlerunner
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.databinding.ActivityBattleEndBinding
+import MapFragment
 
 class BattleEndActivity : AppCompatActivity() {
 
@@ -15,11 +16,28 @@ class BattleEndActivity : AppCompatActivity() {
         binding = ActivityBattleEndBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // exitBtn 클릭 리스너 설정
+        // X 버튼 클릭 리스너 설정
         binding.closeBtn.setOnClickListener {
             val intent = Intent()
             setResult(RESULT_OK, intent)
             this.finish()
         }
+
+        // MapFragment 추가
+        val mapFragment = MapFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.mapFragmentContainer, mapFragment)
+            .commit()
+
+        // BattleFragment에서 전달된 경과 시간 받기
+        val elapsedTime = intent.getLongExtra("elapsedTime", 0)
+
+        // 경과된 시간, 분, 초 계산
+        val seconds = (elapsedTime / 1000) % 60
+        val minutes = (elapsedTime / (1000 * 60)) % 60
+        val hours = (elapsedTime / (1000 * 60 * 60))
+
+        // 경과 시간을 텍스트뷰에 표시 (시:분:초 형식)
+        binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 }

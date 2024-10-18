@@ -3,6 +3,7 @@
     android:layout_width="380dp"
     android:layout_height="600dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_gravity="center">
 
@@ -28,14 +29,12 @@
         android:paddingHorizontal="30dp"
         android:paddingBottom="8dp"/>
 
-    <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
-    <Button
-        android:id="@+id/button"
+    <!-- 지도 Fragment가 들어갈 부분 -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="20dp"
-        android:text="@string/app_name"/>
+        android:layout_height="351dp"
+        tools:ignore="MissingConstraints" />
 
     <Space
         android:layout_width="match_parent"

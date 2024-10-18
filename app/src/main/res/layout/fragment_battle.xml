@@ -62,13 +62,12 @@
         </LinearLayout>
 
         <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
-        <Button
-            android:id="@+id/button"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mapFragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginHorizontal="20dp"
-            android:text="@string/app_name"/>
+            android:layout_marginHorizontal="20dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -100,10 +99,11 @@
                 android:id="@+id/today_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/battle_time"
+                android:text="00:00:00"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:layout_gravity="center"/>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -113,6 +113,7 @@
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="40dp">
                 <Button
+                    android:id="@+id/startBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
