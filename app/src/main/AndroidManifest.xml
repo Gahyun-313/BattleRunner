@@ -22,7 +22,8 @@
         <activity
             android:name=".Login2Activity"
             android:exported="false" />
-        <!-- 스플래시 액티비티 추가 및 앱의 첫 화면으로 설정 -->
+
+        <!-- 스플래시 액티비티를 앱의 첫 화면으로 설정 -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -33,6 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
@@ -46,7 +48,9 @@
                     android:host="oauth"
                     android:scheme="kakao16005e7a061659542eeaf1f020717f46" />
             </intent-filter>
-        </activity> <!-- 액티비티 -->
+        </activity>
+
+        <!-- 액티비티 -->
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
