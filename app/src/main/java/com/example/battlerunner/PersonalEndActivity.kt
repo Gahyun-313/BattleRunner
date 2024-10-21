@@ -1,6 +1,5 @@
 package com.example.battlerunner
 
-import com.example.battlerunner.MapFragment
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.databinding.ActivityPersonalEndBinding
@@ -33,9 +32,9 @@ class PersonalEndActivity : AppCompatActivity() {
         }
 
         // MapFragment를 FragmentContainerView에 설정
-        val mapFragment = MapFragment()
+        val supportMapFragment = MapFragment()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mapFragmentContainer, mapFragment)
+            .replace(R.id.mapFragmentContainer, supportMapFragment)
             .commit()
     }
 }

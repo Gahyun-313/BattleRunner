@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.battlerunner.databinding.FragmentBattleBinding
-import com.example.battlerunner.MapFragment
 
 class BattleFragment : Fragment(R.layout.fragment_battle) {
 
@@ -78,9 +77,9 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
 
 
         // MapFragment 추가
-        val mapFragment = MapFragment()
+        val supportMapFragment = MapFragment()
         childFragmentManager.beginTransaction()
-            .replace(R.id.mapFragmentContainer, mapFragment)
+            .replace(R.id.mapFragmentContainer, supportMapFragment)
             .commit()
     }
 

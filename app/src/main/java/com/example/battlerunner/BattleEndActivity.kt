@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.databinding.ActivityBattleEndBinding
-import com.example.battlerunner.MapFragment
 
 class BattleEndActivity : AppCompatActivity() {
 
@@ -24,9 +23,9 @@ class BattleEndActivity : AppCompatActivity() {
         }
 
         // MapFragment 추가
-        val mapFragment = MapFragment()
+        val supportMapFragment = MapFragment()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.mapFragmentContainer, mapFragment)
+            .replace(R.id.mapFragmentContainer, supportMapFragment)
             .commit()
 
         // BattleFragment에서 전달된 경과 시간 받기
