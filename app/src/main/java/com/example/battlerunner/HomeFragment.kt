@@ -15,6 +15,9 @@ import androidx.fragment.app.Fragment
 import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -161,16 +164,27 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     // 위치 업데이트 시작하는 메서드
     private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            interval = 2000  // 위치 업데이트 간격 (2초)
+            fastestInterval = 1000  // 가장 빠른 위치 업데이트 간격 (1초)
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY  // 높은 정확도 우선
+        }
+
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestLocationPermission()  // 권한 요청
             return
         }
 
-        // 마지막 위치 받아와서 경로에 추가
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                updateLocationUI(it)
+        // 실시간 위치 업데이트를 위한 LocationCallback 설정
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    }
+
+    // 위치 업데이트 콜백 설정
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            locationResult.locations.forEach { location ->
+                updateLocationUI(location)  // 실시간 경로 업데이트
             }
         }
     }
@@ -185,8 +199,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             PolylineOptions().addAll(pathPoints).color(android.graphics.Color.BLUE).width(5f)
         )
 
-        // 카메라 이동
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f))
+        // 구글맵 카메라 이동 (실시간으로 경로를 따라가도록 설정)
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f))  // 줌 레벨 18
     }
 
     // 프래그먼트가 파괴될 때 호출되는 메서드

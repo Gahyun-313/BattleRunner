@@ -68,8 +68,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             requestLocationPermission()
         }
 
-        // 기본 위치 (서울) 설정
-        val seoul = LatLng(37.5665, 126.9780)
+        // 기본 위치 설정 - 명지대학교 5공학관
+        val seoul = LatLng(37.222101, 127.187709)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 12f))
     }
 
