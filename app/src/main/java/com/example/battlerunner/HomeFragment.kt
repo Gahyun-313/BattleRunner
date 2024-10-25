@@ -55,7 +55,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 val hours = (elapsedTime / (1000 * 60 * 60))
 
                 // 시간, 분, 초 포맷팅하여 화면에 표시
-                binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                binding.todayTime.text =
+                    String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
                 // 1초마다 업데이트
                 handler.postDelayed(this, 1000)
@@ -196,11 +197,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         // 경로를 지도에 표시
         googleMap.addPolyline(
-            PolylineOptions().addAll(pathPoints).color(android.graphics.Color.BLUE).width(5f)
+            PolylineOptions().addAll(pathPoints).
+            color(android.graphics.Color.BLUE).width(5f)
         )
 
         // 구글맵 카메라 이동 (실시간으로 경로를 따라가도록 설정)
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f))  // 줌 레벨 18
+        googleMap.animateCamera(CameraUpdateFactory.
+        newLatLngZoom(latLng, 18f))  // 줌 레벨 18
     }
 
     // 프래그먼트가 파괴될 때 호출되는 메서드
