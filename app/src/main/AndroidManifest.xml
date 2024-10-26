@@ -60,10 +60,10 @@
             android:name=".ui.login.SignUpActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".BattleEndActivity"
+            android:name=".ui.battle.BattleEndActivity"
             android:exported="false" />
         <activity
             android:name=".PersonalEndActivity"
