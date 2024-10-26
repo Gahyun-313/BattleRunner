@@ -45,8 +45,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         // SupportMapFragment 사용
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
 
         // 현재 위치로 이동하는 버튼 클릭 리스너
         binding.btnCurrentLocation.setOnClickListener {
