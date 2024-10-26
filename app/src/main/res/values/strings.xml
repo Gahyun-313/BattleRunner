@@ -1,4 +1,7 @@
 <resources>
+    <!--구글 로그인 클라이언트 id-->
+    <string name="default_web_client_id">819529848405-r1o7m77suctqd1m80kdkmqlkfff67ovi.apps.googleusercontent.com</string>
+
 
     <!-- 공통 -->
     <string name="app_name">BATTLE RUNNER</string>
