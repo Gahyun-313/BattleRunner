@@ -1,9 +1,10 @@
 package com.example.battlerunner
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.example.battlerunner.LoginRepository
+import com.example.battlerunner.data.repository.LoginRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
 
@@ -27,15 +28,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // 카카오 로그인을 처리하는 메서드입니다.
-    fun handleKakaoLogin() {
-        repository.performKakaoLogin { success, message ->
+    fun handleKakaoLogin(activity: AppCompatActivity) {
+        repository.performKakaoLogin(activity) { success, message ->
             if (success) {
-                loginStatus.postValue(true)  // 로그인 성공 시 로그인 상태를 true로 업데이트합니다.
+                loginStatus.postValue(true)
             } else {
-                errorMessage.postValue(message)  // 로그인 실패 시 오류 메시지를 업데이트합니다.
+                errorMessage.postValue(message)
             }
         }
     }
+
 
     // Google 로그인 결과를 처리하는 메서드입니다.
     fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {

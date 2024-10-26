@@ -22,12 +22,12 @@
             android:value="AIzaSyC21ZOMbiLf9LxoZ4V4dBqd-Nddfd-dlIc" />
 
         <activity
-            android:name=".Login2Activity"
+            android:name=".ui.login.Login2Activity"
             android:exported="false" />
 
         <!-- 스플래시 액티비티를 앱의 첫 화면으로 설정 -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.main.SplashActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -54,10 +54,10 @@
 
         <!-- 액티비티 -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".SignUpActivity"
+            android:name=".ui.login.SignUpActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
