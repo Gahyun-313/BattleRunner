@@ -59,6 +59,9 @@
                 android:textSize="15sp"
                 android:textStyle="bold"
                 style="?android:attr/buttonBarButtonStyle"/>
+
+            <!-- 검색 버튼 추가 -->
+
         </LinearLayout>
 
         <!--Button 자리에 map fragment 넣어야 함. 위치 속성은 그대로 유지할 것-->
@@ -135,6 +138,20 @@
                     android:background="@drawable/button"
                     android:backgroundTint="@color/grey_dark2"
                     android:text="@string/endBtn"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:fontFamily="@font/pretendard_medium"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="10dp"
+                    style="?android:attr/buttonBarButtonStyle"/>
+                <Button
+                    android:id="@+id/searchBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/button"
+                    android:backgroundTint="@color/blue0"
+                    android:text="@string/search"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:fontFamily="@font/pretendard_medium"

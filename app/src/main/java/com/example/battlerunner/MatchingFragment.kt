@@ -1,59 +1,80 @@
 package com.example.battlerunner
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.battlerunner.databinding.FragmentMatchingBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MatchingFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MatchingFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _binding: FragmentMatchingBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var userAdapter: UserAdapter
+    private val userList = mutableListOf<User>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_matching, container, false)
+        _binding = FragmentMatchingBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MatchingFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MatchingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 더미 데이터 추가
+        userList.add(User("gganpunggi01", "김철수", R.drawable.user_profile3))
+        userList.add(User("runner02", "이영희", R.drawable.user_profile3))
+        userList.add(User("battler03", "박준영", R.drawable.user_profile3))
+
+        // activity가 null이 아닌 경우에만 어댑터 설정
+        activity?.let {
+            // 리사이클러뷰 설정 (초기에는 빈 리스트 설정 및 FragmentActivity 전달)
+            userAdapter = UserAdapter(emptyList(), it)
+            binding.userRecyclerView.layoutManager = LinearLayoutManager(context)
+            binding.userRecyclerView.adapter = userAdapter
+            binding.userRecyclerView.visibility = View.GONE // 처음에는 숨김 처리
+        }
+
+        // 검색 버튼 클릭 리스너 설정
+        binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    if (it.isNotEmpty()) {
+                        searchUser(it)
+                    } else {
+                        Toast.makeText(requireContext(), "검색어를 입력하세요", Toast.LENGTH_SHORT).show()
+                    }
                 }
+                return false
             }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+    }
+
+    // 사용자를 검색하는 메서드
+    private fun searchUser(query: String) {
+        val filteredList = userList.filter { it.id.contains(query, ignoreCase = true) }
+        if (filteredList.isNotEmpty()) {
+            userAdapter.updateUserList(filteredList)
+            binding.userRecyclerView.visibility = View.VISIBLE // 검색 결과가 있을 때만 리사이클러뷰 표시
+        } else {
+            userAdapter.updateUserList(emptyList()) // 검색 결과가 없을 때 빈 리스트로 설정
+            binding.userRecyclerView.visibility = View.GONE // 검색 결과가 없으면 숨김
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

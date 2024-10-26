@@ -51,8 +51,9 @@ class BattleEndActivity : AppCompatActivity(), OnMapReadyCallback {
             supportFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
         supportMapFragment?.getMapAsync(this)
 
-        // BattleFragment에서 전달된 경과 시간 받기
+        // BattleFragment에서 전달된 경과 시간 및 이름 받기
         val elapsedTime = intent.getLongExtra("elapsedTime", 0)
+        val userName = intent.getStringExtra("userName") ?: "상대방"
 
         // 경과된 시간, 분, 초 계산
         val seconds = (elapsedTime / 1000) % 60
@@ -61,6 +62,9 @@ class BattleEndActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // 경과 시간을 텍스트뷰에 표시 (시:분:초 형식)
         binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+
+        // 상대방 이름 텍스트뷰에 표시
+        binding.battleTitle.text = "$userName 님과의 배틀 결과"
     }
 
     // GoogleMap 준비되면 호출되는 메서드

@@ -76,6 +76,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback { 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 전달된 사용자 이름 가져오기
+        val userName = arguments?.getString("userName") ?: ""
+
+        // 텍스트뷰에 사용자 이름 설정
+        binding.title.text = "$userName 님과의 배틀"
+
         // 시작 버튼 클릭 리스너
         binding.startBtn.setOnClickListener {
             startTimer()
@@ -90,7 +96,17 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback { 
         binding.BattlefinishBtn.setOnClickListener {
             val intent = Intent(requireActivity(), BattleEndActivity::class.java)
             intent.putExtra("elapsedTime", elapsedTime)  // 경과 시간 전달
+            intent.putExtra("userName", userName)  // 상대방 이름 전달
             startActivity(intent)
+        }
+
+        // 검색 버튼 클릭 리스너 (MatchingFragment로 이동)
+        binding.searchBtn.setOnClickListener {
+            val matchingFragment = MatchingFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, matchingFragment)  // fragment_container는 해당 프래그먼트를 포함할 컨테이너 ID로 수정 필요
+                .addToBackStack(null)  // 뒤로가기 기능 추가
+                .commit()
         }
 
         // MapFragment 추가 및 초기화
