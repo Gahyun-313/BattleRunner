@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
-    tools:context=".MainActivity">
+    tools:context=".ui.main.MainActivity">
 
     <!--홈바를 제외한 메인 공간-->
 

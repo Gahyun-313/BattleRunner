@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.battlerunner.DBHelper
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.repository.LoginRepository
 
 class SplashViewModel(application: Application) : AndroidViewModel(application) {

@@ -2,7 +2,7 @@ package com.example.battlerunner.data.repository
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import com.example.battlerunner.DBHelper
+import com.example.battlerunner.data.local.DBHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
