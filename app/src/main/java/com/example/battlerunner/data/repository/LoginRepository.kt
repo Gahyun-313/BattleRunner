@@ -20,6 +20,7 @@ class LoginRepository(private val context: Context) {
         if (loginInfo != null) {
             val (userId, userPassword) = loginInfo
             if (dbHelper.checkUserPass(userId, userPassword)) {
+                dbHelper.saveLoginInfo(userId, "", "custom")  // 로그인 정보 저장 (토큰은 빈 값으로 설정)
                 callback(true, null)  // 로그인 성공
             } else {
                 callback(false, "ID 또는 비밀번호가 잘못되었습니다.")  // 로그인 실패
