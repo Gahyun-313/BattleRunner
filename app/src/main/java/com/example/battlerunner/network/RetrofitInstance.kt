@@ -8,6 +8,8 @@ object RetrofitInstance {
     // BASE_URL은 서버의 기본 URL 설정
     private const val BASE_URL = "http://192.168.1.71:8080/"  // 서버 주소를 로컬 IP로 설정 (8080 : 포트 번호)
 
+    // "http://192.168.1.71:8080/" <집>
+
     val api: ApiService by lazy {   // Retrofit 인스턴스 생성 및 API 인터페이스를 초기화하여 제공하는 `api` 변수를 선언
         Retrofit.Builder()
             .baseUrl(BASE_URL)  // 기본 URL 설정
