@@ -68,6 +68,8 @@
         <activity
             android:name=".PersonalEndActivity"
             android:exported="false" />
+        <activity android:name=".BattleApplyActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

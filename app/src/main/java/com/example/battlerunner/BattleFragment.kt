@@ -7,6 +7,7 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -75,6 +76,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback { 
     // 뷰가 생성된 후 호출되는 메서드 (버튼 리스너 설정)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        Log.d("BattleFragment", "BattleFragment has been created")
 
         // 전달된 사용자 이름 가져오기
         val userName = arguments?.getString("userName") ?: ""

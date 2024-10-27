@@ -16,9 +16,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import android.location.Location
-import android.util.Log
-import android.widget.Toast
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Polygon
+import com.google.android.gms.maps.model.PolygonOptions
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -30,6 +30,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val binding get() = _binding!!
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val gridList = mutableListOf<Polygon>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,8 +53,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         binding.btnCurrentLocation.setOnClickListener {
             if (::googleMap.isInitialized) {
                 moveToCurrentLocation()
-            } else {
-                Toast.makeText(requireContext(), "지도가 준비되지 않았습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -71,6 +70,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // 기본 위치 설정 - 명지대학교 5공학관
         val seoul = LatLng(37.222101, 127.187709)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 12f))
+
+        // 격자 생성
+        createGrid()
     }
 
     private fun hasLocationPermission(): Boolean {
@@ -88,8 +90,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 googleMap.isMyLocationEnabled = true
             }
         } catch (e: SecurityException) {
-            Log.e("MapFragment", "권한 없이 위치 서비스를 사용하려고 시도했습니다.", e)
-            Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            // 권한 없이 위치 서비스를 사용하려고 시도한 경우 처리
         }
     }
 
@@ -105,25 +106,55 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun moveToCurrentLocation() {
         if (hasLocationPermission()) {
             try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     if (location != null) {
                         val currentLatLng = LatLng(location.latitude, location.longitude)
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    } else {
-                        Log.e("MapFragment", "현재 위치를 가져올 수 없습니다.")
-                        Toast.makeText(requireContext(), "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: SecurityException) {
-                Log.e("MapFragment", "권한 없이 위치 서비스를 사용하려고 시도했습니다.", e)
-                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                // 권한 없이 위치 서비스를 사용하려고 시도한 경우 처리
             }
         } else {
             requestLocationPermission()  // 권한 요청
         }
     }
 
-    // 생명주기 메서드들 (onDestroyView만 필요)
+    // 격자 생성 함수
+    private fun createGrid() {
+        val startLat = 37.0
+        val startLng = 127.0
+        val endLat = 38.0
+        val endLng = 128.0
+        val gridSize = 0.0025  // 약 250m 정도에 해당하는 값
+
+        var currentLat = startLat
+        while (currentLat < endLat) {
+            var currentLng = startLng
+            while (currentLng < endLng) {
+                val bounds = LatLngBounds(
+                    LatLng(currentLat, currentLng),
+                    LatLng(currentLat + gridSize, currentLng + gridSize)
+                )
+                val polygon = googleMap.addPolygon(
+                    PolygonOptions()
+                        .add(
+                            LatLng(bounds.southwest.latitude, bounds.southwest.longitude),
+                            LatLng(bounds.southwest.latitude, bounds.northeast.longitude),
+                            LatLng(bounds.northeast.latitude, bounds.northeast.longitude),
+                            LatLng(bounds.northeast.latitude, bounds.southwest.longitude)
+                        )
+                        .strokeWidth(2f)
+                        .strokeColor(android.graphics.Color.BLACK)
+                        .fillColor(android.graphics.Color.TRANSPARENT)
+                )
+                gridList.add(polygon)
+                currentLng += gridSize
+            }
+            currentLat += gridSize
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
