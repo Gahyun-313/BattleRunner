@@ -1,4 +1,4 @@
-package com.example.battlerunner
+package com.example.battlerunner.ui.login
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +37,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
 
 
     // Google 로그인 결과를 처리하는 메서드입니다.
