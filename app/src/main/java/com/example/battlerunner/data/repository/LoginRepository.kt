@@ -21,7 +21,7 @@ class LoginRepository(private val context: Context) {
         if (loginInfo != null) {
             val (userId, userPassword) = loginInfo
             if (dbHelper.checkUserPass(userId, userPassword)) {
-                dbHelper.saveLoginInfo(userId, "", "custom")  // 로그인 정보 저장 (토큰은 빈 값으로 설정)
+                dbHelper.saveLoginInfo(userId, token=userPassword, "custom")  // 로그인 정보 저장 (토큰은 빈 값으로 설정)
                 callback(true, null)  // 로그인 성공
             } else {
                 callback(false, "ID 또는 비밀번호가 잘못되었습니다.")  // 로그인 실패
@@ -104,6 +104,7 @@ class LoginRepository(private val context: Context) {
     }
 
     //Todo: 자체 로그인 자동 로그인 안 됨
+    // 자동 로그인
     fun performAutoLogin(callback: (Boolean) -> Unit) {
         val loginInfo = dbHelper.getLoginInfo()  // 저장된 로그인 정보 가져오기
         if (loginInfo != null) {

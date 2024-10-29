@@ -17,7 +17,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var viewModel: LoginViewModel
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 100
+    private val RC_SIGN_IN = 100 // 구글 로그인 요청 코드
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +30,7 @@ class LoginActivity : AppCompatActivity() {
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
+        googleSignInClient = GoogleSignIn.getClient(this, gso) // GoogleSignIn Client 생성
 
         // 자체 로그인 버튼 클릭 리스너
         findViewById<Button>(R.id.login_btn).setOnClickListener {
