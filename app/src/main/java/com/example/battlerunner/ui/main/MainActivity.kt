@@ -1,15 +1,15 @@
 package com.example.battlerunner.ui.main
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.battlerunner.HomeFragment
-import com.example.battlerunner.MyPageFragment
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.ActivityMainBinding
 import com.example.battlerunner.ui.battle.BattleFragment
+import com.example.battlerunner.ui.home.HomeFragment
+import com.example.battlerunner.ui.mypage.MyPageFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,12 +20,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // binding을 여기서 바로 초기화
         val binding = ActivityMainBinding.inflate(layoutInflater)
-
         setContentView(binding.root)
 
-        //앱 시작할 때, 프래그먼트, 홈바를 각각 home으로 시작
+        //앱 시작할 때; 프래그먼트, 홈바를 각각 home으로 시작
         setFragment(homeFragment)
         binding.bottomNavigationMenu.selectedItemId = R.id.home
 
@@ -55,5 +53,4 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
     }
-
 }

@@ -66,15 +66,11 @@ class LoginRepository(private val context: Context) {
             } else if (user != null) {
                 val email = user.kakaoAccount?.email ?: "kakaoUserId"
 
-                // DB에 user_id로 이메일, token으로 토큰을 저장
-                dbHelper.saveLoginInfo(email, token.accessToken, "kakao")
+                dbHelper.saveLoginInfo( // login_info 테이블에 정보 저장
+                    email, token.accessToken, "kakao")
 
-                // users 테이블에 사용자 정보 저장
-                dbHelper.insertUserData(
-                    id = email,
-                    password = "",  // 비밀번호는 사용하지 않음
-                    nick = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
-                )
+                dbHelper.insertUserData( // users 테이블에 정보 저장
+                    email, token.accessToken, user.kakaoAccount?.profile?.nickname ?: "카카오 사용자")
                 callback(true, null)
             }
         }
@@ -86,15 +82,11 @@ class LoginRepository(private val context: Context) {
         try {
             val account = task.getResult(ApiException::class.java)  // Google 로그인 계정 가져오기
             if (account != null) {
-                // login_info 테이블에 Google 로그인 정보 저장
-                dbHelper.saveLoginInfo(account.email ?: "googleUserId", account.idToken ?: "", "google")
+                dbHelper.saveLoginInfo( // login_info 테이블에 정보 저장
+                    account.email ?: "googleUserId", account.idToken ?: "", "google")
 
-                // users 테이블에 Google 사용자 정보 저장
-                dbHelper.insertUserData(
-                    id = account.email ?: "googleUserId",  // id 컬럼에 email 사용
-                    password = "",  // Google 로그인에서는 비밀번호를 사용하지 않음
-                    nick = account.displayName ?: "구글 사용자"  // 닉네임을 displayName으로 설정
-                )
+                dbHelper.insertUserData( // users 테이블에 정보 저장
+                   account.email ?: "googleUserId", account.idToken ?: "", account.displayName ?: "구글 사용자")
 
                 callback(true, null)  // 로그인 성공 시 콜백 호출
             }
@@ -103,7 +95,6 @@ class LoginRepository(private val context: Context) {
         }
     }
 
-    //Todo: 자체 로그인 자동 로그인 안 됨
     // 자동 로그인
     fun performAutoLogin(callback: (Boolean) -> Unit) {
         val loginInfo = dbHelper.getLoginInfo()  // 저장된 로그인 정보 가져오기
@@ -119,7 +110,6 @@ class LoginRepository(private val context: Context) {
             callback(false)
         }
     }
-
 
     // 카카오 자동 로그인 확인 메서드
     private fun performKakaoAutoLogin(callback: (Boolean) -> Unit) {

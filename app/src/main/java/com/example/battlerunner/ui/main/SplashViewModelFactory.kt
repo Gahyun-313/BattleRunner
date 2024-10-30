@@ -1,4 +1,4 @@
-package com.example.battlerunner.ui.main  // 패키지 명시
+package com.example.battlerunner.ui.main
 
 import android.app.Application
 import android.content.Context
