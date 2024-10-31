@@ -46,11 +46,11 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     // 로그인 정보 저장
-    fun saveLoginInfo(userId: String, token: String, loginType: String): Boolean {
+    fun saveLoginInfo(userId: String, password: String, loginType: String): Boolean {
         val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
         val contentValues = ContentValues().apply {
             put("user_id", userId)  // 사용자 ID 추가
-            put("token", token)  // 토큰 추가
+            put("password", password)  // 토큰 추가
             put("login_type", loginType)  // 로그인 타입 추가
         }
         val result = db.insertWithOnConflict("login_info", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE)
@@ -126,7 +126,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         return password  // 비밀번호 반환
     }
 
-    // 마이페이지 프로필 정보 반환 - <id, name>
+    // <마이페이지> 프로필 정보 반환 - <id, name>
     fun getUserInfo(): Pair<String, String>? {
         val db = readableDatabase
 

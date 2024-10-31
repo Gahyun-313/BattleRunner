@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //앱 시작할 때; 프래그먼트, 홈바를 각각 home으로 시작
+        //앱 시작할 때 > 프래그먼트, 홈바를 각각 home으로 시작
         setFragment(homeFragment)
         binding.bottomNavigationMenu.selectedItemId = R.id.home
 
