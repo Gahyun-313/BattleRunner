@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
@@ -17,7 +18,6 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var viewModel: LoginViewModel
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 100 // 구글 로그인 요청 코드
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +40,7 @@ class LoginActivity : AppCompatActivity() {
 
         // 카카오 로그인 버튼 클릭 리스너
         findViewById<ImageButton>(R.id.kakao_login_btn).setOnClickListener {
-            viewModel.handleKakaoLogin(this)
+            viewModel.performKakaoLogin()
         }
 
         // 구글 로그인 버튼 클릭 리스너
@@ -59,21 +59,18 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // 구글 로그인 실행
+    // Google 로그인 실행
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
+        googleLoginLauncher.launch(signInIntent)
     }
-
 
     // Google 로그인 결과 처리
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            viewModel.handleGoogleSignInResult(task)
+    private val googleLoginLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            viewModel.performGoogleLogin(task)
         }
-    }
 
     // 메인 화면으로 이동
     private fun moveToMainActivity() {

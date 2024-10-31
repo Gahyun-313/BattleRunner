@@ -15,9 +15,10 @@
 
         <!--타이틀바 삭제-->
         <item name="windowNoTitle">true</item>
-        <!--상태바 삭제-->
-        <item name="android:windowFullscreen">true</item>
+        <!--상태바-->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
 
     </style>
 </resources>

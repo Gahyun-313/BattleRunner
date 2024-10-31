@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 object LocationUtils {
     const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
-    // 위치 권한이 있는지 확인하는 메서드
+    // 위치 권한이 있는지 확인
     fun hasLocationPermission(context: Context): Boolean {
         return ActivityCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -20,7 +20,7 @@ object LocationUtils {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    // 위치 권한을 요청하는 메서드
+    // 위치 권한을 요청
     fun requestLocationPermission(fragment: Fragment) {
         fragment.requestPermissions(
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),

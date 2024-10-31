@@ -1,6 +1,7 @@
 package com.example.battlerunner.data.repository
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.data.local.DBHelper
@@ -16,95 +17,91 @@ class LoginRepository(private val context: Context) {
     private val dbHelper: DBHelper = DBHelper.getInstance(context)
 
     // 자체 로그인 처리 메서드
-    fun performCustomLogin(callback: (Boolean, String?) -> Unit) {
-        val loginInfo = dbHelper.getLoginInfo()  // 로그인 정보 확인
-        if (loginInfo != null) {
-            val (userId, userPassword) = loginInfo
-            if (dbHelper.checkUserPass(userId, userPassword)) {
-                dbHelper.saveLoginInfo(userId, token=userPassword, "custom")  // 로그인 정보 저장 (토큰은 빈 값으로 설정)
-                callback(true, null)  // 로그인 성공
-            } else {
-                callback(false, "ID 또는 비밀번호가 잘못되었습니다.")  // 로그인 실패
-            }
+    fun performCustomLogin(userId: String, userPassword: String, callback: (Boolean, String?) -> Unit) {
+        val userExists = dbHelper.checkUser(userId)  // 사용자가 DB에 있는지 확인
+
+        if (!userExists) {
+            callback(false, "저장된 로그인 정보가 없습니다. 회원가입을 진행해 주세요.")
+        } else if (dbHelper.checkUserPass(userId, userPassword)) {
+            dbHelper.saveLoginInfo(userId, userPassword, "custom")  // 로그인 정보 저장
+            callback(true, null)  // 로그인 성공
         } else {
-            callback(false, "저장된 로그인 정보가 없습니다. 회원가입을 진행해 주세요.")  // 로그인 정보가 없을 경우
+            callback(false, "아이디 또는 비밀번호가 잘못되었습니다.")  // 로그인 실패
         }
     }
 
-    fun performKakaoLogin(activity: AppCompatActivity, callback: (Boolean, String?) -> Unit) {
-        // 카카오톡 앱이 설치된 경우 카카오톡을 통해 로그인 시도
-        if (UserApiClient.instance.isKakaoTalkLoginAvailable(activity)) {
-            UserApiClient.instance.loginWithKakaoTalk(activity) { token, error ->
-                if (error != null) {
-                    // 카카오톡 로그인 실패 시, 계정 로그인으로 대체
-                    loginWithKakaoAccount(activity, callback)
+    // 카카오 로그인 처리 메서드
+    fun performKakaoLogin(callback: (Boolean, String?) -> Unit) {
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
+            // 카카오톡 설치 시, 앱 연결 시도
+            UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
+                if (error != null) { // 에러 발생 시
+                    loginWithKakaoAccount(callback) // 로그인 시도
                 } else if (token != null) {
-                    handleKakaoLoginSuccess(token, callback)
+                    saveKakaoUserInfo(token, callback)  // 로그인 정보 저장
                 }
             }
         } else {
-            // 카카오톡 미설치 시 계정 로그인 시도
-            loginWithKakaoAccount(activity, callback)
+            // 카카오톡 미설치 시, 로그인 시도
+            loginWithKakaoAccount(callback)
         }
     }
 
-    // 카카오 계정 로그인을 통해 로그인 처리하는 메서드
-    private fun loginWithKakaoAccount(activity: AppCompatActivity, callback: (Boolean, String?) -> Unit) {
-        UserApiClient.instance.loginWithKakaoAccount(activity) { token, error ->
-            if (error != null) {
+    // 카카오톡 계정 로그인 시도
+    private fun loginWithKakaoAccount(callback: (Boolean, String?) -> Unit) {
+        UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
+            if (error != null) { // 에러 발생 시
                 callback(false, "카카오 로그인 실패: ${error.message}")
-            } else if (token != null) {
-                handleKakaoLoginSuccess(token, callback)
+            } else if (token != null) { // 성공
+                saveKakaoUserInfo(token, callback)  // 로그인 정보 저장
             }
         }
     }
 
-    private fun handleKakaoLoginSuccess(token: OAuthToken, callback: (Boolean, String?) -> Unit) {
+    // 카카오 사용자 정보 저장
+    private fun saveKakaoUserInfo(token: OAuthToken, callback: (Boolean, String?) -> Unit) {
         UserApiClient.instance.me { user, userError ->
-            if (userError != null) {
-                callback(false, "사용자 정보 가져오기 실패: ${userError.message}")
-            } else if (user != null) {
+            if (userError == null && user != null) {
                 val email = user.kakaoAccount?.email ?: "kakaoUserId"
+                val nickname = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
 
-                // DB에 user_id로 이메일, token으로 토큰을 저장
+                // login_info 및 users 테이블에 정보 저장
                 dbHelper.saveLoginInfo(email, token.accessToken, "kakao")
+                dbHelper.insertUserData(email, "", nickname)
 
-                // users 테이블에 사용자 정보 저장
-                dbHelper.insertUserData(
-                    id = email,
-                    password = "",  // 비밀번호는 사용하지 않음
-                    nick = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
-                )
                 callback(true, null)
+            } else {
+                callback(false, userError?.message ?: "사용자 정보 가져오기 실패")
             }
         }
     }
 
-
-    // 구글 로그인 처리 메서드
+    // 구글 로그인 결과 처리 메서드
     fun performGoogleLogin(task: Task<GoogleSignInAccount>, callback: (Boolean, String?) -> Unit) {
         try {
-            val account = task.getResult(ApiException::class.java)  // Google 로그인 계정 가져오기
+            val account = task.getResult(ApiException::class.java)
             if (account != null) {
-                // login_info 테이블에 Google 로그인 정보 저장
-                dbHelper.saveLoginInfo(account.email ?: "googleUserId", account.idToken ?: "", "google")
-
-                // users 테이블에 Google 사용자 정보 저장
-                dbHelper.insertUserData(
-                    id = account.email ?: "googleUserId",  // id 컬럼에 email 사용
-                    password = "",  // Google 로그인에서는 비밀번호를 사용하지 않음
-                    nick = account.displayName ?: "구글 사용자"  // 닉네임을 displayName으로 설정
-                )
-
-                callback(true, null)  // 로그인 성공 시 콜백 호출
+                saveGoogleUserInfo(account, callback)
             }
         } catch (e: ApiException) {
-            callback(false, "Google 로그인 실패: ${e.message}")  // 로그인 실패 시 콜백에 오류 메시지 전달
+            callback(false, "Google 로그인 실패: ${e.message}")
         }
     }
 
-    //Todo: 자체 로그인 자동 로그인 안 됨
-    // 자동 로그인
+    // 구글 사용자 정보 저장
+    private fun saveGoogleUserInfo(account: GoogleSignInAccount, callback: (Boolean, String?) -> Unit) {
+        val email = account.email ?: "googleUserId"
+        val displayName = account.displayName ?: "구글 사용자"
+        val token = account.idToken ?: ""
+
+        // login_info 및 users 테이블에 정보 저장
+        dbHelper.saveLoginInfo(email, token, "google")
+        dbHelper.insertUserData(email, "", displayName)
+
+        callback(true, null)
+    }
+
+    // 자동 로그인 확인 메서드
     fun performAutoLogin(callback: (Boolean) -> Unit) {
         val loginInfo = dbHelper.getLoginInfo()  // 저장된 로그인 정보 가져오기
         if (loginInfo != null) {
@@ -119,7 +116,6 @@ class LoginRepository(private val context: Context) {
             callback(false)
         }
     }
-
 
     // 카카오 자동 로그인 확인 메서드
     private fun performKakaoAutoLogin(callback: (Boolean) -> Unit) {

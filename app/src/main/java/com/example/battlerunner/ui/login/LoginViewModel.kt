@@ -1,6 +1,7 @@
 package com.example.battlerunner.ui.login
 
 import android.app.Application
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -12,24 +13,20 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: LoginRepository = LoginRepository(application)  // LoginRepository 인스턴스를 생성합니다.
 
-    // 로그인 상태와 오류 메시지를 위한 LiveData를 선언합니다.
+    // 로그인 상태와 오류 메시지를 위한 LiveData를 선언
     val loginStatus = MutableLiveData<Boolean>()
     val errorMessage = MutableLiveData<String>()
 
-    // 자체 로그인을 처리하는 메서드입니다.
-    fun handleCustomLogin() {
-        repository.performCustomLogin { success, message ->
-            if (success) {
-                loginStatus.postValue(true)  // 로그인 성공 시 로그인 상태를 true로 업데이트합니다.
-            } else {
-                errorMessage.postValue(message)  // 로그인 실패 시 오류 메시지를 업데이트합니다.
-            }
+    // 자동 로그인 확인
+    fun checkAutoLogin() {
+        repository.performAutoLogin { isLoggedIn ->
+            loginStatus.postValue(isLoggedIn)
         }
     }
 
-    // 카카오 로그인을 처리하는 메서드입니다.
-    fun handleKakaoLogin(activity: AppCompatActivity) {
-        repository.performKakaoLogin(activity) { success, message ->
+    // 카카오 로그인 요청
+    fun performKakaoLogin() {
+        repository.performKakaoLogin { success, message ->
             if (success) {
                 loginStatus.postValue(true)
             } else {
@@ -38,15 +35,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
-
-    // Google 로그인 결과를 처리하는 메서드입니다.
-    fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {
+    // 구글 로그인 결과 처리
+    fun performGoogleLogin(task: Task<GoogleSignInAccount>) {
         repository.performGoogleLogin(task) { success, message ->
             if (success) {
-                loginStatus.postValue(true)  // 로그인 성공 시 로그인 상태를 true로 업데이트합니다.
+                loginStatus.postValue(true)
             } else {
-                errorMessage.postValue(message)  // 로그인 실패 시 오류 메시지를 업데이트합니다.
+                errorMessage.postValue(message)
             }
         }
     }

@@ -61,7 +61,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
             android:name=".ui.battle.BattleEndActivity"
             android:exported="false" />

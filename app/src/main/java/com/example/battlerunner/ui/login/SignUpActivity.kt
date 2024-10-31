@@ -15,7 +15,7 @@ import java.util.regex.Pattern
 
 class SignUpActivity : AppCompatActivity() {
 
-    // DBHelper 싱글턴 인스턴스를 저장할 변수
+    // DBHelper 싱글턴 인스턴스 저장 변수
     private lateinit var dbHelper: DBHelper
 
     // xml 내의 뷰를 다룰 변수 선언
@@ -53,7 +53,7 @@ class SignUpActivity : AppCompatActivity() {
         // 아이디 중복확인
         btnCheckId.setOnClickListener {
             val user = editTextId.text.toString()
-            val idPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{6,15}$"
+            val idPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{5,15}$"
 
             if (user.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -95,15 +95,15 @@ class SignUpActivity : AppCompatActivity() {
 
                             // insert 잘 됐는지 확인
                             if (insert) {
-                                Log.d("DBInsert", "Data inserted successfully: {$user, $nick}")
                                 Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
 
                                 // 자동 로그인 정보 저장
-                                dbHelper.saveLoginInfo(userId = user, token = "", loginType = "custom")
+                                dbHelper.saveLoginInfo(userId = user, password = pass, loginType = "custom")
 
+                                // MainActivity 이동
                                 val intent = Intent(this, MainActivity::class.java)
                                 startActivity(intent)
-                                finish()  // 현재 Activity 종료
+                                finish()
                             } else {
                                 Toast.makeText(this@SignUpActivity, "가입 실패하였습니다.", Toast.LENGTH_SHORT).show()
                             }

@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    buildFeatures {
-        viewBinding true
+    viewBinding {
+        enabled = true
     }
 
     namespace 'com.example.battlerunner'
