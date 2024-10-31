@@ -114,6 +114,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
     }
 
+
+    private fun stopTimer() {
+        if (isRunning) {
+            isRunning = false
+            handler.removeCallbacks(timerRunnable)
+        }
+    }
+    // 타이머를 멈추고 초기화하는 메서드
+    private fun stopTimerAndReset() {
+        stopTimer()  // 타이머 중지
+        elapsedTime = 0  // 경과 시간 초기화
+        binding.todayTime.text = "00:00:00"  // 시간 표시 초기화
+    }
+
     // 타이머 멈추고 다음 화면으로 이동하는 메서드
     private fun stopTimerAndMoveToNextScreen() {
         if (isRunning) {
@@ -124,6 +138,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java)
             intent.putExtra("elapsedTime", elapsedTime)  // 경과 시간 전달
             intent.putParcelableArrayListExtra("pathPoints", ArrayList(pathPoints))  // 경로 전달
+            stopTimerAndReset()  // 타이머 멈추고 초기화
             startActivity(intent)
         }
     }

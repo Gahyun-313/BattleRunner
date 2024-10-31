@@ -64,7 +64,7 @@ class BattleEndActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
 
         // 상대방 이름 텍스트뷰에 표시
-        binding.battleTitle.text = "$userName 님과의 배틀 결과"
+        binding.battleTitle.text = "$userName 결과"
     }
 
     // GoogleMap 준비되면 호출되는 메서드
