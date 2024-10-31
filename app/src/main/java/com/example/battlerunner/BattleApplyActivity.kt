@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Button
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 
 class BattleApplyActivity : AppCompatActivity() {
@@ -31,6 +32,11 @@ class BattleApplyActivity : AppCompatActivity() {
             }
             startActivity(intent)
             finish()
+        }
+        // 닫기 버튼 설정
+        val closeButton = findViewById<ImageButton>(R.id.closeBtn)
+        closeButton.setOnClickListener {
+            finish() // 이전 상태로 돌아가기
         }
     }
 }

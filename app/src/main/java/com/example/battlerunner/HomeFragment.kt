@@ -42,6 +42,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap  // GoogleMap 객체
     private val pathPoints = mutableListOf<LatLng>()  // 경로 좌표 리스트
 
+
+
     // 타이머를 주기적으로 업데이트하기 위한 Runnable
     private val timerRunnable = object : Runnable {
         override fun run() {
@@ -69,6 +71,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+
 
         // FusedLocationProviderClient 초기화 (위치 제공자)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())

@@ -69,6 +69,7 @@
             android:name=".PersonalEndActivity"
             android:exported="false" />
         <activity android:name=".BattleApplyActivity"
+            android:theme="@style/PopupTheme"
             android:exported="false"/>
     </application>
 
