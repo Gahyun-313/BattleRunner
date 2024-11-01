@@ -1,5 +1,7 @@
 package com.example.battlerunner.ui.battle
 
+import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -107,4 +109,5 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // Todo : 프래그먼트를 전환해도 종료 버튼을 누를 때 까지는 타이머가 살아있도록 수정 필요
 
     }
+
 }

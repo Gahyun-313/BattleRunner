@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.battlerunner.data.repository.LoginRepository
 
 class SplashViewModel(application: Application) : AndroidViewModel(application) {
+
     private val repository: LoginRepository = LoginRepository(application)
 
     // 자동 로그인 상태를 관리할 MutableLiveData

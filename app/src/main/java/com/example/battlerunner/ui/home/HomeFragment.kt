@@ -44,8 +44,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setStatusBarTransparent() // 상태 바 투명으로 설정(전체화면)
-
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
@@ -107,11 +105,4 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         // Todo : 프래그먼트를 전환해도 종료 버튼을 누를 때 까지는 타이머가 살아있도록 수정 필요
     }
 
-    fun Activity.setStatusBarTransparent() {
-        window.apply {
-            // 상태바를 투명하게 설정
-            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            statusBarColor = Color.TRANSPARENT  // 상태바 색상을 투명으로 설정
-        }
-    }
 }

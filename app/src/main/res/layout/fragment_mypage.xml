@@ -11,7 +11,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:ignore="UselessParent"
-        android:backgroundTint="@color/blue0">
+        android:backgroundTint="@color/blue0"
+        android:layout_marginTop="20dp">
 
         <TextView
             android:id="@+id/logo_text"

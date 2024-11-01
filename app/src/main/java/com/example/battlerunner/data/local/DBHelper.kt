@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 2) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 3) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴
@@ -22,7 +22,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // 데이터베이스 테이블 생성 메서드
     override fun onCreate(db: SQLiteDatabase?) {
         db!!.execSQL("CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, password TEXT, name TEXT)")  // users 테이블 생성
-        db.execSQL("CREATE TABLE IF NOT EXISTS login_info(user_id TEXT PRIMARY KEY, token TEXT, login_type TEXT)")  // login_info 테이블 생성
+        db.execSQL("CREATE TABLE IF NOT EXISTS login_info(user_id TEXT PRIMARY KEY, password TEXT, login_type TEXT)")  // login_info 테이블 생성
     }
 
     // 데이터베이스 버전 업그레이드 시 호출되는 메서드 ??
@@ -60,12 +60,12 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // 자동 로그인 정보 가져오는 메서드
     fun getLoginInfo(): Pair<String, String>? {
         val db = readableDatabase  // 읽기 가능한 데이터베이스 인스턴스 가져오기
-        val cursor = db.rawQuery("SELECT user_id, token FROM login_info LIMIT 1", null)  // 쿼리 실행하여 사용자 ID와 토큰 가져오기
+        val cursor = db.rawQuery("SELECT user_id, password FROM login_info LIMIT 1", null)  // 쿼리 실행하여 사용자 ID와 토큰 가져오기
         return if (cursor.moveToFirst()) {  // 결과가 있으면
             val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))  // user_id 컬럼의 값 가져오기
-            val token = cursor.getString(cursor.getColumnIndexOrThrow("token"))  // token 컬럼의 값 가져오기
+            val password = cursor.getString(cursor.getColumnIndexOrThrow("password"))  // password 컬럼의 값 가져오기
             cursor.close()  // 커서 닫기
-            Pair(userId, token)  // 사용자 ID와 토큰을 Pair로 반환
+            Pair(userId, password)  // 사용자 ID와 토큰을 Pair로 반환
         } else {
             cursor.close()  // 커서 닫기
             null  // 저장된 로그인 정보가 없을 경우 null 반환

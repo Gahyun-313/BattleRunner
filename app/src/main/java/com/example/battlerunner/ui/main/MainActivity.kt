@@ -1,13 +1,17 @@
 package com.example.battlerunner.ui.main
 
 import android.app.Activity
+import android.database.sqlite.SQLiteDatabase
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.battlerunner.R
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityMainBinding
 import com.example.battlerunner.ui.battle.BattleFragment
 import com.example.battlerunner.ui.home.HomeFragment
@@ -21,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setStatusBarTransparent() // 상태바를 투명하게 설정
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -40,20 +45,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     // 프래그먼트 전환 함수
     private fun setFragment (fragment: Fragment) {
         Log.d("MainActivity", "{$fragment}")
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragmentContainer, fragment)   // 첫 번째 인자에 두 번째 인자를 보여준다는 뜻
 
-            // 프래그먼트에 따른 상태바 색상 변경
-            if (fragment == myPageFragment) {
-                window.statusBarColor = ContextCompat.getColor(this@MainActivity, R.color.blue0)
-            }
-
             commit()
+        }
+    }
+
+    fun Activity.setStatusBarTransparent() {
+        window.apply {
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            statusBarColor = Color.TRANSPARENT  // 상태바를 투명하게 설정
         }
     }
 }

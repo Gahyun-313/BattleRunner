@@ -21,6 +21,8 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+        window.statusBarColor = ContextCompat.getColor(this, R.color.blue0)
+
         // ViewModel 초기화
         viewModel = ViewModelProvider(this, SplashViewModelFactory(application)).get(SplashViewModel::class.java)
 
@@ -32,19 +34,20 @@ class SplashActivity : AppCompatActivity() {
 
         // 자동 로그인 여부에 따라 화면 전환
         viewModel.autoLoginStatus.observe(this) { isLoggedIn ->
-            if (isLoggedIn) {
-                // 자동 로그인 성공 시 메인 화면으로 이동
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)  // 스택 지우기
-                startActivity( Intent(this, MainActivity::class.java))
-                finish()
-
+            val targetIntent = if (isLoggedIn) {
+                Intent(this, MainActivity::class.java)
             } else {
-                // 자동 로그인 실패 시 로그인 화면으로 이동
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)  // 스택 지우기
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
+                Intent(this, LoginActivity::class.java)
             }
+            targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)  // 스택 지우기
+            startActivity(targetIntent)
+            finish()
         }
+    }
+
+    // SQLite DB 초기화 메서드
+    private fun deleteDatabaseFile() {
+        deleteDatabase("Login.db")
     }
 
 }

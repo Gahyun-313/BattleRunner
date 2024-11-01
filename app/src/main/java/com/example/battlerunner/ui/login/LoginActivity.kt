@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
@@ -18,6 +18,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var viewModel: LoginViewModel
     private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 100 // 구글 로그인 요청 코드
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,17 +31,19 @@ class LoginActivity : AppCompatActivity() {
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-        googleSignInClient = GoogleSignIn.getClient(this, gso) // GoogleSignIn Client 생성
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         // 자체 로그인 버튼 클릭 리스너
         findViewById<Button>(R.id.login_btn).setOnClickListener {
-            startActivity(Intent(this, Login2Activity::class.java))
+            // Login2Activity로 이동해 아이디와 비밀번호를 입력받음
+            val intent = Intent(this, Login2Activity::class.java)
+            startActivity(intent)
             finish()
         }
 
         // 카카오 로그인 버튼 클릭 리스너
         findViewById<ImageButton>(R.id.kakao_login_btn).setOnClickListener {
-            viewModel.performKakaoLogin()
+            viewModel.handleKakaoLogin(this)
         }
 
         // 구글 로그인 버튼 클릭 리스너
@@ -48,34 +51,36 @@ class LoginActivity : AppCompatActivity() {
             signInWithGoogle()
         }
 
-        // ViewModel의 로그인 상태를 관찰하여 성공 시 메인 화면으로 이동
-        viewModel.loginStatus.observe(this) { status ->
+        // 로그인 상태 관찰
+        viewModel.loginStatus.observe(this, Observer { status ->
             if (status) moveToMainActivity()
-        }
+        })
 
-        // ViewModel의 오류 메시지를 관찰하여 Toast로 표시
-        viewModel.errorMessage.observe(this) { message ->
+        // 오류 메시지 관찰
+        viewModel.errorMessage.observe(this, Observer { message ->
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
+        })
     }
 
-    // Google 로그인 실행
+    // 구글 로그인 실행
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
-        googleLoginLauncher.launch(signInIntent)
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
     // Google 로그인 결과 처리
-    private val googleLoginLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            viewModel.performGoogleLogin(task)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            viewModel.handleGoogleSignInResult(task)
         }
+    }
 
     // 메인 화면으로 이동
     private fun moveToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)  // 스택 지우기
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
         finish()
     }
