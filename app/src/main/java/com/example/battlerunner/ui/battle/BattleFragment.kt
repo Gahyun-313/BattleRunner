@@ -28,7 +28,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private var _binding: FragmentBattleBinding? = null // 바인딩 객체
     private val binding get() = _binding!!
 
-    // Activity 범위에서 HomeViewModel을 가져오기
+    // ★ Activity 범위에서 HomeViewModel을 가져오기 (HomeFragment랑 타이머 공유용)
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }

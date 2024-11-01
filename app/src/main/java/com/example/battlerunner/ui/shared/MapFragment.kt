@@ -30,11 +30,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 바인딩 초기화 및 레이아웃 반환
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    // 뷰가 생성된 후 호출되는 메서드
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -44,6 +44,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // 지도 프래그먼트 설정 및 콜백
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        moveToCurrentLocation()
 
         // 현재 위치 버튼 클릭 리스너
         binding.btnCurrentLocation.setOnClickListener {
