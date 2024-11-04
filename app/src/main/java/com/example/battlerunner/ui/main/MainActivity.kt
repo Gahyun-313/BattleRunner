@@ -33,30 +33,44 @@ class MainActivity : AppCompatActivity() {
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
 
-        //앱 시작할 때 > 프래그먼트, 홈바를 각각 home으로 시작
-        setFragment(homeFragment)
+        // 초기 프래그먼트 설정
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, homeFragment, "HomeFragment")
+                .commit()
+        }
+        // 초기 네비게이션 홈바 설정
         binding.bottomNavigationMenu.selectedItemId = R.id.home
 
         //네비게이션 클릭에 따른 프래그먼트 화면 전환
         binding.bottomNavigationMenu.setOnItemSelectedListener{
             when(it.itemId) {
-                R.id.home -> setFragment(homeFragment)
-                R.id.battle -> setFragment(battleFragment)
-                R.id.community -> setFragment(communityFragment)
-                R.id.myPage -> setFragment(myPageFragment)
+                R.id.home -> showFragment(homeFragment, "HomeFragment")
+                R.id.battle -> showFragment(battleFragment, "BattleFragment")
+                R.id.community -> showFragment(communityFragment, "CommunityFragment")
+                R.id.myPage -> showFragment(myPageFragment, "MyPageFragment")
             }
             true
         }
     }
 
-    // 프래그먼트 전환 함수
-    private fun setFragment (fragment: Fragment) {
-        Log.d("MainActivity", "{$fragment}")
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragmentContainer, fragment)   // 첫 번째 인자에 두 번째 인자를 보여준다는 뜻
-            commit()
+    // 프래그먼트를 전환하는 함수
+    private fun showFragment(fragment: Fragment, tag: String) {
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // 이미 추가된 프래그먼트인지 확인
+        supportFragmentManager.fragments.forEach { transaction.hide(it) }
+
+        if (supportFragmentManager.findFragmentByTag(tag) != null) {
+            // 이미 추가된 경우 show
+            transaction.show(fragment)
+        } else {
+            // 처음 추가하는 경우 add
+            transaction.add(R.id.fragmentContainer, fragment, tag)
         }
+        transaction.commit()
     }
+
 
     // 상태바 투명 설정 함수
     private fun Activity.setStatusBarTransparent() {

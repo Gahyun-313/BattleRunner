@@ -22,15 +22,17 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var _binding: FragmentMapBinding? = null // 뷰 바인딩을 위한 변수
     private val binding get() = _binding!! // 바인딩 객체 접근용
-    private lateinit var googleMap: GoogleMap // 구글 맵 객체
+    lateinit var googleMap: GoogleMap // 구글 맵 객체
     private lateinit var fusedLocationClient: FusedLocationProviderClient // 위치 제공자 클라이언트
     private var onMapReadyCallback: (() -> Unit)? = null
+    private var cameraPosition: CameraPosition? = null // 카메라 위치 저장 변수
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,11 +54,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 as? SupportMapFragment ?: SupportMapFragment.newInstance().also {
             childFragmentManager.beginTransaction().replace(R.id.mapFragmentContainer, it).commitNow()
         }
-        mapFragment.getMapAsync(this)
+        mapFragment.getMapAsync(this) // Map 준비가 완료되면 onMapReady 호출
 
         // custom 내 위치 버튼 리스너
         binding.customLocationButton.setOnClickListener{
-            moveToCurrentLocation()
+            moveToCurrentLocationImmediate()
         }
     }
 
@@ -69,14 +71,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         googleMap.uiSettings.isMyLocationButtonEnabled = false // 기본 내 위치 버튼 숨기기
 
         if (LocationUtils.hasLocationPermission(requireContext())) {
-            enableMyLocation() // 권한이 있으면 내 위치 활성화
-            moveToCurrentLocation() // 내 위치로 이동
+            enableMyLocation() // 내 위치 활성화
+            moveToCurrentLocationImmediate()
         } else {
-            // 기본 위치(명지대학교) 설정
+            // 기본 위치 = 명지대 5공학관
             val defaultLocation = LatLng(37.222101, 127.187709)
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
 
-            LocationUtils.requestLocationPermission(this) // 권한 요청
+            // 위치 권한 요청
+            LocationUtils.requestLocationPermission(this)
+        }
+
+        // 카메라 이동이 완료될 때마다 현재 위치를 저장하도록 리스너 설정
+        googleMap.setOnCameraIdleListener {
+            cameraPosition = googleMap.cameraPosition // ★ 현재 카메라 위치 저장
         }
 
         // Map이 준비되었음을 알림
@@ -85,34 +93,35 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     // 내 위치 활성화 메서드
     private fun enableMyLocation() {
-        try {
-            if (LocationUtils.hasLocationPermission(requireContext())) {
+        if (LocationUtils.hasLocationPermission(requireContext())) { // ★ 권한 확인
+            try {
                 googleMap.isMyLocationEnabled = true // 내 위치 표시 활성화
+            } catch (e: SecurityException) { // ★ SecurityException 예외 처리
+                Log.e("MapFragment", "권한 없이 위치 서비스를 사용하려고 시도했습니다.", e)
+                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: SecurityException) {
-            Log.e("MapFragment", "권한 없이 위치 서비스를 사용하려고 시도했습니다.", e)
-            Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+        } else {
+            LocationUtils.requestLocationPermission(this) // 권한이 없으면 요청
         }
     }
 
     // 현재 위치로 카메라를 이동하는 메서드
-    fun moveToCurrentLocation() {
-        if (LocationUtils.hasLocationPermission(requireContext())) {
+    fun moveToCurrentLocationImmediate() {
+        if (LocationUtils.hasLocationPermission(requireContext())) { // ★ 권한을 먼저 확인
             try {
                 fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                     .addOnSuccessListener { location: Location? ->
-                        if (location != null) {
-                            val currentLatLng = LatLng(location.latitude, location.longitude)
-                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                        } else {
-                            Toast.makeText(requireContext(), "현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                        }
+                        location?.let {
+                            val currentLatLng = LatLng(it.latitude, it.longitude)
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f)) // 애니메이션 없이 즉시 이동
+                        } ?: Toast.makeText(requireContext(), "현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
-            } catch (e: SecurityException) {
+            } catch (e: SecurityException) { // ★ 권한 예외를 명시적으로 처리
+                e.printStackTrace()
                 Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
         } else {
-            LocationUtils.requestLocationPermission(this)
+            LocationUtils.requestLocationPermission(this) // 권한이 없으면 요청
         }
     }
 
