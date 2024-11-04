@@ -85,7 +85,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient)
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
             } else {
                 LocationUtils.requestLocationPermission(this)
             }

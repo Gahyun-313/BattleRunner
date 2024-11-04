@@ -50,6 +50,8 @@ class HomeViewModel : ViewModel() {
 
     // 새로운 위치를 추가하고 거리를 계산하는 메서드
     fun addPathPoint(location: LatLng) {
+        if (!isRunning) return // 정지 상태에서는 업데이트하지 않음
+
         // 이전 위치가 있는 경우, 현재 위치와의 거리를 계산하여 누적
         lastLocation?.let {
             val results = FloatArray(1) // 거리 결과를 저장할 배열
@@ -62,6 +64,7 @@ class HomeViewModel : ViewModel() {
         }
         // 현재 위치를 이전 위치로 설정하여 다음 위치 추가 시 사용할 수 있게 함
         lastLocation = location
+
         // 경로 리스트에 현재 위치를 추가하고 LiveData 업데이트
         val updatedPoints = _pathPoints.value?.toMutableList() ?: mutableListOf()
         updatedPoints.add(location)

@@ -6,6 +6,7 @@ import android.location.Location
 import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.battlerunner.ui.home.HomeViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -38,7 +39,7 @@ object MapUtils {
     }
 
     // 위치 업데이트 시작
-    fun startLocationUpdates(context: Context, fusedLocationClient: FusedLocationProviderClient) {
+    fun startLocationUpdates(context: Context, fusedLocationClient: FusedLocationProviderClient, viewModel: HomeViewModel) {
         if (LocationUtils.hasLocationPermission(context)) {
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
                 .setMinUpdateIntervalMillis(500)
@@ -46,7 +47,16 @@ object MapUtils {
 
             try {
                 fusedLocationClient.requestLocationUpdates(
-                    locationRequest, locationCallback, Looper.getMainLooper()
+                    locationRequest, object : LocationCallback() {
+                        override fun onLocationResult(locationResult: LocationResult) {
+                            locationResult.locations.lastOrNull()?.let { location ->
+                                _currentLocation.value = location
+                                //updatePathPoints(location)
+                                // 위치 업데이트 시 ViewModel에 경로 추가
+                                viewModel.addPathPoint(LatLng(location.latitude, location.longitude))
+                            }
+                        }
+                    }, Looper.getMainLooper()
                 )
             } catch (e: SecurityException) {
                 e.printStackTrace()

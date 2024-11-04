@@ -94,20 +94,18 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient)
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
 
             viewModel.startTimer() // 타이머 시작
-            isDrawing = true // 경로 그리기 활성화
             observePathUpdates() // 경로 관찰 시작
         }
 
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
-            isDrawing = false // 경로 그리기 중지
             MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
         }
     }
