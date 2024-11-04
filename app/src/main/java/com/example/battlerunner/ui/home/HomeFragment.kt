@@ -17,8 +17,10 @@ import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -51,11 +53,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
         // MapFragment 초기화 및 설정
         mapFragment = MapFragment()
         childFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, mapFragment)
-            .commitNow() // commitNow를 사용해 트랜잭션이 즉시 완료되도록 보장
+            .replace(R.id.mapFragmentContainer, mapFragment)
+            .commitNow()
+
+        // MapFragment 준비 완료 콜백 설정
+        mapFragment.setOnMapReadyCallback {
+            cameraPosition?.let {
+                mapFragment.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it)) // ★ 카메라 위치 복원
+            } ?: mapFragment.moveToCurrentLocationImmediate() // ★ 위치 정보 없을 때 현재 위치로 이동
+        }
 
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
@@ -74,9 +85,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient)
-            // 위치 권한이 없다면
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
@@ -107,7 +116,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onDestroyView()
         _binding = null
         viewModel.stopTimer() // 타이머 정지
-        // Todo : 프래그먼트를 전환해도 종료 버튼을 누를 때 까지는 타이머가 살아있도록 수정 필요
     }
-
 }
