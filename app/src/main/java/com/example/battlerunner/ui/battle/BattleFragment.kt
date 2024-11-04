@@ -29,8 +29,9 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
     private var _binding: FragmentBattleBinding? = null // 바인딩 객체
     private val binding get() = _binding!!
     private var mapFragment = MapFragment()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 선언
 
-    // ★ Activity 범위에서 HomeViewModel을 가져오기 (HomeFragment랑 타이머 공유용)
+    // Activity 범위에서 HomeViewModel을 가져오기 (HomeFragment랑 타이머 공유용)
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
@@ -50,19 +51,13 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity()) // fusedLocationClient 초기화
+
         // MapFragment 초기화 및 설정
         mapFragment = MapFragment()
         childFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, mapFragment)
             .commitNow() // commitNow를 사용해 트랜잭션이 즉시 완료되도록 보장
-
-        // MapFragment의 콜백 설정
-        mapFragment.setOnMapReadyCallback {
-            // Map이 준비된 후 버튼의 동작을 설정
-            binding.customLocationButton.setOnClickListener {
-                mapFragment.moveToCurrentLocation()
-            }
-        }
 
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
@@ -81,7 +76,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), LocationServices.getFusedLocationProviderClient(requireActivity()))
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient)
                 // 위치 권한이 없다면
             } else {
                 LocationUtils.requestLocationPermission(this)
@@ -96,7 +92,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
             isDrawing = false // 경로 그리기 중지
-            MapUtils.stopLocationUpdates() // 경로 업데이트 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
         }
     }
 

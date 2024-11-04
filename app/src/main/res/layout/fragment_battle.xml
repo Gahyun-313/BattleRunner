@@ -57,21 +57,6 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="170dp"/>
 
-    <!-- 현재 위치 버튼 -->
-    <Button
-        android:id="@+id/customLocationButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="bottom|left"
-        android:layout_marginBottom="190dp"
-        android:layout_marginLeft="20dp"
-        android:backgroundTint="@color/white"
-        android:background="@drawable/button"
-        android:textColor="@color/grey_dark"
-        android:elevation="5dp"
-        android:text="●"
-        tools:ignore="RtlHardcoded" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="180dp"

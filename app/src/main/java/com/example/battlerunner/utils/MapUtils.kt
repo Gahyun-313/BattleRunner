@@ -27,9 +27,7 @@ object MapUtils {
     private val _pathPoints = MutableLiveData<List<LatLng>>(emptyList())
     val pathPoints: LiveData<List<LatLng>> get() = _pathPoints
 
-    // 위치 제공자와 콜백 초기화
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-
+    // 위치 콜백 설정
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.locations.lastOrNull()?.let { location ->
@@ -41,8 +39,6 @@ object MapUtils {
 
     // 위치 업데이트 시작
     fun startLocationUpdates(context: Context, fusedLocationClient: FusedLocationProviderClient) {
-        this.fusedLocationClient = fusedLocationClient
-
         if (LocationUtils.hasLocationPermission(context)) {
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
                 .setMinUpdateIntervalMillis(500)
@@ -68,7 +64,7 @@ object MapUtils {
     }
 
     // 위치 업데이트 중지
-    fun stopLocationUpdates() {
+    fun stopLocationUpdates(fusedLocationClient: FusedLocationProviderClient) {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
