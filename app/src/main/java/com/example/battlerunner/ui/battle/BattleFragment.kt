@@ -41,7 +41,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
     private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 초기화 선언
 
     // ★ Activity 범위에서 HomeViewModel을 가져오기
-    private val viewModel by lazy {
+    private val homeViewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
 
@@ -70,7 +70,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
             .commitNow()
 
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
-        viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+        homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
@@ -78,7 +78,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         }
 
         // 총 러닝 거리 관찰 및 UI 업데이트
-        viewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
+        homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
         }
 
@@ -86,12 +86,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
 
-            viewModel.startTimer() // 타이머 시작
+            homeViewModel.startTimer() // 타이머 시작
 
             // MainActivity에 경로 시작 알리기 -> HomeFragment에서 경로 그리게 함
             (activity as? MainActivity)?.notifyStartPathDrawing()
@@ -104,7 +104,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         */
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer() // 타이머 중지
+            homeViewModel.stopTimer() // 타이머 중지
             MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
         }
     }
@@ -113,6 +113,6 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        viewModel.stopTimer() // 타이머 정지
+        homeViewModel.stopTimer() // 타이머 정지
     }
 }
