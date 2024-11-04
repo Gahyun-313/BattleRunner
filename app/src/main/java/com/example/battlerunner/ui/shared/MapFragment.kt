@@ -68,7 +68,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         if (!isAdded) return  // Fragment가 Activity에 연결되었는지 확인
 
-        googleMap.uiSettings.isMyLocationButtonEnabled = false // 기본 내 위치 버튼 숨기기
+        // TODO: false로 설정해 기본 버튼을 숨기고 customBtn 활성화 해야 하나, customBtn 미작동 이슈로 임시 사용함
+        googleMap.uiSettings.isMyLocationButtonEnabled = true // 기본 내 위치 버튼 숨기기
 
         if (LocationUtils.hasLocationPermission(requireContext())) {
             enableMyLocation() // 내 위치 활성화

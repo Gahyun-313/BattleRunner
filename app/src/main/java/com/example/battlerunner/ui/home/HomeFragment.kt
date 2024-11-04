@@ -3,6 +3,7 @@ package com.example.battlerunner.ui.home
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
+import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
@@ -59,6 +61,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
+        // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
+        (activity as? MainActivity)?.startPathDrawing = {
+            Log.d("HomeFragment", "startPathDrawing called from MainActivity") // 로그 추가
+
+            viewModel.setDrawingStatus(true) // 경로 그리기 활성화
+            observePathUpdates() // 경로 관찰 시작
+        }
+
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
@@ -86,10 +96,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             observePathUpdates() // 경로 관찰 시작
         }
 
-        /*
-        * 현재 종료 버튼 리스너의 기능을 정지 버튼의 리스너로 변경
-        * 종료 버튼 리스너 : 종료 팝업 액티비티 실행 후 타이머&거리&경로 리셋
-        */
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
@@ -100,8 +106,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun observePathUpdates() {
         viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (viewModel.isDrawing.value == true) { // isDrawing이 true인 경우에만 경로 업데이트
-                mapFragment.drawPath(pathPoints) // 경로를 HomeFragment에만 그림
+            if (viewModel.isDrawing.value == true) { // viewModel의 isDrawing을 사용
+                mapFragment.drawPath(pathPoints) // 경로 그리기
             }
         }
     }

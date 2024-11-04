@@ -19,6 +19,7 @@ import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.databinding.FragmentMapBinding
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.home.HomeViewModel
+import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
@@ -91,6 +92,10 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
             }
 
             viewModel.startTimer() // 타이머 시작
+
+            // MainActivity에 경로 시작 알리기 -> HomeFragment에서 경로 그리게 함
+            (activity as? MainActivity)?.notifyStartPathDrawing()
+            Log.d("BattleFragment", "notifyStartPathDrawing called") // 로그 추가
         }
 
         /*

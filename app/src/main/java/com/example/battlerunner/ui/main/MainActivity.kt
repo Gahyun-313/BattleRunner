@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
 
+    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
+    var startPathDrawing: (() -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,6 +74,11 @@ class MainActivity : AppCompatActivity() {
         transaction.commit()
     }
 
+    // BattleFragment에서 경로 그리기 요청 시 호출할 메서드
+    fun notifyStartPathDrawing() {
+        Log.d("MainActivity", "notifyStartPathDrawing invoked")
+        startPathDrawing?.invoke()
+    }
 
     // 상태바 투명 설정 함수
     private fun Activity.setStatusBarTransparent() {
