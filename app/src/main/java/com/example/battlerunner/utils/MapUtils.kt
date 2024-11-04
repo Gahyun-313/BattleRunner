@@ -29,6 +29,7 @@ object MapUtils {
 
     // 위치 제공자와 콜백 초기화
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.locations.lastOrNull()?.let { location ->

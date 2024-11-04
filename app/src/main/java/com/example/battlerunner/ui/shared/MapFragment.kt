@@ -69,17 +69,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             LocationUtils.requestLocationPermission(this) // 권한 요청
         }
 
-        // 기본 위치(명지대학교) 설정
-        val defaultLocation = LatLng(37.222101, 127.187709)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
+//        // 기본 위치(명지대학교) 설정
+//        val defaultLocation = LatLng(37.222101, 127.187709)
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
 
         // Map이 준비되었음을 알림
         onMapReadyCallback?.invoke()
-    }
-
-    // moveToCurrentLocation을 안전하게 호출하기 위한 콜백 설정 메서드
-    fun setOnMapReadyCallback(callback: () -> Unit) {
-        onMapReadyCallback = callback
     }
 
     // 내 위치 활성화 메서드
@@ -97,24 +92,25 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     // 현재 위치로 카메라를 이동하는 메서드
     fun moveToCurrentLocation() {
         if (LocationUtils.hasLocationPermission(requireContext())) {
-            try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                    location?.let {
-                        // 위치가 있으면 지도 카메라를 현재 위치로 이동
-                        val currentLatLng = LatLng(it.latitude, it.longitude)
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    } ?: run {
-                        Log.e("MapFragment", "현재 위치를 가져올 수 없습니다.")
-                        Toast.makeText(requireContext(), "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: SecurityException) {
-                Log.e("MapFragment", "권한 없이 위치 서비스를 사용하려고 시도했습니다.", e)
-                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            MapUtils.startLocationUpdates(requireContext(), fusedLocationClient)
+
+            // 위치 LiveData 관찰하여 지도 위치 업데이트
+            MapUtils.currentLocation.observe(viewLifecycleOwner) { location ->
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
             }
-        } else {
-            LocationUtils.requestLocationPermission(this) // 권한 요청
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        MapUtils.stopLocationUpdates()
+        _binding = null
+    }
+
+    // moveToCurrentLocation을 안전하게 호출하기 위한 콜백 설정 메서드
+    fun setOnMapReadyCallback(callback: () -> Unit) {
+        onMapReadyCallback = callback
     }
 
     // 경로를 그리는 메서드
