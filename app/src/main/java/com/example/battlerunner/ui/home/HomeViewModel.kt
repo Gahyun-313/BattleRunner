@@ -22,6 +22,9 @@ class HomeViewModel : ViewModel() {
     private var _distance = MutableLiveData<Float>(0f) // 초기 값은 0으로 설정
     val distance: LiveData<Float> get() = _distance
 
+    private val _isDrawing = MutableLiveData<Boolean>(false)
+    val isDrawing: LiveData<Boolean> get() = _isDrawing
+
     private var timer: CountDownTimer? = null // 타이머 객체
     private var isRunning = false // 러닝 시작 여부를 나타내는 변수
     private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
@@ -46,6 +49,11 @@ class HomeViewModel : ViewModel() {
     fun stopTimer() {
         timer?.cancel() // 타이머 취소
         isRunning = false // 실행 상태를 false로 설정
+    }
+
+    // 경로 그리기 상태 변경 메서드 추가
+    fun setDrawingStatus(status: Boolean) {
+        _isDrawing.value = status
     }
 
     // 새로운 위치를 추가하고 거리를 계산하는 메서드

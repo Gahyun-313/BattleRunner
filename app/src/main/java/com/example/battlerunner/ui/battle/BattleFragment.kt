@@ -38,8 +38,6 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
     private val binding get() = _binding!!
     private var mapFragment = MapFragment()
     private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 초기화 선언
-    private var cameraPosition: CameraPosition? = null // 카메라 위치 저장 변수
-
 
     // ★ Activity 범위에서 HomeViewModel을 가져오기
     private val viewModel by lazy {
@@ -70,13 +68,6 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
-        // MapFragment 준비 완료 콜백 설정
-        mapFragment.setOnMapReadyCallback {
-            cameraPosition?.let {
-                mapFragment.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it)) // ★ 카메라 위치 복원
-            } ?: mapFragment.moveToCurrentLocationImmediate() // ★ 위치 정보 없을 때 현재 위치로 이동
-        }
-
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
@@ -100,21 +91,16 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
             }
 
             viewModel.startTimer() // 타이머 시작
-            observePathUpdates() // 경로 관찰 시작
         }
 
+        /*
+        * 현재 종료 버튼 리스너의 기능을 정지 버튼의 리스너로 변경
+        * 종료 버튼 리스너 : 종료 팝업 액티비티 실행 후 타이머&거리&경로 리셋
+        */
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
             MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
-        }
-    }
-
-    private fun observePathUpdates() {
-        viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (isDrawing) { // isDrawing이 활성화된 경우에만 경로 업데이트
-                mapFragment.drawPath(pathPoints)
-            }
         }
     }
 

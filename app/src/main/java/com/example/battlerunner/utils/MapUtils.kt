@@ -28,6 +28,9 @@ object MapUtils {
     private val _pathPoints = MutableLiveData<List<LatLng>>(emptyList())
     val pathPoints: LiveData<List<LatLng>> get() = _pathPoints
 
+    // 위치 제공자와 콜백 초기화
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     // 위치 콜백 설정
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -51,7 +54,7 @@ object MapUtils {
                         override fun onLocationResult(locationResult: LocationResult) {
                             locationResult.locations.lastOrNull()?.let { location ->
                                 _currentLocation.value = location
-                                //updatePathPoints(location)
+                                updatePathPoints(location)
                                 // 위치 업데이트 시 ViewModel에 경로 추가
                                 viewModel.addPathPoint(LatLng(location.latitude, location.longitude))
                             }
