@@ -53,6 +53,7 @@
     <!-- 홈바 navigation menu-->
     <string name="homeBar_title_battle">배틀</string>
     <string name="homeBar_title_home">개인</string>
+    <string name="homeBar_title_community">커뮤니티</string>
     <string name="homeBar_title_myPage">마이페이지</string>
 
     <!-- fragment_matching.xml -->

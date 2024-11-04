@@ -14,6 +14,12 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/community"
+        android:title="@string/homeBar_title_community"
+        android:icon="@drawable/home_bar_community"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/myPage"
         android:title="@string/homeBar_title_myPage"
         android:icon="@drawable/home_bar_menu"

@@ -8,28 +8,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
+import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 
-class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
+class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private var mapFragment = MapFragment()
 
-    // Activity 범위에서 HomeViewModel을 가져오기
+    // ★ Activity 범위에서 HomeViewModel을 가져오기
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
 
-    private lateinit var googleMap: GoogleMap
+    private var isDrawing = false // 경로 그리기 상태 변수
 
     // 프래그먼트의 뷰를 생성하는 메서드
     override fun onCreateView(
@@ -44,6 +46,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // MapFragment 초기화 및 설정
+        mapFragment = MapFragment()
+        childFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, mapFragment)
+            .commitNow() // commitNow를 사용해 트랜잭션이 즉시 완료되도록 보장
+
+        // MapFragment의 콜백 설정
+        mapFragment.setOnMapReadyCallback {
+            // Map이 준비된 후 버튼의 동작을 설정
+            binding.customLocationButton.setOnClickListener {
+                mapFragment.moveToCurrentLocation()
+            }
+        }
+
         // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
@@ -52,48 +68,40 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
         }
 
-        // 위치 추적 및 타이머 시작 버튼
+        // 총 러닝 거리 관찰 및 UI 업데이트
+        viewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
+            binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
+        }
+
+        // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
-            viewModel.startTimer()
+            // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), LocationServices.getFusedLocationProviderClient(requireActivity()))
+            // 위치 권한이 없다면
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
+
+            viewModel.startTimer() // 타이머 시작
+            isDrawing = true // 경로 그리기 활성화
+            observePathUpdates() // 경로 관찰 시작
         }
 
-        // 위치 추적 및 타이머 중지 버튼
+        // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer()
-            MapUtils.stopLocationUpdates()
+            viewModel.stopTimer() // 타이머 중지
+            isDrawing = false // 경로 그리기 중지
+            MapUtils.stopLocationUpdates() // 경로 업데이트 중지
         }
 
-        // 지도 초기화 및 준비
-        val supportMapFragment = SupportMapFragment()
-        childFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, supportMapFragment)
-            .commit()
-        supportMapFragment.getMapAsync(this)
     }
 
-    // GoogleMap 준비가 완료되면 호출되는 메서드
-    override fun onMapReady(map: GoogleMap) {
-        googleMap = map
-
-        if (LocationUtils.hasLocationPermission(requireContext())) {
-            MapUtils.drawPathOnMap(googleMap)
-            try {
-                googleMap.isMyLocationEnabled = true
-            } catch (e: SecurityException) {
-                e.printStackTrace()
+    private fun observePathUpdates() {
+        viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
+            if (isDrawing) { // isDrawing이 활성화된 경우에만 경로 업데이트
+                mapFragment.drawPath(pathPoints)
             }
-        } else {
-            LocationUtils.requestLocationPermission(this)
-        }
-
-        // ViewModel의 경로 포인트 LiveData를 관찰하여 지도에 경로 업데이트
-        viewModel.pathPoints.observe(viewLifecycleOwner) {
-            MapUtils.drawPathOnMap(googleMap)
         }
     }
 

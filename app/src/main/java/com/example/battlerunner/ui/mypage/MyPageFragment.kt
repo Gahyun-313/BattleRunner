@@ -30,8 +30,7 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         // fragment_mypage 레이아웃을 inflate하여 view에 저장
         val view = inflater.inflate(R.layout.fragment_mypage, container, false)
 
-        // DBHelper 인스턴스 초기화
-        dbHelper = DBHelper.getInstance(requireContext())
+        dbHelper = DBHelper.getInstance(requireContext()) // DBHelper 인스턴스 초기화
         userIdTextView = view.findViewById(R.id.userId)  // 사용자 ID 표시할 TextView
         userNameTextView = view.findViewById(R.id.userName)  // 사용자 이름 표시할 TextView
 
@@ -49,9 +48,10 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
         // DBHelper를 통해 사용자 정보 가져와 화면에 표시
         val userInfo = dbHelper.getUserInfo()
+
         if (userInfo != null) {
-            userIdTextView.text = userInfo.first
-            userNameTextView.text = userInfo.second
+            userIdTextView.text = userInfo.first    // ID 표시
+            userNameTextView.text = userInfo.second // 이름 표시
         } else {
             userIdTextView.text = "ID not found"
             userNameTextView.text = "Name not found"
@@ -60,6 +60,7 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         // 로그아웃 버튼 클릭 시 ViewModel을 통해 로그아웃 실행
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
+
             // SharedPreferences에서 loginType 가져와 ViewModel에 전달
             val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
             val loginType = sharedPref.getString("loginType", "custom") ?: "custom"

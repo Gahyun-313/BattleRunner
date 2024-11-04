@@ -1,6 +1,7 @@
 package com.example.battlerunner.utils
 
 import android.content.Context
+import android.graphics.Color
 import android.location.Location
 import android.os.Looper
 import androidx.lifecycle.LiveData
@@ -42,8 +43,8 @@ object MapUtils {
         this.fusedLocationClient = fusedLocationClient
 
         if (LocationUtils.hasLocationPermission(context)) {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000)
-                .setMinUpdateIntervalMillis(1000)
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+                .setMinUpdateIntervalMillis(500)
                 .build()
 
             try {
@@ -56,21 +57,18 @@ object MapUtils {
         }
     }
 
+    // 경로를 그릴 PolylineOptions 생성
+    fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
+        return PolylineOptions()
+            .addAll(points)
+            .width(10f)  // 두께
+            .color(Color.BLUE)  // 경로 색상
+            .geodesic(true)  // 지오데식 경로 설정
+    }
+
     // 위치 업데이트 중지
     fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
-    // 지도에 경로를 그리는 메서드
-    fun drawPathOnMap(googleMap: GoogleMap) {
-        _pathPoints.value?.let { points ->
-            googleMap.clear()
-            googleMap.addPolyline(
-                PolylineOptions().addAll(points)
-                    .color(android.graphics.Color.BLUE)
-                    .width(5f)
-            )
-        }
     }
 
     // 경로를 업데이트
