@@ -57,6 +57,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this) // Map 준비가 완료되면 onMapReady 호출
 
         // custom 내 위치 버튼 리스너
+        // TODO: 버튼은 눌리는데 내 위치로 이동이 안 됨 // 일단 앱 실행에는 문제 없으니 기본 내 위치 버튼으로 구현하고 여유 생기면 고치기
         binding.customLocationButton.setOnClickListener {
             moveToCurrentLocationImmediate()
         }

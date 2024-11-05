@@ -1,6 +1,8 @@
 package com.example.battlerunner.network
 
 import com.example.battlerunner.data.model.LoginInfo
+import com.example.battlerunner.data.model.User
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -8,9 +10,11 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("uploadLoginInfo")
-    suspend fun uploadLoginInfo(@Body loginInfo: LoginInfo): Response<Any>
+    @POST("addUser")
+    suspend fun addUser(@Body user: User): Call<Void>
 
+    @POST("addLoginInfo")
+    suspend fun addLoginInfo(@Body loginInfo: LoginInfo): Call<Void>
 }
 
 
