@@ -20,6 +20,7 @@
         android:contentDescription="@string/battleEnd_closeBtn"/>
 
     <TextView
+        android:id="@+id/battleTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/battleEnd_title"

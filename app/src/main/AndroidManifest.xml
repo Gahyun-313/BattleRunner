@@ -64,10 +64,14 @@
             android:exported="false"/>
         <activity
             android:name=".ui.battle.BattleEndActivity"
-            android:exported="false" />
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
             android:name=".PersonalEndActivity"
             android:exported="false" />
+
+        <activity android:name=".BattleApplyActivity" />
+
+        <activity android:name=".BattleEndActivity" />
     </application>
 
 </manifest>

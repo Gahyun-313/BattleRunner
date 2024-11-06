@@ -1,46 +1,56 @@
 package com.example.battlerunner.ui.home
 
-import android.app.Activity
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
+import com.example.battlerunner.utils.LocationUtils.requestLocationPermission
 import com.example.battlerunner.utils.MapUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var mapFragment = MapFragment()
-    private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 초기화 선언
-    private var cameraPosition: CameraPosition? = null // 카메라 위치 저장 변수
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var googleMap: GoogleMap
+    private var cameraPosition: CameraPosition? = null
+    private var isDrawing: Boolean = false
 
 
-    // ★ Activity 범위에서 HomeViewModel을 가져오기
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
 
-    private var isDrawing = false // 경로 그리기 상태 변수
-    private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
+    private val pathPoints = mutableListOf<LatLng>()
 
-    // 프래그먼트의 뷰를 생성하는 메서드
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,26 +59,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         return binding.root
     }
 
-    // 뷰가 생성된 후 호출되는 메서드, 주요 초기화 작업 수행
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // MapFragment 초기화 및 설정
         mapFragment = MapFragment()
         childFragmentManager.beginTransaction()
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
-        // MapFragment 준비 완료 콜백 설정
         mapFragment.setOnMapReadyCallback {
             cameraPosition?.let {
-                mapFragment.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it)) // ★ 카메라 위치 복원
-            } ?: mapFragment.moveToCurrentLocationImmediate() // ★ 위치 정보 없을 때 현재 위치로 이동
+                mapFragment.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it))
+            } ?: mapFragment.moveToCurrentLocationImmediate()
         }
 
-        // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
+        // ViewModel의 경과 시간 관찰하여 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
@@ -76,45 +83,94 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
         }
 
-        // 총 러닝 거리 관찰 및 UI 업데이트
+        // ViewModel의 거리 관찰하여 UI 업데이트
         viewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
-            binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
+            binding.todayDistance.text = String.format("%.2f m", totalDistance)
         }
 
-        // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
-            // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
+                viewModel.startTimer() // ViewModel에서 타이머 시작
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
-
-            viewModel.startTimer() // 타이머 시작
-            isDrawing = true // 경로 그리기 활성화
-            observePathUpdates() // 경로 관찰 시작
         }
 
-        // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer() // 타이머 중지
-            isDrawing = false // 경로 그리기 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+            viewModel.stopTimer() // ViewModel에서 타이머 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient)
         }
+
+        observePathUpdates()
     }
 
     private fun observePathUpdates() {
         viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (isDrawing) { // isDrawing이 활성화된 경우에만 경로 업데이트
+            if (isDrawing && ::googleMap.isInitialized) { // googleMap 초기화 여부 확인
                 mapFragment.drawPath(pathPoints)
+            } else {
+                Log.e("HomeFragment", "googleMap is not initialized or not in drawing mode")
             }
         }
     }
 
-    // 프래그먼트가 파괴될 때 호출되는 메서드
+    private fun updateMapPath(pathPoints: List<LatLng>) {
+        googleMap.clear()
+        googleMap.addPolyline(
+            PolylineOptions().addAll(pathPoints).color(Color.BLUE).width(5f)
+        )
+    }
+
+    override fun onMapReady(map: GoogleMap) {
+        googleMap = map
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            googleMap.isMyLocationEnabled = true
+        } else {
+            LocationUtils.requestLocationPermission(this)
+        }
+        startLocationUpdates()
+    }
+
+    private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            interval = 2000
+            fastestInterval = 1000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
+    }
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            locationResult.locations.forEach { location ->
+                updateLocationUI(location)
+            }
+        }
+    }
+
+    private fun updateLocationUI(location: Location) {
+        val latLng = LatLng(location.latitude, location.longitude)
+        pathPoints.add(latLng)
+        viewModel.addPathPoint(latLng)
+        googleMap.addPolyline(
+            PolylineOptions().addAll(pathPoints).color(Color.BLUE).width(5f)
+        )
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f))
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
         viewModel.stopTimer() // 타이머 정지
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 }

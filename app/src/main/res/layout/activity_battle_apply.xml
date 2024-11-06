@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="380dp"
-    android:layout_height="wrap_content"
+    android:layout_width="300dp"
+    android:layout_height="430dp"
+    android:background="@drawable/popup_background"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_gravity="center">
@@ -38,6 +39,7 @@
         android:layout_marginVertical="15dp"/>
 
     <TextView
+        android:id="@+id/userNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/userName"
@@ -83,6 +85,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/battleApplyButton"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="@drawable/button"
@@ -96,6 +99,13 @@
         android:paddingHorizontal="35dp"
         android:paddingVertical="15dp"
         android:layout_marginBottom="40dp"/>
+
+    <!-- 여기에 Fragment가 표시될 공간을 정의 -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 
 </LinearLayout>
