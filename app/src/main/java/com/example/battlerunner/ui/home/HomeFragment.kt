@@ -18,6 +18,7 @@ import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -31,6 +32,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val binding get() = _binding!!
     private var mapFragment = MapFragment()
     private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 초기화 선언
+    private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
+    private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
 
     // ★ Activity 범위에서 HomeViewModel을 가져오기
     private val viewModel by lazy {
@@ -38,7 +41,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private var isDrawing = false // 경로 그리기 상태 변수
-    private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
 
     // 프래그먼트의 뷰를 생성하는 메서드
     override fun onCreateView(
@@ -60,6 +62,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         childFragmentManager.beginTransaction()
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
+
 
         // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
         (activity as? MainActivity)?.startPathDrawing = {
