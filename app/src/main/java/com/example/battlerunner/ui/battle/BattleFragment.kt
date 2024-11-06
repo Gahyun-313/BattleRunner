@@ -117,7 +117,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         }
     }
 
-    // Territory Capture 그리드 초기화
+    // Territory Capture 그리드 초기화 [!!그리드 그릴 때 필요한 메서드!!]
     private fun initializeMap() {
         val startLatLng = LatLng(37.5665, 126.9780) // 시작 위치 (예: 서울)
         battleViewModel.createGrid(startLatLng, 10, 10) // 10x10 그리드 생성
@@ -131,7 +131,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         }
     }
 
-    // 위치 업데이트를 위한 LocationRequest와 LocationCallback 설정
+    // 위치 업데이트를 위한 LocationRequest와 LocationCallback 설정 [!!그리드 그릴 때 필요한 메서드!!]
 //    private fun initializeLocationUpdates() {
 //        val locationRequest = LocationRequest.Builder(
 //            Priority.PRIORITY_HIGH_ACCURACY,
@@ -166,7 +166,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle) {
         homeViewModel.stopTimer() // 타이머 정지
     }
 
-    // Polygon.contains 확장 함수 정의
+    // Polygon.contains 확장 함수 정의 [!!그리드 그릴 때 필요한 메서드!!]
     private fun Polygon.contains(point: LatLng): Boolean {
         val vertices = this.points
         var contains = false

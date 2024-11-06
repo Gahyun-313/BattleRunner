@@ -10,10 +10,10 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("login-info/addLoginInfo") // 서버 경로와 일치하도록 수정
+    @POST("login-info/addLoginInfo")
     suspend fun addLoginInfo(@Body loginInfo: LoginInfo): Response<Void>
 
-    @POST("users/addUser") // 서버의 UserController와 맞추기
+    @POST("users/addUser")
     suspend fun addUser(@Body user: User): Response<Void>
 
 }
