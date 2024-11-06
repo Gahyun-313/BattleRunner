@@ -88,15 +88,18 @@ class LoginRepository(private val context: Context) {
             if (userError != null) callback(false, "사용자 정보 가져오기 실패: ${userError.message}")
             else if (user != null) {
                 val email = user.kakaoAccount?.email ?: "kakaoUserId"
-                val nickname = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
+                val name = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
 
                 dbHelper.saveLoginInfo(email, token.accessToken ?: "", "kakao")
-                dbHelper.insertUserData(email, token.accessToken ?: "", nickname)
+                dbHelper.insertUserData(email, token.accessToken ?: "", name)
 
                 // 서버에 로그인 정보와 사용자 정보 전송
                 CoroutineScope(Dispatchers.IO).launch {
-                    sendLoginInfoToServer(LoginInfo(email, token.accessToken ?: "", "kakao"))
-                    sendUserToServer(User(email, token.accessToken ?: "", nickname))
+                    val user = User(email, token.accessToken ?: "", name)
+                    val loginInfo = LoginInfo(email, token.accessToken ?: "", "kakao")
+
+                    sendUserToServer(user)
+                    sendLoginInfoToServer(loginInfo)
                 }
 
                 callback(true, null)
@@ -118,9 +121,13 @@ class LoginRepository(private val context: Context) {
 
                 // 서버에 로그인 정보와 사용자 정보 전송
                 CoroutineScope(Dispatchers.IO).launch {
-                    sendLoginInfoToServer(LoginInfo(email, account.idToken ?: "", "google"))
-                    sendUserToServer(User(email, account.idToken ?: "", name))
+                    val user = (User(email, account.idToken ?: "", name))
+                    val loginInfo = LoginInfo(email, account.idToken ?: "", "google")
+
+                    sendUserToServer(user)
+                    sendLoginInfoToServer(loginInfo)
                 }
+
                 callback(true, null)
             }
         } catch (e: ApiException) {
@@ -179,11 +186,11 @@ class LoginRepository(private val context: Context) {
     private suspend fun sendUserToServer(user: User) {
         withContext(Dispatchers.IO) {
             try {
-                val response = RetrofitInstance.api.addUser(user).awaitResponse()
+                val response = RetrofitInstance.api.addUser(user)
                 if (response.isSuccessful) {
                     Log.d("Server", "User data sent successfully")
                 } else {
-                    Log.e("ServerError", "Failed to send user data")
+                    Log.e("ServerError", "Failed to send user data: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 Log.e("ServerError", "Failed to send user data: ${e.message}")
@@ -195,11 +202,11 @@ class LoginRepository(private val context: Context) {
     private suspend fun sendLoginInfoToServer(loginInfo: LoginInfo) {
         withContext(Dispatchers.IO) {
             try {
-                val response = RetrofitInstance.api.addLoginInfo(loginInfo).awaitResponse()
+                val response = RetrofitInstance.api.addLoginInfo(loginInfo)
                 if (response.isSuccessful) {
                     Log.d("Server", "LoginInfo data sent successfully")
                 } else {
-                    Log.e("ServerError", "Failed to send login info data")
+                    Log.e("ServerError", "Failed to send login info data: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 Log.e("ServerError", "Failed to send login info data: ${e.message}")
