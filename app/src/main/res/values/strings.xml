@@ -9,6 +9,7 @@
     <string name="km">km</string>
 
     <string name="startBtn">시작</string>
+    <string name="stopBtn">정지</string>
     <string name="endBtn">종료</string>
 
     <string name="userID">userID</string>

@@ -16,9 +16,12 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.BattleEndActivity
+import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.ui.shared.MapFragment
+import com.example.battlerunner.ui.shared.SharedViewModel
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.LocationUtils.requestLocationPermission
 import com.example.battlerunner.utils.MapUtils
@@ -49,6 +52,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
 
+    private val sharedViewModel: SharedViewModel by lazy {
+        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
+
     private val pathPoints = mutableListOf<LatLng>()
 
     override fun onCreateView(
@@ -61,6 +68,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.startBtn.visibility = View.VISIBLE
+        binding.stopBtn.visibility = View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -76,7 +86,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
 
         // ViewModel의 경과 시간 관찰하여 UI 업데이트
-        viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+        sharedViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
@@ -91,16 +101,49 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.startBtn.setOnClickListener {
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
-                viewModel.startTimer() // ViewModel에서 타이머 시작
+                sharedViewModel.startTimer() // ViewModel에서 타이머 시작
+
+                // 시작 버튼을 숨기고 정지 버튼을 표시
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
         }
 
-        binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer() // ViewModel에서 타이머 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient)
+        binding.stopBtn.setOnClickListener {
+            sharedViewModel.stopTimer() // ViewModel에서 타이머 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 위치 업데이트 중지
+
+            // 정지 버튼을 숨기고 시작 버튼을 표시
+            binding.stopBtn.visibility = View.GONE
+            binding.startBtn.visibility = View.VISIBLE
         }
+
+        binding.finishBtn.setOnClickListener {
+            sharedViewModel.stopTimer() // ViewModel에서 타이머 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 위치 업데이트 중지
+
+
+
+            // PersonalEndActivity로 이동하며 경과 시간과 거리를 전달
+            val intent = Intent(requireContext(), PersonalEndActivity::class.java).apply {
+                putExtra("elapsedTime", sharedViewModel.elapsedTime.value ?: 0L)
+                putExtra("distance", viewModel.distance.value ?: 0f)
+            }
+            startActivity(intent)
+            sharedViewModel.resetTimer()
+
+        }
+
+        binding.BattlefinishBtn.setOnClickListener {
+            // BattleEndActivity로 이동
+            val intent = Intent(requireContext(), BattleEndActivity::class.java)
+            startActivity(intent)
+        }
+
+
+
 
         observePathUpdates()
     }

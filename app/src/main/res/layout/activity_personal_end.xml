@@ -32,6 +32,7 @@
     <!-- 지도 Fragment가 들어갈 부분 -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapFragmentContainer"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="351dp"
         tools:ignore="MissingConstraints" />

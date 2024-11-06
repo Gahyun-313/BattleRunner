@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.databinding.FragmentBattleBinding
+import com.example.battlerunner.ui.shared.SharedViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationCallback
@@ -33,6 +34,10 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private lateinit var battleViewModel: BattleViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
+
+    private val sharedViewModel: SharedViewModel by lazy {
+        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,7 +61,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             binding.appliedUserName.text = name
         }
 
-        battleViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+        sharedViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
@@ -76,19 +81,20 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
 
         binding.startBtn.setOnClickListener {
-            battleViewModel.startTimer()
+            sharedViewModel.startTimer()
         }
 
         binding.finishBtn.setOnClickListener {
-            battleViewModel.stopTimer()
+            sharedViewModel.stopTimer()
         }
 
         binding.BattlefinishBtn.setOnClickListener {
+            sharedViewModel.stopTimer()
             val intent = Intent(requireActivity(), BattleEndActivity::class.java)
             intent.putExtra("elapsedTime", battleViewModel.elapsedTime.value ?: 0L)
             intent.putExtra("userName", binding.title.text.toString())
             startActivity(intent)
-            battleViewModel.resetTimer()
+            sharedViewModel.resetTimer()
         }
     }
 

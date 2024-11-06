@@ -26,6 +26,8 @@
         private var isRunning = false // 러닝 시작 여부를 나타내는 변수
         private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
 
+        private var elapsedTimeValue: Long = 0
+
         // 타이머 시작 메서드
         fun startTimer() {
             if (!isRunning) { // 타이머가 이미 실행 중이 아닌 경우에만 시작
@@ -70,5 +72,13 @@
             updatedPoints.add(location)
             _pathPoints.value = updatedPoints
         }
+
+        fun resetTimer() {
+            _elapsedTime.value = 0L
+            _distance.value = 0f
+            lastLocation = null // 거리 계산을 위한 마지막 위치도 초기화
+        }
+
+
     }
 

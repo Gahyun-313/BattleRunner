@@ -21,6 +21,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import android.widget.TextView
+import com.example.battlerunner.ui.main.MainActivity
 
 class BattleEndActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -45,6 +46,15 @@ class BattleEndActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent()
             setResult(RESULT_OK, intent)
             this.finish()
+        }
+
+        binding.closeBtn.setOnClickListener {
+            // MainActivity로 돌아가 MatchingFragment를 표시
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
+            finish() // BattleEndActivity 종료
         }
 
         // MapFragment 추가 및 초기화
