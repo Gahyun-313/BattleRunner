@@ -89,13 +89,14 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         }
 
         binding.BattlefinishBtn.setOnClickListener {
-            sharedViewModel.stopTimer()
-            val intent = Intent(requireActivity(), BattleEndActivity::class.java)
-            intent.putExtra("elapsedTime", battleViewModel.elapsedTime.value ?: 0L)
-            intent.putExtra("userName", binding.title.text.toString())
+            val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
+                putExtra("elapsedTime", battleViewModel.elapsedTime.value ?: 0L)
+                putExtra("userName", binding.title.text.toString())
+            }
             startActivity(intent)
-            sharedViewModel.resetTimer()
+            // battleViewModel.resetTimer() // 타이머를 초기화하지 않습니다.
         }
+
     }
 
     override fun onMapReady(map: GoogleMap) {

@@ -11,18 +11,19 @@ class SharedViewModel : ViewModel() {
     val elapsedTime: LiveData<Long> get() = _elapsedTime
 
     private var timer: CountDownTimer? = null
-    private var isRunning = false
+    private val _isRunning = MutableLiveData<Boolean>(false)
+    val isRunning: LiveData<Boolean> get() = _isRunning
 
     fun startTimer() {
-        if (!isRunning) {
-            isRunning = true
+        if (_isRunning.value == false) {
+            _isRunning.value = true
             timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     _elapsedTime.value = (_elapsedTime.value ?: 0) + 1000
                 }
 
                 override fun onFinish() {
-                    isRunning = false
+                    _isRunning.value = false
                 }
             }.start()
         }
@@ -30,10 +31,11 @@ class SharedViewModel : ViewModel() {
 
     fun stopTimer() {
         timer?.cancel()
-        isRunning = false
+        _isRunning.value = false
     }
 
     fun resetTimer() {
         _elapsedTime.value = 0L
+        _isRunning.value = false
     }
 }

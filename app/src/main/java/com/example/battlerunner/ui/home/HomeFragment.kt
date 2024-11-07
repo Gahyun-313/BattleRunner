@@ -85,6 +85,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             } ?: mapFragment.moveToCurrentLocationImmediate()
         }
 
+        // SharedViewModel의 isRunning 상태를 관찰하여 버튼 가시성을 동적으로 설정
+        sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+            if (isRunning) {
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+            }
+        }
+
         // ViewModel의 경과 시간 관찰하여 UI 업데이트
         sharedViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
