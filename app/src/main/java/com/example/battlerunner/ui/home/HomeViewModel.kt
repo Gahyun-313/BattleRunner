@@ -78,6 +78,12 @@ class HomeViewModel : ViewModel() {
         _distance.value = 0f
         lastLocation = null // 거리 계산을 위한 마지막 위치도 초기화
     }
+    fun resetTimerInHome() {
+        _elapsedTime.value = 0L
+        _distance.value = 0f
+        lastLocation = null
+        _pathPoints.value = emptyList()
+    }
 
 
 }

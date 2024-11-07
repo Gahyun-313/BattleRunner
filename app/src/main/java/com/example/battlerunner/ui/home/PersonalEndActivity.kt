@@ -55,6 +55,7 @@ class PersonalEndActivity : AppCompatActivity(), OnMapReadyCallback {
         // X 버튼 클릭 리스너 추가
         binding.closeBtn.setOnClickListener {
             // 현재 액티비티를 종료하여 HomeFragment로 돌아가게 함
+            setResult(RESULT_OK)
             finish()
         }
 

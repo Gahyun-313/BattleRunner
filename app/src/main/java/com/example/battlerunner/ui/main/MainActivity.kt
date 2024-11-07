@@ -77,10 +77,17 @@ class MainActivity : AppCompatActivity() {
 
     // 배틀 여부 및 매칭 상태에 따라 BattleFragment 또는 MatchingFragment로 이동하는 함수
     private fun navigateToBattleOrMatchingFragment() {
+        val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
         val fragment = if (isInBattle || isMatched) {
-            BattleFragment().apply {
-                arguments = Bundle().apply {
-                    putString("userName", intent.getStringExtra("userName"))
+            if (existingBattleFragment != null) {
+                // 이미 BattleFragment가 존재하면 해당 프래그먼트를 재사용
+                existingBattleFragment as BattleFragment
+            } else {
+                // BattleFragment가 없으면 새로 생성
+                BattleFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("userName", intent.getStringExtra("userName"))
+                    }
                 }
             }
         } else {
@@ -91,12 +98,21 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
     // 프래그먼트를 전환하는 함수
     private fun setFragment(fragment: Fragment, tag: String) {
         val transaction = supportFragmentManager.beginTransaction()
 
-        // 프래그먼트를 replace하여 새로 로드
-        transaction.replace(R.id.fragmentContainer, fragment, tag)
+        // 모든 프래그먼트를 숨기고 필요한 프래그먼트만 보여줌
+        supportFragmentManager.fragments.forEach { transaction.hide(it) }
+
+        if (supportFragmentManager.findFragmentByTag(tag) != null) {
+            // 이미 존재하는 프래그먼트를 보여줌
+            transaction.show(fragment)
+        } else {
+            // 존재하지 않으면 새로 추가
+            transaction.add(R.id.fragmentContainer, fragment, tag)
+        }
 
         // 프래그먼트에 따른 상태바 색상 변경
         if (fragment == myPageFragment) {
@@ -106,6 +122,7 @@ class MainActivity : AppCompatActivity() {
         }
         transaction.commit()
     }
+
 
 
     // 외부에서 매칭 성공을 설정하는 메서드

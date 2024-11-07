@@ -1,6 +1,8 @@
+//HomeFragment
 package com.example.battlerunner.ui.home
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -48,6 +50,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var isDrawing: Boolean = false
 
 
+
+
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
@@ -67,6 +71,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         super.onViewCreated(view, savedInstanceState)
 
         binding.startBtn.visibility = View.VISIBLE
@@ -97,7 +102,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
 
         // ViewModel의 경과 시간 관찰하여 UI 업데이트
-        sharedViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+        sharedViewModel.elapsedTimeForHome.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
@@ -112,9 +117,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.startBtn.setOnClickListener {
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
-                sharedViewModel.startTimer() // ViewModel에서 타이머 시작
+                sharedViewModel.startTimer() // 타이머 시작
 
-                // 시작 버튼을 숨기고 정지 버튼을 표시
                 binding.startBtn.visibility = View.GONE
                 binding.stopBtn.visibility = View.VISIBLE
             } else {
@@ -123,40 +127,49 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
 
         binding.stopBtn.setOnClickListener {
-            sharedViewModel.stopTimer() // ViewModel에서 타이머 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient) // 위치 업데이트 중지
+            sharedViewModel.stopTimer()
+            MapUtils.stopLocationUpdates(fusedLocationClient)
 
-            // 정지 버튼을 숨기고 시작 버튼을 표시
             binding.stopBtn.visibility = View.GONE
             binding.startBtn.visibility = View.VISIBLE
         }
 
         binding.finishBtn.setOnClickListener {
-            sharedViewModel.stopTimer() // ViewModel에서 타이머 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient) // 위치 업데이트 중지
-
-
+            sharedViewModel.stopTimer()
+            MapUtils.stopLocationUpdates(fusedLocationClient)
 
             // PersonalEndActivity로 이동하며 경과 시간과 거리를 전달
             val intent = Intent(requireContext(), PersonalEndActivity::class.java).apply {
-                putExtra("elapsedTime", sharedViewModel.elapsedTime.value ?: 0L)
+                putExtra("elapsedTime", sharedViewModel.elapsedTimeForHome.value ?: 0L)
                 putExtra("distance", viewModel.distance.value ?: 0f)
             }
-            startActivity(intent)
-            sharedViewModel.resetTimer()
+            startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
 
+            // HomeFragment에서만 타이머를 완전히 초기화
+            sharedViewModel.resetTimerForHome()
         }
+    }
 
-        binding.BattlefinishBtn.setOnClickListener {
+
+
+
+
+        /*binding.BattlefinishBtn.setOnClickListener {
             // BattleEndActivity로 이동
             val intent = Intent(requireContext(), BattleEndActivity::class.java)
             startActivity(intent)
+        }*/
+
+
+
+
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
+            sharedViewModel.resetTimerForHome()
         }
-
-
-
-
-        observePathUpdates()
     }
 
     private fun observePathUpdates() {
@@ -225,6 +238,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+        private const val REQUEST_CODE_PERSONAL_END = 1001
     }
 }

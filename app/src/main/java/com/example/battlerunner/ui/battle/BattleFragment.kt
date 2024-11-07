@@ -1,3 +1,4 @@
+//BattleFragment.kt
 package com.example.battlerunner
 
 import android.Manifest
@@ -85,17 +86,18 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         }
 
         binding.finishBtn.setOnClickListener {
-            sharedViewModel.stopTimer()
+            sharedViewModel.stopTimer() // 타이머 정지 (초기화 X)
         }
 
         binding.BattlefinishBtn.setOnClickListener {
-            // sharedViewModel의 elapsedTime 값을 가져와 Intent에 추가하여 BattleEndActivity로 전달
+            sharedViewModel.stopTimer()
             val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
                 putExtra("elapsedTime", sharedViewModel.elapsedTime.value ?: 0L)
                 putExtra("userName", binding.title.text.toString())
             }
             startActivity(intent)
         }
+
 
     }
 

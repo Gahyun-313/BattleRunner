@@ -1,4 +1,3 @@
-// SharedViewModel.kt
 package com.example.battlerunner.ui.shared
 
 import android.os.CountDownTimer
@@ -7,19 +6,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class SharedViewModel : ViewModel() {
-    private var _elapsedTime = MutableLiveData<Long>()
+    private var _elapsedTimeForHome = MutableLiveData<Long>() // HomeFragment 전용 시간
+    val elapsedTimeForHome: LiveData<Long> get() = _elapsedTimeForHome
+
+    private var _elapsedTime = MutableLiveData<Long>() // BattleFragment에서도 사용
     val elapsedTime: LiveData<Long> get() = _elapsedTime
 
     private var timer: CountDownTimer? = null
+    private var accumulatedTime: Long = 0L // 누적 시간 저장
+
     private val _isRunning = MutableLiveData<Boolean>(false)
     val isRunning: LiveData<Boolean> get() = _isRunning
 
+    // 타이머 시작 메서드
     fun startTimer() {
         if (_isRunning.value == false) {
             _isRunning.value = true
             timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
-                    _elapsedTime.value = (_elapsedTime.value ?: 0) + 1000
+                    accumulatedTime += 1000 // 누적 시간을 증가
+                    _elapsedTime.value = accumulatedTime // BattleFragment에서 사용
+                    _elapsedTimeForHome.value = accumulatedTime // HomeFragment에서 사용
                 }
 
                 override fun onFinish() {
@@ -29,13 +36,17 @@ class SharedViewModel : ViewModel() {
         }
     }
 
+    // 타이머 정지 메서드 (누적 시간은 유지)
     fun stopTimer() {
         timer?.cancel()
         _isRunning.value = false
+        // accumulatedTime 유지하여 BattleFragment에서 이어갈 수 있도록 함
     }
 
-    fun resetTimer() {
-        _elapsedTime.value = 0L
+    // HomeFragment에서 타이머와 누적 시간을 완전히 초기화
+    fun resetTimerForHome() {
+        _elapsedTimeForHome.value = 0L // HomeFragment 전용 시간 초기화
+        accumulatedTime = 0L // 누적 시간 초기화
         _isRunning.value = false
     }
 }
