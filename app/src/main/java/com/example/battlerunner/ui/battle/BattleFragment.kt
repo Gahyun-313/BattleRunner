@@ -89,12 +89,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         }
 
         binding.BattlefinishBtn.setOnClickListener {
+            // sharedViewModel의 elapsedTime 값을 가져와 Intent에 추가하여 BattleEndActivity로 전달
             val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
-                putExtra("elapsedTime", battleViewModel.elapsedTime.value ?: 0L)
+                putExtra("elapsedTime", sharedViewModel.elapsedTime.value ?: 0L)
                 putExtra("userName", binding.title.text.toString())
             }
             startActivity(intent)
-            // battleViewModel.resetTimer() // 타이머를 초기화하지 않습니다.
         }
 
     }
