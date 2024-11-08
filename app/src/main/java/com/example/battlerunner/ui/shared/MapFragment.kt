@@ -88,7 +88,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // 내 위치 활성화 메서드
-    private fun enableMyLocation() {
+    fun enableMyLocation() {
         if (LocationUtils.hasLocationPermission(requireContext())) { // 권한 확인
             try {
                 googleMap.isMyLocationEnabled = true // 내 위치 표시 활성화
@@ -102,7 +102,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // 현재 위치로 카메라를 이동하는 메서드
-    private fun moveToCurrentLocationImmediate() {
+    fun moveToCurrentLocationImmediate() {
         if (LocationUtils.hasLocationPermission(requireContext())) { // 권한을 먼저 확인
             try {
                 fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)

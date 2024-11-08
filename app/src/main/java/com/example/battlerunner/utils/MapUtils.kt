@@ -12,8 +12,6 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 
@@ -47,22 +45,25 @@ object MapUtils {
 
             try {
                 fusedLocationClient.requestLocationUpdates(
-                    locationRequest, object : LocationCallback() {
+                    locationRequest,
+                    object : LocationCallback() {
                         override fun onLocationResult(locationResult: LocationResult) {
                             locationResult.locations.lastOrNull()?.let { location ->
+                                // 현재 위치 업데이트
                                 _currentLocation.value = location
-                                updatePathPoints(location)
-                                // 위치 업데이트 시 ViewModel에 경로 추가
+                                // ViewModel에 새로운 위치 추가
                                 viewModel.addPathPoint(LatLng(location.latitude, location.longitude))
                             }
                         }
-                    }, Looper.getMainLooper()
+                    },
+                    Looper.getMainLooper()
                 )
             } catch (e: SecurityException) {
                 e.printStackTrace()
             }
         }
     }
+
 
     // 경로를 그릴 PolylineOptions 생성
     fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
@@ -85,3 +86,4 @@ object MapUtils {
         _pathPoints.value = newPathPoints
     }
 }
+
