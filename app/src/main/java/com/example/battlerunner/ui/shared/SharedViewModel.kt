@@ -19,10 +19,14 @@ class SharedViewModel : ViewModel() {
     private val _isRunning = MutableLiveData<Boolean>(false)
     val isRunning: LiveData<Boolean> get() = _isRunning
 
+    private val _hasStarted = MutableLiveData<Boolean>(false) // 시작 버튼 눌렀는지 여부 확인
+    val hasStarted: LiveData<Boolean> get() = _hasStarted
+
     // 타이머 시작 메서드
     fun startTimer() {
         if (_isRunning.value == false) {
             _isRunning.value = true
+            _hasStarted.value = true // 시작되었음을 표시
             timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     accumulatedTime += 1000 // 누적 시간을 증가
@@ -41,6 +45,7 @@ class SharedViewModel : ViewModel() {
     fun stopTimer() {
         timer?.cancel()
         _isRunning.value = false
+        _hasStarted.value = false
         // accumulatedTime 유지하여 BattleFragment에서 이어갈 수 있도록 함
     }
 
@@ -50,5 +55,6 @@ class SharedViewModel : ViewModel() {
         _elapsedTime.value = 0L
         accumulatedTime = 0L
         _isRunning.value = false
+        _hasStarted.value = false // 타이머 상태 초기화
     }
 }

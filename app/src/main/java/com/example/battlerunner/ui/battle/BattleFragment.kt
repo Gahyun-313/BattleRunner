@@ -60,7 +60,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
         binding.startBtn.visibility = View.VISIBLE
         binding.stopBtn.visibility = View.GONE
-        binding.finishBtn.visibility = View.VISIBLE
+        binding.finishBtn.visibility = View.GONE
 
 
         val userName = arguments?.getString("userName") ?: battleViewModel.userName.value ?: ""
@@ -76,6 +76,31 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
+
+        sharedViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted) {
+                if (sharedViewModel.isRunning.value == true) {
+                    binding.startBtn.visibility = View.GONE
+                    binding.stopBtn.visibility = View.VISIBLE
+                    binding.finishBtn.visibility = View.VISIBLE
+                } else {
+                    binding.startBtn.visibility = View.VISIBLE
+                    binding.stopBtn.visibility = View.GONE
+                    binding.finishBtn.visibility = View.GONE
+                }
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+        sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+            if (!isRunning) {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
         }
 
         battleViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
@@ -96,6 +121,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             // 버튼 상태 변경: 시작 버튼 숨기고 정지 버튼 보이기
             binding.startBtn.visibility = View.GONE
             binding.stopBtn.visibility = View.VISIBLE
+            binding.finishBtn.visibility = View.VISIBLE
         }
 
         // 정지 버튼 클릭 리스너
@@ -105,6 +131,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             // 버튼 상태 변경: 정지 버튼 숨기고 시작 버튼 보이기
             binding.startBtn.visibility = View.VISIBLE
             binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
         }
 
         // 종료 버튼 클릭 리스너

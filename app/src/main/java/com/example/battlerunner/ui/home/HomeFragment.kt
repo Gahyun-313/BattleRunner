@@ -76,6 +76,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         binding.startBtn.visibility = View.VISIBLE
         binding.stopBtn.visibility = View.GONE
+        binding.finishBtn.visibility = View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -101,6 +102,32 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             }
         }
 
+        sharedViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted) {
+                if (sharedViewModel.isRunning.value == true) {
+                    binding.startBtn.visibility = View.GONE
+                    binding.stopBtn.visibility = View.VISIBLE
+                    binding.finishBtn.visibility = View.VISIBLE
+                } else {
+                    binding.startBtn.visibility = View.VISIBLE
+                    binding.stopBtn.visibility = View.GONE
+                    binding.finishBtn.visibility = View.GONE
+                }
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+
+        sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+            if (!isRunning) {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+
         // ViewModel의 경과 시간 관찰하여 UI 업데이트
         sharedViewModel.elapsedTimeForHome.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
@@ -121,6 +148,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
                 binding.startBtn.visibility = View.GONE
                 binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
@@ -130,8 +158,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             sharedViewModel.stopTimer()
             MapUtils.stopLocationUpdates(fusedLocationClient)
 
-            binding.stopBtn.visibility = View.GONE
             binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
         }
 
         binding.finishBtn.setOnClickListener {
@@ -169,7 +198,18 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
             sharedViewModel.resetTimer()
+
+            binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.startBtn.visibility = View.VISIBLE
+        binding.stopBtn.visibility = View.GONE
+        binding.finishBtn.visibility = View.GONE
     }
 
     private fun observePathUpdates() {
