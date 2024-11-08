@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeFragment"
+    android:background="@color/blue0">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:ignore="UselessParent"
+        android:backgroundTint="@color/blue0"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/logo_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textStyle="italic"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="@color/blue0"
+            android:layout_gravity="center"
+            android:fontFamily="@font/pretendard_extrabold"
+            android:paddingTop="10dp"
+            android:paddingBottom="25dp"
+            android:paddingLeft="20dp"/>
+
+        <!--프로필카드-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="15dp"
+            android:orientation="horizontal"
+            android:layout_weight="2.5"
+            android:background="@drawable/button"
+            android:paddingVertical="15dp">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/user_profile3"
+                android:layout_marginStart="30dp"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginLeft="30dp"
+                android:orientation="vertical"
+                tools:ignore="NestedWeights">
+
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="@string/myPage_userName"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
+                <TextView
+                    android:id="@+id/userId"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="@string/myPage_userID"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/myPage_age"
+                        android:layout_marginEnd="20dp"
+                        android:gravity="center_vertical"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/myPage_sex"
+                        android:gravity="center_vertical"/>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="@string/myPage_grade"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:text="@string/myPage_longestDistance"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="15dp"/>
+
+        <!--개인 러닝 기록-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_personalRunning"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:textSize="17sp"
+            android:text="@string/myPage_weekGoal"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:textSize="17sp"
+            android:text="@string/myPage_calendar"/>
+
+        <!--배틀 기록-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_battle"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:textSize="17sp"
+            android:text="@string/myPage_record"/>
+
+        <!--카카오톡 로그아웃-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:background="@color/grey_lite"
+            android:text="@string/myPage_logout_text"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="20dp"/>
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:text="@string/myPage_logout"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:textColor="@color/red0" />
+
+        <!--여백-->
+
+    </LinearLayout>
+</FrameLayout>

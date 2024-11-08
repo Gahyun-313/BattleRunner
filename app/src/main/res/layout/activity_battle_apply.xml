@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="380dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_gravity="center">
+
+    <ImageButton
+        android:id="@+id/closeBtn"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_gravity="right"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="fitCenter"
+        android:src="@drawable/close"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/userID"
+        android:textSize="17sp"
+        android:textColor="@color/grey_dark2"
+        android:gravity="start"
+        android:fontFamily="@font/pretendard_medium"
+        android:layout_gravity="center"/>
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/user_profile3"
+        android:contentDescription="@string/user_profile_image"
+        android:layout_gravity="center"
+        android:layout_marginVertical="15dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/userName"
+        android:textSize="23sp"
+        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:fontFamily="@font/pretendard_extrabold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:orientation="vertical"
+        android:layout_marginVertical="15dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/battleApply_monthRecord"
+            android:textColor="@color/grey_dark2"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/km"
+            android:textColor="@color/grey_dark2"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/temp_time"
+            android:textColor="@color/grey_dark2"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="17sp"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/button"
+        android:backgroundTint="@color/blue0"
+        android:text="@string/battleApply_applyBtn"
+        android:textColor="@color/white"
+        android:textSize="23sp"
+        android:fontFamily="@font/pretendard_extrabold"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_gravity="center"
+        android:paddingHorizontal="35dp"
+        android:paddingVertical="15dp"
+        android:layout_marginBottom="40dp"/>
+
+
+</LinearLayout>

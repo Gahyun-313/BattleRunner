@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="380dp"
+    android:layout_height="600dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:background="@color/white">
+
+    <ImageButton
+        android:id="@+id/closeBtn"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_gravity="right"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="fitCenter"
+        android:src="@drawable/close"
+        android:contentDescription="@string/battleEnd_closeBtn"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/battleEnd_title"
+        android:textSize="23sp"
+        android:textColor="@color/black"
+        android:gravity="start"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:paddingHorizontal="30dp"
+        android:paddingBottom="8dp"/>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/battleEnd_win"
+        android:textSize="23sp"
+        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:layout_marginTop="15dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/battleEnd_line_lose"
+        android:textColor="@color/grey_dark"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:gravity="center"
+        android:layout_marginBottom="15dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:paddingVertical="15dp"
+        android:background="@drawable/button"
+        android:backgroundTint="@color/blue0"
+        android:orientation="vertical"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/today_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/personalEnd_distance"
+            android:textColor="@color/white"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="18sp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/today_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/personalEnd_time"
+            android:textColor="@color/white"
+            android:fontFamily="@font/pretendard_medium"
+            android:textSize="18sp"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

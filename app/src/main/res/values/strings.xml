@@ -1,0 +1,103 @@
+<resources>
+    <!--구글 로그인 클라이언트 id-->
+    <string name="default_web_client_id">819529848405-r1o7m77suctqd1m80kdkmqlkfff67ovi.apps.googleusercontent.com</string>
+
+
+    <!-- 공통 -->
+    <string name="app_name">BATTLE RUNNER</string>
+    <string name="icon">logo icon</string>
+    <string name="km">km</string>
+
+    <string name="startBtn">시작</string>
+    <string name="endBtn">종료</string>
+
+    <string name="userID">userID</string>
+    <string name="userName">userName</string>
+
+
+    <!--수정 후 지워야 할 것들-->
+    <string name="search_hint">ID로 검색하기</string>
+    <string name="user_profile_image">user profile image</string>
+    <string name="today_running_record">오늘의 러닝 기록</string>
+    <string name="battle_end">수고하셨습니다!</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- temporary -->
+    <string name="temp_distance">10.19</string>
+    <string name="temp_time">13:34:49</string>
+
+    <!-- activity_login.xml -->
+    <string name="login_temp">temp</string>
+    <string name="login_login">로그인</string>
+
+    <!-- activity_login2.xml -->
+    <string name="login2_signup">회원가입</string>
+    <string name="login2_id">ID</string>
+    <string name="login2_password">비밀번호</string>
+
+    <!-- fragment_home.xml -->
+    <string name="home_title">오늘의 러닝</string>
+    <string name="home_GOAL">GOAL</string>
+    <string name="home_record">현재 기록</string>
+    <string name="home_distance">거리</string>
+    <string name="home_time">시간</string>
+
+    <!-- fragment_battle.xml -->
+    <string name="battle_title">님과의 배틀</string>
+    <string name="battle_finish">finish</string>
+    <string name="battle_record">오늘의 러닝</string>
+    <string name="battle_distance">거리</string>
+    <string name="battle_time">시간</string>
+
+    <!-- 홈바 navigation menu-->
+    <string name="homeBar_title_battle">배틀</string>
+    <string name="homeBar_title_home">개인</string>
+    <string name="homeBar_title_community">커뮤니티</string>
+    <string name="homeBar_title_myPage">마이페이지</string>
+
+    <!-- fragment_matching.xml -->
+    <string name="matching_title">배틀 상대 매칭</string>
+    <string name="matching_subtitle">함께 뛸 러너가 매칭되기 전이에요!</string>
+    <string name="matching_search">ID로 검색하기</string>
+    <string name="matching_searchBtn">신청</string>
+
+    <!-- activity_personal_end.xml -->
+    <string name="personalEnd_title">오늘의 러닝 기록</string>
+    <string name="personalEnd_distance">달린 거리</string>
+    <string name="personalEnd_time">소요 시간</string>
+    <string name="personalEnd_line">수고하셨습니다!</string>
+
+    <!-- activity_battle_end.xml -->
+    <string name="battleEnd_title">님과의 배틀 결과</string>
+    <string name="battleEnd_closeBtn">창 닫기 버튼</string>
+    <string name="battleEnd_win">님의 승리</string>
+    <string name="battleEnd_line_win">축하합니다!</string>
+    <string name="battleEnd_line_lose">수고하셨습니다!</string>
+
+    <!-- activity_battle_apply.xml -->
+    <string name="battleApply_applyBtn">배틀 신청</string>
+    <string name="battleApply_monthRecord">이달의 기록</string>
+
+    <!-- actiivty_battle_request.xml -->
+    <string name="battleRequest_line">배틀 신청이 도착했습니다</string>
+    <string name="battleRequest_allow">수락</string>
+    <string name="battleRequest_deny">거절</string>
+
+    <!-- fragment_myPage.xml -->
+    <string name="myPage_userID">userID</string>
+    <string name="myPage_userName">이름</string>
+    <string name="myPage_longestDistance">최장거리</string>
+    <string name="myPage_grade">전적</string>
+    <string name="myPage_sex">성별</string>
+    <string name="myPage_age">나이</string>
+    <string name="myPage_personalRunning">개인 러닝</string>
+    <string name="myPage_weekGoal">이번주 목표</string>
+    <string name="myPage_calendar">캘린더</string>
+    <string name="myPage_battle">배틀</string>
+    <string name="myPage_record">기록</string>
+    <string name="myPage_logout_text">로그인/로그아웃</string>
+    <string name="myPage_logout">로그아웃</string>
+
+
+</resources>
