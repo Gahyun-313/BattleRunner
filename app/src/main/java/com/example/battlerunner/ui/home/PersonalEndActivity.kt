@@ -1,6 +1,7 @@
 package com.example.battlerunner
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -54,9 +55,8 @@ class PersonalEndActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // X 버튼 클릭 리스너 추가
         binding.closeBtn.setOnClickListener {
-            // 현재 액티비티를 종료하여 HomeFragment로 돌아가게 함
-            setResult(RESULT_OK)
-            finish()
+            setResult(Activity.RESULT_OK) // 결과 설정
+            finish() // 액티비티 종료
         }
 
         // MapFragment 추가 및 초기화

@@ -146,7 +146,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
 
             // HomeFragment에서만 타이머를 완전히 초기화
-            sharedViewModel.resetTimerForHome()
+
         }
     }
 
@@ -154,11 +154,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
 
 
-        /*binding.BattlefinishBtn.setOnClickListener {
-            // BattleEndActivity로 이동
-            val intent = Intent(requireContext(), BattleEndActivity::class.java)
-            startActivity(intent)
-        }*/
+    /*binding.BattlefinishBtn.setOnClickListener {
+        // BattleEndActivity로 이동
+        val intent = Intent(requireContext(), BattleEndActivity::class.java)
+        startActivity(intent)
+    }*/
 
 
 
@@ -168,7 +168,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
-            sharedViewModel.resetTimerForHome()
+            sharedViewModel.resetTimer()
         }
     }
 

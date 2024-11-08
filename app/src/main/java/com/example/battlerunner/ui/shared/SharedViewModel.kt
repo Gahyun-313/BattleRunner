@@ -1,3 +1,4 @@
+//SharedViewModel
 package com.example.battlerunner.ui.shared
 
 import android.os.CountDownTimer
@@ -43,10 +44,11 @@ class SharedViewModel : ViewModel() {
         // accumulatedTime 유지하여 BattleFragment에서 이어갈 수 있도록 함
     }
 
-    // HomeFragment에서 타이머와 누적 시간을 완전히 초기화
-    fun resetTimerForHome() {
-        _elapsedTimeForHome.value = 0L // HomeFragment 전용 시간 초기화
-        accumulatedTime = 0L // 누적 시간 초기화
+    // 타이머 및 누적 시간 초기화 메서드
+    fun resetTimer() {
+        _elapsedTimeForHome.value = 0L
+        _elapsedTime.value = 0L
+        accumulatedTime = 0L
         _isRunning.value = false
     }
 }
