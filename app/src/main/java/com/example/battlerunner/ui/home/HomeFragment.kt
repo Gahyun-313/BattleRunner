@@ -63,6 +63,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
+        // MapFragment가 추가된 후에 map 초기화를 시도
+        childFragmentManager.executePendingTransactions()
+
+        // MapFragment의 onMapReady가 호출되었을 때 현재 위치로 이동하도록 콜백 설정
+        mapFragment.setOnMapReadyCallback {
+            mapFragment.enableMyLocation()
+            mapFragment.moveToCurrentLocationImmediate() // 내 위치 초기화 호출
+        }
 
         // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
         (activity as? MainActivity)?.startPathDrawing = {
