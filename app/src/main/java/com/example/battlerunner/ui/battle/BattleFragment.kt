@@ -95,6 +95,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 binding.finishBtn.visibility = View.GONE
             }
         }
+
         sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
             if (!isRunning) {
                 binding.startBtn.visibility = View.VISIBLE
@@ -117,8 +118,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
         binding.startBtn.setOnClickListener {
             sharedViewModel.startTimer()
-
-            // 버튼 상태 변경: 시작 버튼 숨기고 정지 버튼 보이기
+            sharedViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
             binding.startBtn.visibility = View.GONE
             binding.stopBtn.visibility = View.VISIBLE
             binding.finishBtn.visibility = View.VISIBLE

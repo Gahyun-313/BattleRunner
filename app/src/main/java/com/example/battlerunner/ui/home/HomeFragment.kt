@@ -74,9 +74,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         super.onViewCreated(view, savedInstanceState)
 
+
         binding.startBtn.visibility = View.VISIBLE
         binding.stopBtn.visibility = View.GONE
         binding.finishBtn.visibility = View.GONE
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -91,28 +93,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             } ?: mapFragment.moveToCurrentLocationImmediate()
         }
 
-        // SharedViewModel의 isRunning 상태를 관찰하여 버튼 가시성을 동적으로 설정
-        sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
-            if (isRunning) {
+
+
+        // hasStarted와 isRunning 상태를 관찰하여 버튼 가시성 업데이트
+        sharedViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted && sharedViewModel.isRunning.value == true) {
                 binding.startBtn.visibility = View.GONE
                 binding.stopBtn.visibility = View.VISIBLE
-            } else {
-                binding.startBtn.visibility = View.VISIBLE
-                binding.stopBtn.visibility = View.GONE
-            }
-        }
-
-        sharedViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
-            if (hasStarted) {
-                if (sharedViewModel.isRunning.value == true) {
-                    binding.startBtn.visibility = View.GONE
-                    binding.stopBtn.visibility = View.VISIBLE
-                    binding.finishBtn.visibility = View.VISIBLE
-                } else {
-                    binding.startBtn.visibility = View.VISIBLE
-                    binding.stopBtn.visibility = View.GONE
-                    binding.finishBtn.visibility = View.GONE
-                }
+                binding.finishBtn.visibility = View.VISIBLE
             } else {
                 binding.startBtn.visibility = View.VISIBLE
                 binding.stopBtn.visibility = View.GONE
@@ -121,12 +109,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
 
         sharedViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
-            if (!isRunning) {
+            if (isRunning && sharedViewModel.hasStarted.value == true) {
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
+            } else {
                 binding.startBtn.visibility = View.VISIBLE
                 binding.stopBtn.visibility = View.GONE
                 binding.finishBtn.visibility = View.GONE
             }
         }
+
 
         // ViewModel의 경과 시간 관찰하여 UI 업데이트
         sharedViewModel.elapsedTimeForHome.observe(viewLifecycleOwner) { elapsedTime ->
@@ -207,9 +200,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        binding.startBtn.visibility = View.VISIBLE
-        binding.stopBtn.visibility = View.GONE
-        binding.finishBtn.visibility = View.GONE
+
+        // ViewModel의 현재 상태에 따라 버튼 가시성 설정
+        if (sharedViewModel.hasStarted.value == true && sharedViewModel.isRunning.value == true) {
+            binding.startBtn.visibility = View.GONE
+            binding.stopBtn.visibility = View.VISIBLE
+            binding.finishBtn.visibility = View.VISIBLE
+        } else {
+            binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
+        }
+        //binding.startBtn.visibility = View.VISIBLE
+        //binding.stopBtn.visibility = View.GONE
+        //binding.finishBtn.visibility = View.GONE
     }
 
     private fun observePathUpdates() {

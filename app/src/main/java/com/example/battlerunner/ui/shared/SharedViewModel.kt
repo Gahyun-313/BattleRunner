@@ -22,6 +22,8 @@ class SharedViewModel : ViewModel() {
     private val _hasStarted = MutableLiveData<Boolean>(false) // 시작 버튼 눌렀는지 여부 확인
     val hasStarted: LiveData<Boolean> get() = _hasStarted
 
+
+
     // 타이머 시작 메서드
     fun startTimer() {
         if (_isRunning.value == false) {
@@ -45,7 +47,6 @@ class SharedViewModel : ViewModel() {
     fun stopTimer() {
         timer?.cancel()
         _isRunning.value = false
-        _hasStarted.value = false
         // accumulatedTime 유지하여 BattleFragment에서 이어갈 수 있도록 함
     }
 
@@ -56,5 +57,9 @@ class SharedViewModel : ViewModel() {
         accumulatedTime = 0L
         _isRunning.value = false
         _hasStarted.value = false // 타이머 상태 초기화
+    }
+
+    fun setHasStarted(value: Boolean) {
+        _hasStarted.value = value
     }
 }

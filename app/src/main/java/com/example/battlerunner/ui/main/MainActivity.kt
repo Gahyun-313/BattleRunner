@@ -1,3 +1,4 @@
+//MainActivity
 package com.example.battlerunner.ui.main
 
 import android.app.Activity
