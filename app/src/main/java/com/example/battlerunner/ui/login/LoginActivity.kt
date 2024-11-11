@@ -9,11 +9,13 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
@@ -77,7 +79,10 @@ class LoginActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            viewModel.handleGoogleSignInResult(task)
+            // 코루틴을 시작하여 suspend 함수를 호출
+            lifecycleScope.launch {
+                viewModel.handleGoogleSignInResult(task)
+            }
         }
     }
 

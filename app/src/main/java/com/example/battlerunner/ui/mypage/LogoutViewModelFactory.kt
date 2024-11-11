@@ -21,4 +21,3 @@ class LogoutViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")  // ViewModel 클래스가 맞지 않을 때 예외 발생
     }
 }
-

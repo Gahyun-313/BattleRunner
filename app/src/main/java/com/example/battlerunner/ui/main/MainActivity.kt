@@ -2,18 +2,20 @@
 package com.example.battlerunner.ui.main
 
 import android.app.Activity
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.battlerunner.R
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.BattleFragment
 import com.example.battlerunner.MatchingFragment
-import com.example.battlerunner.R
 import com.example.battlerunner.databinding.ActivityMainBinding
-
 import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.mypage.MyPageFragment
@@ -26,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     private val matchingFragment by lazy { MatchingFragment() } // 추가된 MatchingFragment
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
+
+    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
+    var startPathDrawing: (() -> Unit)? = null
 
     private lateinit var binding: ActivityMainBinding
 
@@ -125,6 +130,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    // BattleFragment에서 경로 그리기 요청 시 호출할 메서드
+    fun notifyStartPathDrawing() {
+        Log.d("MainActivity", "notifyStartPathDrawing invoked")
+        startPathDrawing?.invoke()
+    }
 
     // 외부에서 매칭 성공을 설정하는 메서드
     fun setMatched(matched: Boolean) {

@@ -25,7 +25,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Google 로그인
-    fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {
+    suspend fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {
         repository.performGoogleLogin(task) { success, message ->
             if (success) loginStatus.postValue(true)
             else errorMessage.postValue(message)
