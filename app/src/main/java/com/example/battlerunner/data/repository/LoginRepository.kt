@@ -107,7 +107,7 @@ class LoginRepository(private val context: Context) {
             }
         }
     }
-
+    //TODO 구글 로그인 시 마이페이지 업데이트
     // 구글 로그인
     fun performGoogleLogin(task: Task<GoogleSignInAccount>, callback: (Boolean, String?) -> Unit) {
         try {
@@ -130,12 +130,12 @@ class LoginRepository(private val context: Context) {
         }
     }
 
-    // 자동 로그인 기능
+    // 자동 로그인 기능에서 서버의 정보를 가져와 일치 여부 확인
     fun performAutoLogin(callback: (Boolean) -> Unit) {
         val loginInfo = dbHelper.getLoginInfo()
         if (loginInfo != null) {
             when (dbHelper.getLoginType()) {
-                "custom" -> callback(dbHelper.checkUserPass(loginInfo.first, loginInfo.second))
+                "custom" -> verifyLoginInfoOnServer(loginInfo.first, callback)
                 "kakao" -> performKakaoAutoLogin(callback)
                 "google" -> performGoogleAutoLogin(callback)
                 else -> callback(false)
@@ -143,6 +143,19 @@ class LoginRepository(private val context: Context) {
         } else {
             callback(false)
         }
+    }
+
+    // 서버에서 로그인 정보를 확인
+    private fun verifyLoginInfoOnServer(userId: String, callback: (Boolean) -> Unit) {
+        RetrofitInstance.loginApi.getLoginInfoById(userId).enqueue(object : Callback<LoginInfo> {
+            override fun onResponse(call: Call<LoginInfo>, response: Response<LoginInfo>) {
+                callback(response.isSuccessful && response.body()?.userId == userId)
+            }
+
+            override fun onFailure(call: Call<LoginInfo>, t: Throwable) {
+                callback(false)
+            }
+        })
     }
 
     private fun performKakaoAutoLogin(callback: (Boolean) -> Unit) {

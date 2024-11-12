@@ -1,4 +1,3 @@
-// HomeViewModel.kt
 package com.example.battlerunner.ui.home
 
 import android.location.Location
@@ -6,7 +5,11 @@ import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.battlerunner.network.RetrofitInstance
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
@@ -28,6 +31,7 @@ class HomeViewModel : ViewModel() {
     private var timer: CountDownTimer? = null // 타이머 객체
     private var isRunning = false // 러닝 시작 여부를 나타내는 변수
     private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
+    private var userId: String? = null // 유저 ID를 저장하는 변수
 
     // 타이머 시작 메서드
     fun startTimer() {
@@ -78,5 +82,30 @@ class HomeViewModel : ViewModel() {
         updatedPoints.add(location)
         _pathPoints.value = updatedPoints
     }
-}
 
+    // 유저 ID 설정
+    fun setUserId(id: String) {
+        userId = id
+    }
+
+    // 러닝 기록을 서버로 전송하는 메서드
+    fun sendRunningRecordToServer() {
+        userId?.let { id ->
+            val runningTime = _elapsedTime.value ?: 0L
+            val timestamp = System.currentTimeMillis()  // 현재 시간을 timestamp로 설정
+            val distance = _distance.value ?: 0f
+
+            // 서버로 데이터 전송 (예시: API 호출)
+            GlobalScope.launch(Dispatchers.IO) {
+                // Retrofit을 사용하여 서버에 데이터를 전송
+                val response = RetrofitInstance.userApi.updateRunningRecord(id, distance, runningTime)
+                if (response.isSuccessful) {
+                    // 성공적인 응답 처리 (UI 업데이트 등)
+                } else {
+                    // 실패한 경우 처리
+                }
+            }
+        }
+    }
+
+}

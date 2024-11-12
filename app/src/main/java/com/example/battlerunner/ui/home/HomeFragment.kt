@@ -35,6 +35,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
     private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
 
+
+
     // ★ Activity 범위에서 HomeViewModel을 가져오기
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
@@ -104,6 +106,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             viewModel.stopTimer() // 타이머 중지
             viewModel.setDrawingStatus(false) // 경로 그리기 중지
             MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+
+//            // 서버로 러닝 기록 전송
+//            viewModel.sendRunningRecordToServer()
+            // userId가 설정된 경우에만 서버로 기록 전송
         }
     }
 
