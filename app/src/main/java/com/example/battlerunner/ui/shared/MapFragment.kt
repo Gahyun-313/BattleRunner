@@ -83,8 +83,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             // 위치 권한 요청
             LocationUtils.requestLocationPermission(this)
         }
-        // Map이 준비되었음을 알림
-        onMapReadyCallback?.invoke()
+        onMapReadyCallback?.invoke() // 콜백 호출
     }
 
     // 내 위치 활성화 메서드
