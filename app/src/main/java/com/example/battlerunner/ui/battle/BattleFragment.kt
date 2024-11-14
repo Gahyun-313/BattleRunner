@@ -17,6 +17,7 @@ import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
+import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -34,7 +35,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback // 위치 업데이트에 필요한 콜백 함수
     private lateinit var dbHelper: DBHelper // 데이터베이스 접근을 위한 DBHelper 인스턴스
     private var gridInitialized = false // 그리드가 초기화되었는지 여부를 확인하는 플래그
-    //private var mapFragment = MapFragment()
+    private var trackingActive = false // 현재 소유권 추적 활성화 상태
 
     private val homeViewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
@@ -89,13 +90,25 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
-            if (LocationUtils.hasLocationPermission(requireContext())) {
-                startLocationUpdates() // 위치 업데이트 시작 메서드 호출
-            } else {
-                LocationUtils.requestLocationPermission(this)
+            if (!trackingActive) { // 추적이 비활성화된 경우에만 시작
+
+                if (LocationUtils.hasLocationPermission(requireContext())) {
+                    startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+                } else {
+                    LocationUtils.requestLocationPermission(this)
+                }
+                homeViewModel.startTimer() // 타이머 시작
+                trackingActive = true // 추적 활성화 상태 변경
+                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
             }
-            homeViewModel.startTimer() // 타이머 시작
-            (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+        }
+
+        binding.finishBtn.setOnClickListener {
+            if (trackingActive) { // 추적이 활성화된 경우에만 정지
+                stopLocationUpdates()
+                homeViewModel.stopTimer() // 타이머 중지
+                trackingActive = false // 추적 비활성화 상태 변경
+            }
         }
     }
     // GoogleMap이 준비되었을 때 호출되는 메서드
@@ -172,6 +185,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         } else {
             LocationUtils.requestLocationPermission(this)
         }
+    }
+
+    // 위치 업데이트 중지
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+        Log.d("BattleFragment", "Location updates stopped.")
     }
 
     // 경과 시간을 형식에 맞춰 반환
