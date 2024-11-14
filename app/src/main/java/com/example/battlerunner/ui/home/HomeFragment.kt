@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ import com.example.battlerunner.BattleEndActivity
 import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
+import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.ui.shared.SharedViewModel
 import com.example.battlerunner.utils.LocationUtils
@@ -35,11 +37,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 
-class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
+class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -47,7 +50,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private var cameraPosition: CameraPosition? = null
-    private var isDrawing: Boolean = false
+    private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
+
+
 
 
 
@@ -61,6 +66,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     private val pathPoints = mutableListOf<LatLng>()
+
+    private var isDrawing = false // 경로 그리기 상태 변수
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -87,11 +94,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
+        // MapFragment가 추가된 후에 map 초기화를 시도
+        childFragmentManager.executePendingTransactions()//추가한거
+
+        // MapFragment의 onMapReady가 호출되었을 때 현재 위치로 이동하도록 콜백 설정
         mapFragment.setOnMapReadyCallback {
-            cameraPosition?.let {
-                mapFragment.googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it))
-            } ?: mapFragment.moveToCurrentLocationImmediate()
-        }
+            mapFragment.enableMyLocation()
+            mapFragment.moveToCurrentLocationImmediate() // 내 위치 초기화 호출
+        }//추가한거
+
+        // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
+        (activity as? MainActivity)?.startPathDrawing = {
+            Log.d("HomeFragment", "startPathDrawing called from MainActivity") // 로그 추가
+
+            viewModel.setDrawingStatus(true) // 경로 그리기 활성화
+            observePathUpdates() // 경로 관찰 시작
+        }//추가한거
 
 
 
@@ -149,7 +167,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         binding.stopBtn.setOnClickListener {
             sharedViewModel.stopTimer()
-            MapUtils.stopLocationUpdates(fusedLocationClient)
+            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
             binding.startBtn.visibility = View.VISIBLE
             binding.stopBtn.visibility = View.GONE
@@ -158,7 +177,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         binding.finishBtn.setOnClickListener {
             sharedViewModel.stopTimer()
-            MapUtils.stopLocationUpdates(fusedLocationClient)
+            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
             // PersonalEndActivity로 이동하며 경과 시간과 거리를 전달
             val intent = Intent(requireContext(), PersonalEndActivity::class.java).apply {
@@ -170,6 +190,18 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             // HomeFragment에서만 타이머를 완전히 초기화
 
         }
+
+        // Goal_Btn 클릭 시 HomeGoalActivity로 이동
+        binding.GoalBtn?.setOnClickListener {
+            try {
+                val intent = Intent(requireContext(), HomeGoalActivity::class.java)
+                startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(requireContext(), "Error navigating to HomeGoalActivity", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
 
 
@@ -218,22 +250,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     private fun observePathUpdates() {
         viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (isDrawing && ::googleMap.isInitialized) { // googleMap 초기화 여부 확인
-                mapFragment.drawPath(pathPoints)
-            } else {
-                Log.e("HomeFragment", "googleMap is not initialized or not in drawing mode")
+            if (viewModel.isDrawing.value == true) { // viewModel의 isDrawing을 사용
+                mapFragment.drawPath(pathPoints) // 경로 그리기
             }
         }
     }
 
-    private fun updateMapPath(pathPoints: List<LatLng>) {
+    /*private fun updateMapPath(pathPoints: List<LatLng>) {
         googleMap.clear()
         googleMap.addPolyline(
             PolylineOptions().addAll(pathPoints).color(Color.BLUE).width(5f)
         )
-    }
+    }*/ //지워봄
 
-    override fun onMapReady(map: GoogleMap) {
+    /*override fun onMapReady(map: GoogleMap) {
         googleMap = map
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
@@ -244,9 +274,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             LocationUtils.requestLocationPermission(this)
         }
         startLocationUpdates()
-    }
+    }*/ //지워봄
 
-    private fun startLocationUpdates() {
+    /*private fun startLocationUpdates() {
         val locationRequest = LocationRequest.create().apply {
             interval = 2000
             fastestInterval = 1000
@@ -255,17 +285,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         if (LocationUtils.hasLocationPermission(requireContext())) {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
-    }
+    }*/ //지워봄
 
-    private val locationCallback = object : LocationCallback() {
+    /*private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.locations.forEach { location ->
                 updateLocationUI(location)
             }
         }
-    }
+    }*/ //지워봄
 
-    private fun updateLocationUI(location: Location) {
+    /*private fun updateLocationUI(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)
         pathPoints.add(latLng)
         viewModel.addPathPoint(latLng)
@@ -273,7 +303,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             PolylineOptions().addAll(pathPoints).color(Color.BLUE).width(5f)
         )
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f))
-    }
+    }*/ //지워봄
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -11,6 +11,7 @@
     <string name="startBtn">시작</string>
     <string name="stopBtn">정지</string>
     <string name="endBtn">종료</string>
+    <string name="confirmBtn">확인</string>
 
     <string name="userID">userID</string>
     <string name="userName">userName</string>
@@ -99,6 +100,7 @@
     <string name="myPage_record">기록</string>
     <string name="myPage_logout_text">로그인/로그아웃</string>
     <string name="myPage_logout">로그아웃</string>
+    <string name="title_activity_home_goal">HomeGoalActivity</string>
 
 
 </resources>

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <Button
-        android:id="@+id/BattlefinishBtn"
+        android:id="@+id/GoalBtn"
         android:layout_width="70dp"
         android:layout_height="48dp"
         android:layout_gravity="top|end"

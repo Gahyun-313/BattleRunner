@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 상단 버튼 레이아웃 (거리 입력, 확인 버튼, X 버튼) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <!-- 거리 입력 EditText -->
+        <EditText
+            android:id="@+id/distanceInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="km 입력"
+            android:inputType="number" />
+
+        <!-- 확인 버튼 -->
+        <Button
+            android:id="@+id/confirmBtn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/blue0"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="@string/confirmBtn"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <!-- 'X' 버튼 -->
+        <ImageButton
+            android:id="@+id/closeBtn"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginHorizontal="15dp"
+            android:layout_gravity="right"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:src="@drawable/close" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
+
+    <!-- 추천 경로 표시 TextView -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragmentContainer"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        tools:ignore="MissingConstraints"
+        android:layout_width="match_parent"
+        android:layout_height="619dp" />
+</LinearLayout>
