@@ -88,8 +88,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
-                //startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+                //MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
+                startLocationUpdates() // 위치 업데이트 시작 메서드 호출
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
@@ -123,7 +123,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f))
                 Log.d("BattleFragment", "현재 위치를 기준으로 그리드 생성 시작")
 
-                battleViewModel.createGrid(googleMap, currentLatLng, 30, 30) // 현재 위치 기준으로 그리드 생성
+                battleViewModel.createGrid(googleMap, currentLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
                 // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 그리드의 행, 그리드의 열)
                 gridInitialized = true
             }
@@ -145,7 +145,32 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 }
             }
         }
-        MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel) // 위치 업데이트 시작
+        //MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel) // 위치 업데이트 시작
+        startLocationUpdates()
+    }
+
+    private fun startLocationUpdates() {
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            try {
+                // 위치 요청 설정
+                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L) // 1초 주기로 위치 업데이트
+                    .setMinUpdateIntervalMillis(500) // 최소 업데이트 간격 500ms
+                    .build()
+
+                // 위치 업데이트 요청
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+                Log.d("BattleFragment", "Location updates started.")
+            } catch (e: SecurityException) {
+                Log.e("BattleFragment", "위치 권한이 없어 위치 업데이트를 요청할 수 없습니다.", e)
+                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            LocationUtils.requestLocationPermission(this)
+        }
     }
 
     // 경과 시간을 형식에 맞춰 반환

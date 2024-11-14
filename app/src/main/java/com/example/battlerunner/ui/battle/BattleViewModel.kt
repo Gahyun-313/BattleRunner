@@ -1,4 +1,3 @@
-// BattleViewModel.kt
 package com.example.battlerunner.ui.battle
 
 import android.graphics.Color
@@ -41,7 +40,6 @@ class BattleViewModel : ViewModel() {
                     southWest.latitude + gridSize * metersToLatLng,
                     southWest.longitude + gridSize * metersToLatLng
                 )
-
                 val polygonOptions = PolygonOptions()
                     .add(
                         southWest,
