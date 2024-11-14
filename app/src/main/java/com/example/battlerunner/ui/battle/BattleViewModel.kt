@@ -12,64 +12,69 @@ import com.google.android.gms.maps.model.PolygonOptions
 
 class BattleViewModel : ViewModel() {
 
-    // 생성된 그리드 폴리곤 리스트 (Polygon 객체 리스트)
-    private val _gridPolygons = MutableLiveData<List<Polygon>>()
+    // 그리드 polygon 리스트 (polygon 객체 리스트)
+    private val _gridPolygons = MutableLiveData<List<Polygon>>() // _gridPolygons: 생성된 그리드 폴리곤들을 LiveData 형태로 저장
     val gridPolygons: LiveData<List<Polygon>> get() = _gridPolygons
-    // 각 폴리곤의 소유자를 추적하기 위한 Map
-    private val ownershipMap = mutableMapOf<Polygon, String>()
+    private val ownershipMap = mutableMapOf<Polygon, String>() // 각 폴리곤의 소유자를 추적하기 위한 맵 => <폴리곤 객체, 소유자ID>
 
     // 초기 그리드를 생성하고 _gridPolygons LiveData에 추가
     fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 250) {
         Log.d("BattleViewModel", "createGrid 호출됨. Center: $centerLatLng")
-        val polygons = mutableListOf<Polygon>()
-        val metersToLatLng = 0.00000225     // 약 1m를 위도/경도로 변환한 값 (수정: 정확한 변환 값 사용)
 
-        // 시작 좌표를 사용자 위치 기준으로 중앙에 설정
+        val polygons = mutableListOf<Polygon>() // 생성한 폴리곤 객체들을 저장할 리스트
+        val metersToLatLng = 0.00000225     // 약 1m를 위도/경도로 변환한 값
+
+        // 시작 좌표 -> 사용자의 위치 기준 그리드의 왼쪽 하단 모서리에 맞추어 설정
+        // TODO: 사용자가 중심 그리드의 중앙 위치에서 시작하도록
         val startLatLng = LatLng(
-            centerLatLng.latitude - (rows / 2) * gridSize * metersToLatLng, // 남쪽으로 이동
-            centerLatLng.longitude - (cols / 2) * gridSize * metersToLatLng // 서쪽으로 이동
+            centerLatLng.latitude - (rows / 2) * gridSize * metersToLatLng, // 남쪽으로 이동하여 그리드 시작점의 위도 설정
+            centerLatLng.longitude - (cols / 2) * gridSize * metersToLatLng // 서쪽으로 이동하여 그리드 시작점의 경도 설정
         )
 
-        for (i in 0 until rows) {
-            for (j in 0 until cols) {
-                val southWest = LatLng(
+        // 그리드의 행, 열 개수에 맞춰 폴리곤 생성해 지도에 추가
+        for (i in 0 until rows) { // 행
+            for (j in 0 until cols) { // 열
+                val southWest = LatLng( // 폴리곤의 남서쪽 꼭지점 좌표를 계산
                     startLatLng.latitude + i * gridSize * metersToLatLng,
                     startLatLng.longitude + j * gridSize * metersToLatLng
                 )
-                val northEast = LatLng(
+                val northEast = LatLng( // 폴리곤의 북동쪽 꼭지점 좌표를 계산
                     southWest.latitude + gridSize * metersToLatLng,
                     southWest.longitude + gridSize * metersToLatLng
                 )
+                // 각 꼭지점을 사용하여 폴리곤 옵션을 정의
                 val polygonOptions = PolygonOptions()
                     .add(
                         southWest,
-                        LatLng(southWest.latitude, northEast.longitude),
+                        LatLng(southWest.latitude, northEast.longitude), // 남동쪽 꼭지점
                         northEast,
-                        LatLng(northEast.latitude, southWest.longitude)
+                        LatLng(northEast.latitude, southWest.longitude) // 북서쪽 꼭지점
                     )
-                    .strokeColor(Color.GRAY) // 경계선
+                    .strokeColor(Color.GRAY) // 경계선 색상
                     .strokeWidth(0.5f) // 경계선 두께
-                    .fillColor(Color.argb(10, 0, 0, 0)) // 초기 상태에서는 투명
+                    .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상
 
-                val polygon = map.addPolygon(polygonOptions)
-                ownershipMap[polygon] = "neutral" // 초기 소유자는 중립으로 설정
-                polygons.add(polygon)
+                val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
+                ownershipMap[polygon] = "neutral" // 초기 소유자-> "neutral"
+                polygons.add(polygon) // 생성한 폴리곤을 리스트에 추가
             }
         }
-        _gridPolygons.value = polygons  // 생성된 그리드를 LiveData에 추가
+        _gridPolygons.value = polygons  // 생성된 그리드를 LiveData에 추가 -> UI에 반영되도록 함
         Log.d("BattleViewModel", "생성된 그리드 폴리곤 수: ${polygons.size}")
 
     }
 
-    // 사용자의 위치를 기준으로 그리드의 소유권을 업데이트
+    // 사용자의 위치를 기준으로 해당 폴리곤(그리드)의 소유권을 업데이트
     fun updateOwnership(userLocation: LatLng, userId: String) {
-        _gridPolygons.value?.forEach { polygon ->
-            if (polygon.isPointInside(userLocation)) { // isPointInside 함수 호출
-                val currentOwner = ownershipMap[polygon]
-                if (currentOwner != userId) { // 기존 소유자와 다르면 업데이트
-                    ownershipMap[polygon] = userId
+        _gridPolygons.value?.forEach { polygon -> // 각 폴리곤에 대해 반복
+
+            if (polygon.isPointInside(userLocation)) { // 사용자가 폴리곤 내부에 있는지 확인
+                val currentOwner = ownershipMap[polygon] // 현재 폴리곤의 소유자
+
+                if (currentOwner != userId) { // 현재 소유자와 사용자가 다를 경우,
+                    ownershipMap[polygon] = userId // 폴리곤의 소유권을 사용자 ID로 업데이트
                     polygon.fillColor = Color.BLUE // 사용자가 해당 그리드에 있을 경우 파란색으로 변경
-                    Log.d("BattleViewModel", "Polygon ownership updated for user: $userId") // 추가: 소유권 업데이트 로그
+                    Log.d("BattleViewModel", "Polygon ownership updated for user: $userId")
                     // sendOwnershipToServer(polygon.id.toString(), userId) // 서버로 소유권 전송 예시
                     // TODO: 서버로 소유권 전송
                 }
@@ -80,23 +85,22 @@ class BattleViewModel : ViewModel() {
         }
     }
 
-    // Polygon 확장 함수 정의
+    // Polygon 객체에 대해 확장 함수 정의 (포함 여부를 판단)
     private fun Polygon.isPointInside(point: LatLng): Boolean {
-        val vertices = this.points
-        var contains = false
-        var j = vertices.size - 1
+        val vertices = this.points // 폴리곤의 꼭지점 좌표 리스트
+        var contains = false // 포함 여부를 저장하는 변수
+        var j = vertices.size - 1 // 마지막 꼭지점 인덱스를 설정
 
+        // 점이 폴리곤 내부에 있는지 여부를 판별
         for (i in vertices.indices) {
             if ((vertices[i].latitude > point.latitude) != (vertices[j].latitude > point.latitude) &&
                 (point.longitude < (vertices[j].longitude - vertices[i].longitude) * (point.latitude - vertices[i].latitude) /
                         (vertices[j].latitude - vertices[i].latitude) + vertices[i].longitude)
             ) {
-                contains = !contains
+                contains = !contains // 포함 여부를 토글
             }
-            j = i
+            j = i // 이전 꼭지점의 인덱스를 현재 인덱스로 갱신
         }
-
-        Log.d("BattleViewModel", "Point $point ${if (contains) "is inside" else "is outside"} polygon")
-        return contains // Polygon 내부 여부를 반환
+        return contains // Polygon 내부 여부를 반환 -> 내부 true, 외부 false
     }
 }

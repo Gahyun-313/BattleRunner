@@ -30,10 +30,10 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private var _binding: FragmentBattleBinding? = null
     private val binding get() = _binding!!
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var googleMap: GoogleMap
-    private lateinit var locationCallback: LocationCallback // 위치 콜백
-    private lateinit var dbHelper: DBHelper // --그리드 소유권 때문에 임시로 넣은 것--
-    private var gridInitialized = false
+    private lateinit var googleMap: GoogleMap // GoogleMap 객체를 담아 지도를 제어
+    private lateinit var locationCallback: LocationCallback // 위치 업데이트에 필요한 콜백 함수
+    private lateinit var dbHelper: DBHelper // 데이터베이스 접근을 위한 DBHelper 인스턴스
+    private var gridInitialized = false // 그리드가 초기화되었는지 여부를 확인하는 플래그
     //private var mapFragment = MapFragment()
 
     private val homeViewModel by lazy {
@@ -57,7 +57,9 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         Log.d("BattleFragment", "onViewCreated called")
 
+        // 위치 서비스 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
         // DBHelper 싱글턴 인스턴스 초기화
         dbHelper = DBHelper.getInstance(requireContext())
 
@@ -74,7 +76,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // 위치 업데이트 시작 ***!!!! 이거 없으면 그리드 안 그려짐 GPT가 없애라고 해도 무시하고 남겨둬 !!!!***
         MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
-        initializeLocationUpdates() // 위치 업데이트 함수 호출
+        initializeLocationUpdates() // 위치 업데이트 콜백 설정
         Log.d("BattleFragment", "initializeLocationUpdates() 호출 완료")
 
         // 타이머 및 거리 업데이트 UI
@@ -88,13 +90,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                //MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
                 startLocationUpdates() // 위치 업데이트 시작 메서드 호출
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
-            homeViewModel.startTimer()
-            (activity as? MainActivity)?.notifyStartPathDrawing()
+            homeViewModel.startTimer() // 타이머 시작
+            (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
         }
     }
     // GoogleMap이 준비되었을 때 호출되는 메서드
@@ -120,12 +121,12 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             if (location != null && !gridInitialized) {
                 val currentLatLng = LatLng(location.latitude, location.longitude)
 
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f))
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f)) // 지도를 현재 위치로 이동
                 Log.d("BattleFragment", "현재 위치를 기준으로 그리드 생성 시작")
 
                 battleViewModel.createGrid(googleMap, currentLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
-                // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 그리드의 행, 그리드의 열)
-                gridInitialized = true
+                    // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 그리드의 행, 그리드의 열)
+                gridInitialized = true // 그리드가 초기화되었음을 표시
             }
         }
     }
@@ -140,15 +141,15 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
                     // 현재 위치가 포함된 폴리곤을 찾아 소유권을 업데이트
                     dbHelper.getUserInfo()?.let { userInfo ->
-                        battleViewModel.updateOwnership(userLocation, userInfo.second)
+                        battleViewModel.updateOwnership(userLocation, userInfo.second) // 소유권 업데이트
                     }
                 }
             }
         }
-        //MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel) // 위치 업데이트 시작
-        startLocationUpdates()
+        startLocationUpdates() // 위치 업데이트 시작
     }
 
+    // 위치 업데이트를 요청하는 메서드
     private fun startLocationUpdates() {
         if (LocationUtils.hasLocationPermission(requireContext())) {
             try {
@@ -185,31 +186,13 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        fusedLocationClient.removeLocationUpdates(locationCallback) // 수정: 위치 업데이트 중지
-    }
-
-    // Polygon.contains 확장 함수 정의
-    private fun Polygon.isPointInside(point: LatLng): Boolean {
-        val vertices = this.points
-        var contains = false
-        var j = vertices.size - 1
-
-        for (i in vertices.indices) {
-            if ((vertices[i].latitude > point.latitude) != (vertices[j].latitude > point.latitude) &&
-                (point.longitude < (vertices[j].longitude - vertices[i].longitude) * (point.latitude - vertices[i].latitude) /
-                        (vertices[j].latitude - vertices[i].latitude) + vertices[i].longitude)
-            ) {
-                contains = !contains
-            }
-            j = i
-        }
-        return contains
+        fusedLocationClient.removeLocationUpdates(locationCallback) // 위치 업데이트 중지
     }
 
     // 내 위치 표시 활성화 메서드
     private fun enableMyLocation() {
         try {
-            googleMap.isMyLocationEnabled = true
+            googleMap.isMyLocationEnabled = true // 구글 기본 내 위치 버튼 활성화
         } catch (e: SecurityException) {
             Log.e("BattleFragment", "위치 권한이 필요합니다.", e)
             Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
