@@ -16,6 +16,12 @@ class BattleViewModel : ViewModel() {
     private val _gridPolygons = MutableLiveData<List<Polygon>>() // _gridPolygons: 생성된 그리드 폴리곤들을 LiveData 형태로 저장
     val gridPolygons: LiveData<List<Polygon>> get() = _gridPolygons
     private val ownershipMap = mutableMapOf<Polygon, String>() // 각 폴리곤의 소유자를 추적하기 위한 맵 => <폴리곤 객체, 소유자ID>
+    private var isTrackingActive = false // 소유권 추적 활성화 상태 플래그
+
+    // 소유권 추적 활성화/비활성화 설정 메서드
+    fun setTrackingActive(active: Boolean) {
+        isTrackingActive = active
+    }
 
     // 초기 그리드를 생성하고 _gridPolygons LiveData에 추가
     fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 250) {
@@ -64,8 +70,12 @@ class BattleViewModel : ViewModel() {
 
     }
 
-    // 사용자의 위치를 기준으로 해당 폴리곤(그리드)의 소유권을 업데이트
+    // 폴리곤 소유권(+색칠하기) 메서드
     fun updateOwnership(userLocation: LatLng, userId: String) {
+        // 소유권 추적이 비활성화된 경우 => 실행하지 않음
+        if (!isTrackingActive) return
+
+        // 소유권 추적이 활성화 된 경우
         _gridPolygons.value?.forEach { polygon -> // 각 폴리곤에 대해 반복
 
             if (polygon.isPointInside(userLocation)) { // 사용자가 폴리곤 내부에 있는지 확인

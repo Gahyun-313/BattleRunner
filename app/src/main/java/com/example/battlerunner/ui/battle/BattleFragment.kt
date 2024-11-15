@@ -94,18 +94,21 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
                 if (LocationUtils.hasLocationPermission(requireContext())) {
                     startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+                    battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
+                    homeViewModel.startTimer() // 타이머 시작
+                    trackingActive = true // 추적 활성화 상태 변경
+                    (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+
                 } else {
                     LocationUtils.requestLocationPermission(this)
                 }
-                homeViewModel.startTimer() // 타이머 시작
-                trackingActive = true // 추적 활성화 상태 변경
-                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
             }
         }
 
         binding.finishBtn.setOnClickListener {
             if (trackingActive) { // 추적이 활성화된 경우에만 정지
                 stopLocationUpdates()
+                battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
                 homeViewModel.stopTimer() // 타이머 중지
                 trackingActive = false // 추적 비활성화 상태 변경
             }
