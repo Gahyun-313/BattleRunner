@@ -16,11 +16,11 @@ import com.google.android.gms.maps.model.PolygonOptions
 
 class BattleViewModel : ViewModel() {
 
-    // 생성된 그리드 폴리곤 리스트 (Polygon 객체 리스트)
-    private val _gridPolygons = MutableLiveData<List<Polygon>>()
+    // 그리드 polygon 리스트 (polygon 객체 리스트)
+    private val _gridPolygons = MutableLiveData<List<Polygon>>() // _gridPolygons: 생성된 그리드 폴리곤들을 LiveData 형태로 저장
     val gridPolygons: LiveData<List<Polygon>> get() = _gridPolygons
-    // 각 폴리곤의 소유자를 추적하기 위한 Map
-    private val ownershipMap = mutableMapOf<Polygon, String>()
+    private val ownershipMap = mutableMapOf<Polygon, String>() // 각 폴리곤의 소유자를 추적하기 위한 맵 => <폴리곤 객체, 소유자ID>
+
 
 
 
@@ -50,30 +50,32 @@ class BattleViewModel : ViewModel() {
             centerLatLng.longitude - (cols / 2) * gridSize * metersToLatLng // 서쪽으로 이동
         )
 
-        for (i in 0 until rows) {
-            for (j in 0 until cols) {
-                val southWest = LatLng(
+        // 그리드의 행, 열 개수에 맞춰 폴리곤 생성해 지도에 추가
+        for (i in 0 until rows) { // 행
+            for (j in 0 until cols) { // 열
+                val southWest = LatLng( // 폴리곤의 남서쪽 꼭지점 좌표를 계산
                     startLatLng.latitude + i * gridSize * metersToLatLng,
                     startLatLng.longitude + j * gridSize * metersToLatLng
                 )
-                val northEast = LatLng(
+                val northEast = LatLng( // 폴리곤의 북동쪽 꼭지점 좌표를 계산
                     southWest.latitude + gridSize * metersToLatLng,
                     southWest.longitude + gridSize * metersToLatLng
                 )
+                // 각 꼭지점을 사용하여 폴리곤 옵션을 정의
                 val polygonOptions = PolygonOptions()
                     .add(
                         southWest,
-                        LatLng(southWest.latitude, northEast.longitude),
+                        LatLng(southWest.latitude, northEast.longitude), // 남동쪽 꼭지점
                         northEast,
-                        LatLng(northEast.latitude, southWest.longitude)
+                        LatLng(northEast.latitude, southWest.longitude) // 북서쪽 꼭지점
                     )
-                    .strokeColor(Color.GRAY) // 경계선
+                    .strokeColor(Color.GRAY) // 경계선 색상
                     .strokeWidth(0.5f) // 경계선 두께
-                    .fillColor(Color.argb(10, 0, 0, 0)) // 초기 상태에서는 투명
+                    .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상
 
-                val polygon = map.addPolygon(polygonOptions)
-                ownershipMap[polygon] = "neutral" // 초기 소유자는 중립으로 설정
-                polygons.add(polygon)
+                val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
+                ownershipMap[polygon] = "neutral" // 초기 소유자-> "neutral"
+                polygons.add(polygon) // 생성한 폴리곤을 리스트에 추가
             }
         }
         _gridPolygons.value = polygons  // 생성된 그리드를 LiveData에 추가

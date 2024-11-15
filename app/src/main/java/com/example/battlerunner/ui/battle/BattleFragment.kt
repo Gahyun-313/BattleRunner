@@ -160,7 +160,13 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
 
         binding.startBtn.setOnClickListener {
+            if (LocationUtils.hasLocationPermission(requireContext())) {
+                startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+            } else {
+                LocationUtils.requestLocationPermission(this)
+            }
             sharedViewModel.startTimer()
+            (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
             sharedViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
             binding.startBtn.visibility = View.GONE
             binding.stopBtn.visibility = View.VISIBLE
