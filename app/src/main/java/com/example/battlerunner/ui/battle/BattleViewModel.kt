@@ -75,7 +75,7 @@ class BattleViewModel : ViewModel() {
 
                 val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
                 ownershipMap[polygon] = "neutral" // 초기 소유자-> "neutral"
-                polygons.add(polygon) // 생성한 폴리곤을 리스트에 추가함
+                polygons.add(polygon) // 생성한 폴리곤을 리스트에 추가함함
             }
         }
         _gridPolygons.value = polygons  // 생성된 그리드를 LiveData에 추가
