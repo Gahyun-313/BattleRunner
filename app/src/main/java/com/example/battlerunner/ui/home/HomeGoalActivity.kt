@@ -2,7 +2,9 @@
 package com.example.battlerunner.ui.home
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -29,6 +31,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -38,6 +41,17 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var closeBtn: ImageButton
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var currentLatitude: Double? = null
+    private var currentLongitude: Double? = null
+
+    private fun checkLocationEnabled() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+            !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Toast.makeText(this, "위치 서비스가 비활성화되어 있습니다. 활성화해 주세요.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +78,11 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
     }
+
+
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
@@ -81,52 +99,81 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 val currentLocation = LatLng(location.latitude, location.longitude)
+                currentLatitude = location.latitude
+                currentLongitude = location.longitude
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 googleMap.addMarker(MarkerOptions().position(currentLocation).title("현재 위치"))
             } else {
-                Toast.makeText(this, "현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                // 위치 데이터가 없을 경우 새 위치를 요청
+                requestNewLocationData()
             }
         }
     }
 
+    private fun requestNewLocationData() {
+        val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, object : com.google.android.gms.location.LocationCallback() {
+                override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                    val location = locationResult.lastLocation
+                    if (location != null) {
+                        val currentLocation = LatLng(location.latitude, location.longitude)
+                        currentLatitude = location.latitude
+                        currentLongitude = location.longitude
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                        googleMap.addMarker(MarkerOptions().position(currentLocation).title("현재 위치"))
+                    }
+                }
+            }, null)
+        }
+    }
+
+
+
+
     // ChatGPT API로 추천 경로를 가져오는 함수
     private fun fetchRecommendedRoute(distance: Int) {
+        if (currentLatitude == null || currentLongitude == null) {
+            Toast.makeText(this, "현재 위치를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 요청 JSON 생성
                 val json = JSONObject().apply {
                     put("model", "gpt-3.5-turbo")
                     put("messages", JSONArray().apply {
                         put(JSONObject().apply {
-                            put("role", "user") // 사용자 역할 지정
-                            put("content", "추천 경로를 ${distance}km 거리로 알려주세요.") // 요청 내용
+                            put("role", "user")
+                            put("content", "현재 위치 (${currentLatitude}, ${currentLongitude})에서 ${distance}km 이내의 추천 경로를 JSON 형태로 좌표 리스트로 제공해 주세요.")
                         })
                     })
                     put("max_tokens", 100)
                     put("temperature", 0.7)
                 }
 
-                // API 키
-                val apiKey = "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" // 실제 OpenAI API 키
-
-                // HTTP 클라이언트 및 요청 설정
+                val apiKey = "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"
                 val client = OkHttpClient()
                 val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json.toString())
                 val request = Request.Builder()
-                    .url("https://api.openai.com/v1/chat/completions") // 올바른 엔드포인트
-                    .addHeader("Authorization", "Bearer $apiKey") // 인증 헤더
+                    .url("https://api.openai.com/v1/chat/completions")
+                    .addHeader("Authorization", "Bearer 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")
                     .post(requestBody)
                     .build()
 
-                // API 호출
                 val response = client.newCall(request).execute()
                 val responseData = response.body?.string()
 
-                // 로그 출력
                 println("Response Code: ${response.code}")
                 println("Response Data: $responseData")
 
-                // 응답 처리
+
+
                 if (response.isSuccessful && responseData != null) {
                     val routeCoordinates = parseRouteCoordinates(responseData)
                     withContext(Dispatchers.Main) {
@@ -134,11 +181,13 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@HomeGoalActivity,
-                            "추천 경로를 가져올 수 없습니다. 코드: ${response.code}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val errorMessage = when (response.code) {
+                            400 -> "잘못된 요청입니다."
+                            401 -> "API 키가 유효하지 않습니다."
+                            500 -> "서버 오류입니다. 잠시 후 다시 시도해주세요."
+                            else -> "추천 경로를 가져올 수 없습니다. 코드: ${response.code}"
+                        }
+                        Toast.makeText(this@HomeGoalActivity, errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
@@ -154,15 +203,90 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-    // JSON 응답에서 경로 좌표를 추출하는 함수 (예시)
+
+
+
     private fun parseRouteCoordinates(responseData: String): List<LatLng> {
-        // responseData에서 필요한 좌표를 추출
-        // 여기에 실제 좌표 추출 로직을 구현해야 합니다.
-        return listOf(
-            LatLng(37.5665, 126.9780), // 임의의 예시 좌표
-            LatLng(37.5765, 126.9780)
-        )
+        val routeCoordinates = mutableListOf<LatLng>()
+
+        try {
+            val jsonObject = JSONObject(responseData)
+            val choices = jsonObject.getJSONArray("choices")
+            val content = choices.getJSONObject(0).getJSONObject("message").getString("content")
+
+            // content를 JSONObject로 변환
+            val contentJson = JSONObject(content)
+
+            // route 또는 routes 키 확인
+            if (contentJson.has("route")) {
+                // route 키를 사용
+                val routeArray = contentJson.getJSONArray("route")
+                for (i in 0 until routeArray.length()) {
+                    val point = routeArray.getJSONObject(i)
+                    val lat = point.getDouble("latitude")
+                    val lng = point.getDouble("longitude")
+                    routeCoordinates.add(LatLng(lat, lng))
+                }
+            } else if (contentJson.has("routes")) {
+                // routes 키를 사용
+                val routesArray = contentJson.getJSONArray("routes")
+
+                // routes 배열 내부 확인
+                for (i in 0 until routesArray.length()) {
+                    val element = routesArray.get(i)
+
+                    // 배열 안에 바로 좌표 객체가 있는 경우
+                    if (element is JSONObject && element.has("latitude") && element.has("longitude")) {
+                        val lat = element.getDouble("latitude")
+                        val lng = element.getDouble("longitude")
+                        routeCoordinates.add(LatLng(lat, lng))
+                    }
+                    // 배열 안에 coordinates 배열이 있는 경우
+                    else if (element is JSONObject && element.has("coordinates")) {
+                        val coordinatesArray = element.getJSONArray("coordinates")
+                        for (j in 0 until coordinatesArray.length()) {
+                            val point = coordinatesArray.getJSONObject(j)
+                            val lat = point.getDouble("latitude")
+                            val lng = point.getDouble("longitude")
+                            routeCoordinates.add(LatLng(lat, lng))
+                        }
+                    }
+                }
+            } else {
+                throw JSONException("route 또는 routes 키를 찾을 수 없습니다.")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(this@HomeGoalActivity, "추천 경로 데이터를 처리하는 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        return routeCoordinates
     }
+
+
+
+
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation()
+            } else {
+                Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+
 
     // 지도에 추천 경로를 표시하는 함수
     private fun displayRouteOnMap(routeCoordinates: List<LatLng>) {
