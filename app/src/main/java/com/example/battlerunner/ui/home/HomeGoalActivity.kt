@@ -107,7 +107,7 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
                 val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json.toString())
                 val request = Request.Builder()
                     .url("https://api.openai.com/v1/chat/completions")
-                    .addHeader("Authorization", "ss")
+                    .addHeader("Authorization", "sss")
                     .post(requestBody)
                     .build()
 
