@@ -42,7 +42,6 @@ class LoginRepository(private val context: Context) {
         }
     }
 
-
     // 카카오 로그인
     fun performKakaoLogin(activity: AppCompatActivity, callback: (Boolean, String?) -> Unit) {
         Log.d("KakaoLogin", "Attempting Kakao login")

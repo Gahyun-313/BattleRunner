@@ -83,7 +83,7 @@ class BattleViewModel : ViewModel() {
 
                 if (currentOwner != userId) { // 현재 소유자와 사용자가 다를 경우,
                     ownershipMap[polygon] = userId // 폴리곤의 소유권을 사용자 ID로 업데이트
-                    polygon.fillColor = Color.BLUE // 사용자가 해당 그리드에 있을 경우 파란색으로 변경
+                    polygon.fillColor = Color.BLUE // 파란색으로 변경
                     Log.d("BattleViewModel", "Polygon ownership updated for user: $userId")
                     // sendOwnershipToServer(polygon.id.toString(), userId) // 서버로 소유권 전송 예시
                     // TODO: 서버로 소유권 전송

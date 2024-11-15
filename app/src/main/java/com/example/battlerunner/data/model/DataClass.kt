@@ -22,7 +22,7 @@ data class User(
 data class Battle(
     val battleId: Long,
     val ranking: Int,
-    val flags: Int,
+    //val flags: Int,
     val isBattleStarted: Boolean,
     val user1Username: String,  // 사용자 1 (신청 한 사람)
     val user2Username: String,  // 사용자 2 (신청 받은 사람)

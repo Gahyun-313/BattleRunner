@@ -26,13 +26,21 @@ class HomeViewModel : ViewModel() {
     val isDrawing: LiveData<Boolean> get() = _isDrawing
 
     private var timer: CountDownTimer? = null // 타이머 객체
+
     private var isRunning = false // 러닝 시작 여부를 나타내는 변수
+
     private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
+
+    // (추가)
+    private val _hasStarted = MutableLiveData<Boolean>(false) // 시작 버튼 눌렀는지 여부 확인
+    val hasStarted: LiveData<Boolean> get() = _hasStarted
 
     // 타이머 시작 메서드
     fun startTimer() {
         if (!isRunning) { // 타이머가 이미 실행 중이 아닌 경우에만 시작
             isRunning = true
+            _hasStarted.value = true // 추
+
             timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     _elapsedTime.value = (_elapsedTime.value ?: 0) + 1000 // 1초마다 경과 시간 증가
@@ -54,6 +62,17 @@ class HomeViewModel : ViewModel() {
     // 경로 그리기 상태 변경 메서드 추가
     fun setDrawingStatus(status: Boolean) {
         _isDrawing.value = status
+    }
+
+    // 타이머 및 누적 시간 초기화 메서드
+    fun resetTimer() {
+        _elapsedTime.value = 0L
+        isRunning = false
+        _hasStarted.value = false // 타이머 상태 초기화
+    }
+
+    fun setHasStarted(value: Boolean) {
+        _hasStarted.value = value
     }
 
     // 새로운 위치를 추가하고 거리를 계산하는 메서드
