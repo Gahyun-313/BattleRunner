@@ -53,7 +53,7 @@ class HomeViewModel : ViewModel() {
         isRunning = false // 실행 상태를 false로 설정
     }
 
-    // 경로 그리기 상태 변경 메서드 추가
+    // 경로 그리기 상태 변경 메서드 추가임
     fun setDrawingStatus(status: Boolean) {
         _isDrawing.value = status
     }

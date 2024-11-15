@@ -1,4 +1,4 @@
-// HomeGoalActivity
+//HomeGoalActivity
 package com.example.battlerunner.ui.home
 
 import android.Manifest
@@ -93,33 +93,40 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun fetchRecommendedRoute(distance: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // 요청 JSON 생성
                 val json = JSONObject().apply {
                     put("model", "gpt-3.5-turbo")
                     put("messages", JSONArray().apply {
                         put(JSONObject().apply {
-                            put("role", "user")
-                            put("content", "추천 경로를 ${distance}km 거리로 알려주세요.")
+                            put("role", "user") // 사용자 역할 지정
+                            put("content", "추천 경로를 ${distance}km 거리로 알려주세요.") // 요청 내용
                         })
                     })
+                    put("max_tokens", 100)
+                    put("temperature", 0.7)
                 }
 
+                // API 키
+                val apiKey = "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" // 실제 OpenAI API 키
+
+                // HTTP 클라이언트 및 요청 설정
                 val client = OkHttpClient()
                 val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json.toString())
                 val request = Request.Builder()
-                    .url("https://api.openai.com/v1/chat/completions")
-                    .addHeader("Authorization", "sss")
+                    .url("https://api.openai.com/v1/chat/completions") // 올바른 엔드포인트
+                    .addHeader("Authorization", "Bearer $apiKey") // 인증 헤더
                     .post(requestBody)
                     .build()
 
+                // API 호출
                 val response = client.newCall(request).execute()
                 val responseData = response.body?.string()
 
-                // 로그 추가 - HTTP 상태 코드와 메시지
+                // 로그 출력
                 println("Response Code: ${response.code}")
-                println("Response Message: ${response.message}")
                 println("Response Data: $responseData")
 
-
+                // 응답 처리
                 if (response.isSuccessful && responseData != null) {
                     val routeCoordinates = parseRouteCoordinates(responseData)
                     withContext(Dispatchers.Main) {
@@ -127,17 +134,24 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@HomeGoalActivity, "추천 경로를 가져올 수 없습니다. 코드: ${response.code}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@HomeGoalActivity,
+                            "추천 경로를 가져올 수 없습니다. 코드: ${response.code}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@HomeGoalActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                e.printStackTrace() // 예외 스택 추적 로그 추가
+                e.printStackTrace()
             }
         }
     }
+
+
+
 
 
     // JSON 응답에서 경로 좌표를 추출하는 함수 (예시)

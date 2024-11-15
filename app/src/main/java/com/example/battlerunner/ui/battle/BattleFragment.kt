@@ -348,7 +348,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        fusedLocationClient.removeLocationUpdates(locationCallback) // 수정: 위치 업데이트 중지함
+        fusedLocationClient.removeLocationUpdates(locationCallback) // 수정: 위치 업데이트 중지함함
     }
 
     // Polygon.contains 확장 함수 정의

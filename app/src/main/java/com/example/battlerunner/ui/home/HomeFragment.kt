@@ -67,7 +67,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val pathPoints = mutableListOf<LatLng>()
 
-    private var isDrawing = false // 경로 그리기 상태 변수
+    private var isDrawing = false // 경로 그리기 상태 변수임
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -71,7 +71,7 @@ class BattleViewModel : ViewModel() {
                     )
                     .strokeColor(Color.GRAY) // 경계선 색상
                     .strokeWidth(0.5f) // 경계선 두께
-                    .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상
+                    .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상임
 
                 val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
                 ownershipMap[polygon] = "neutral" // 초기 소유자-> "neutral"
