@@ -80,6 +80,11 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         initializeLocationUpdates() // 위치 업데이트 콜백 설정
         Log.d("BattleFragment", "initializeLocationUpdates() 호출 완료")
 
+        // 초기 버튼 상태 설정: 시작 버튼만 보이도록
+        binding.startBtn.visibility = View.VISIBLE
+        binding.stopBtn.visibility = View.GONE
+        binding.finishBtn.visibility = View.GONE
+
         // 타이머 및 거리 업데이트 UI
         homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             binding.todayTime.text = formatElapsedTime(elapsedTime)

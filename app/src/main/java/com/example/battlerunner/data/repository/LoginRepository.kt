@@ -21,6 +21,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.awaitResponse
+import kotlin.math.log
 
 class LoginRepository(private val context: Context) {
 
@@ -29,11 +30,12 @@ class LoginRepository(private val context: Context) {
     // 자체 로그인
     fun performCustomLogin(userId: String, userPassword: String, callback: (Boolean, String?) -> Unit) {
         if (dbHelper.checkUserPass(userId, userPassword)) {
-            dbHelper.saveLoginInfo(userId, userPassword, name = "customUser", "custom")
+            val loginInfo = LoginInfo(userId, userPassword, name = "customUser", "custom")
+
+            dbHelper.saveLoginInfo(loginInfo)
 
             // 서버에 로그인 정보와 사용자 정보 전송
             CoroutineScope(Dispatchers.IO).launch {
-                val loginInfo = LoginInfo(userId, userPassword, name = "customUser", "kakao")
                 sendLoginInfoToServer(loginInfo)
             }
             callback(true, null)
@@ -83,11 +85,12 @@ class LoginRepository(private val context: Context) {
                 val email = user.kakaoAccount?.email ?: "kakaoUserId"
                 val name = user.kakaoAccount?.profile?.nickname ?: "카카오 사용자"
 
-                dbHelper.saveLoginInfo(email, token.accessToken ?: "", name, "kakao")
+                val loginInfo = LoginInfo(email, token.accessToken ?: "", name, "kakao")
+
+                dbHelper.saveLoginInfo(loginInfo)
 
                 // 서버에 로그인 정보와 사용자 정보 전송
                 CoroutineScope(Dispatchers.IO).launch {
-                    val loginInfo = LoginInfo(email, token.accessToken ?: "", name, "kakao")
                     sendLoginInfoToServer(loginInfo)
                 }
                 callback(true, null)
@@ -104,11 +107,11 @@ class LoginRepository(private val context: Context) {
                 val email = account.email ?: "googleUserId"
                 val name = account.displayName ?: "구글 사용자"
 
-                dbHelper.saveLoginInfo(email, account.idToken ?: "", name, "google")
+                val loginInfo = LoginInfo(email, account.idToken ?: "", name, "google")
+                dbHelper.saveLoginInfo(loginInfo)
 
                 // 서버에 로그인 정보와 사용자 정보 전송
                 CoroutineScope(Dispatchers.IO).launch {
-                    val loginInfo = LoginInfo(email, account.idToken ?: "",name, "google")
                     sendLoginInfoToServer(loginInfo)
                 }
 
@@ -149,31 +152,32 @@ class LoginRepository(private val context: Context) {
         callback(googleAccount != null)
     }
 
+    // TODO: 원래 Register~ 메서드임. 아래의 send~ 메서드랑 병함 중
     // 회원 가입 메서드 : 서버에 회원 정보 저장
-    fun registerUser(userId: String, password: String, username: String, loginType: String, callback: (Boolean, String?) -> Unit) {
+    private fun sendLoginInfoToServer(loginInfo: LoginInfo) {
+
         // dbHelper에 로그인 정보 저장
-        val isInserted = dbHelper.saveLoginInfo(userId, password, username, loginType)
+        val isInserted = dbHelper.saveLoginInfo(loginInfo)
 
         if (isInserted) {
-            val loginInfo = LoginInfo(userId, password, username, loginType)
             RetrofitInstance.loginApi.addLoginInfo(loginInfo).enqueue(object : Callback<LoginInfo> {
                 override fun onResponse(call: Call<LoginInfo>, response: Response<LoginInfo>) {
                     if (response.isSuccessful) {
                         Log.d("LoginRepository", "서버에 회원 정보 전송 성공")
-                        callback(true, null)
+                        //callback(true, null)
                     } else {
                         Log.e("LoginRepository", "서버 전송 실패: ${response.errorBody()?.string()}")
-                        callback(false, "서버 전송 실패")
+                        //callback(false, "서버 전송 실패")
                     }
                 }
 
                 override fun onFailure(call: Call<LoginInfo>, t: Throwable) {
                     Log.e("LoginRepository", "서버 전송 중 오류 발생: ${t.message}")
-                    callback(false, "서버 전송 중 오류 발생: ${t.message}")
+                    //callback(false, "서버 전송 중 오류 발생: ${t.message}")
                 }
             })
         } else {
-            callback(false, "로컬 DB에 회원 정보 저장 실패")
+            //callback(false, "로컬 DB에 회원 정보 저장 실패")
         }
     }
 
@@ -190,7 +194,7 @@ class LoginRepository(private val context: Context) {
         })
     }
 
-    private fun sendLoginInfoToServer(loginInfo: LoginInfo): Call<LoginInfo> {
-        return RetrofitInstance.loginApi.addLoginInfo(loginInfo)
-    }
+//    private fun sendLoginInfoToServer(loginInfo: LoginInfo): Call<LoginInfo> {
+//        return RetrofitInstance.loginApi.addLoginInfo(loginInfo)
+//    }
 }

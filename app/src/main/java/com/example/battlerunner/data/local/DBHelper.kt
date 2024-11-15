@@ -5,8 +5,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.battlerunner.data.model.LoginInfo
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 3) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 4) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴
@@ -32,14 +33,14 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     // <회원가입> 로그인 정보 저장
-    fun saveLoginInfo(userId: String, password: String, name: String, loginType: String): Boolean {
+    fun saveLoginInfo(loginInfo: LoginInfo): Boolean {
         val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
         val contentValues = ContentValues().apply {
             // id, password(토큰), 이름, 로그인 타입 추가
-            put("user_id", userId)
-            put("password", password)
-            put("name", name)
-            put("login_type", loginType)
+            put("user_id", loginInfo.userId)
+            put("password", loginInfo.password)
+            put("name", loginInfo.name)
+            put("login_type", loginInfo.loginType)
         }
         val result = db.insertWithOnConflict("login_info", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE)
         return result != -1L  // 삽입 성공 여부 반환

@@ -2,18 +2,17 @@
     <!--구글 로그인 클라이언트 id-->
     <string name="default_web_client_id">819529848405-r1o7m77suctqd1m80kdkmqlkfff67ovi.apps.googleusercontent.com</string>
 
-
     <!-- 공통 -->
     <string name="app_name">BATTLE RUNNER</string>
     <string name="icon">logo icon</string>
     <string name="km">km</string>
 
     <string name="startBtn">시작</string>
+    <string name="stopBtn">정지</string>
     <string name="endBtn">종료</string>
 
     <string name="userID">userID</string>
     <string name="userName">userName</string>
-
 
     <!--수정 후 지워야 할 것들-->
     <string name="search_hint">ID로 검색하기</string>

@@ -4,7 +4,7 @@ data class LoginInfo(
     val userId: String, // 변수명 변경 : user_id -> userID
     val password: String,
     val name: String,
-    val loginInfo: String // (추가) 로그인 타입
+    val loginType: String // (추가) 로그인 타입
 )
 
 data class User(
@@ -15,7 +15,9 @@ data class User(
     val distance: Float = 0f,   // 현재 세션의 러닝 거리 (미터)
     val totalDistance: Float = 0f, // 사용자 누적 총 러닝 거리 (미터)
     val totalTime: Float = 0f,  // 사용자 누적 총 러닝 시간 (초 또는 분)
-    val averageSpeed: Float = 0f // 사용자 평균 속도 (거리/시간)
+    val averageSpeed: Float = 0f, // 사용자 평균 속도 (거리/시간)
+
+    val profileImageResId: Int // 프로필 사진 <배틀 매칭>
 )
 
 //배틀 상대 표현을 위해 사용자1,2로 구분

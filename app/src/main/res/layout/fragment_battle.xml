@@ -119,6 +119,22 @@
                 style="?android:attr/buttonBarButtonStyle"/>
 
             <Button
+                android:id="@+id/stopBtn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/grey_dark2"
+                android:fontFamily="@font/pretendard_medium"
+                android:text="@string/stopBtn"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+            <Button
                 android:id="@+id/finishBtn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
