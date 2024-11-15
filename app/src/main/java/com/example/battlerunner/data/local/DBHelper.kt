@@ -21,37 +21,25 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
 
     // 데이터베이스 테이블 생성 메서드
     override fun onCreate(db: SQLiteDatabase?) {
-        db!!.execSQL("CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, password TEXT, name TEXT)")  // users 테이블 생성
-        db.execSQL("CREATE TABLE IF NOT EXISTS login_info(user_id TEXT PRIMARY KEY, password TEXT, login_type TEXT)")  // login_info 테이블 생성
+        db!!.execSQL("CREATE TABLE IF NOT EXISTS login_info(user_id TEXT PRIMARY KEY, password TEXT, name TEXT, login_type TEXT)")  // login_info 테이블 생성
     }
 
     // 데이터베이스 버전 업그레이드 시 호출되는 메서드 ??
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         Log.d("DBHelper", "onUpgrade 호출됨: oldVersion = $oldVersion, newVersion = $newVersion")  // 업그레이드 로그 출력
-        db!!.execSQL("DROP TABLE IF EXISTS users")  // 기존 users 테이블 삭제
-        db.execSQL("DROP TABLE IF EXISTS login_info")  // 기존 login_info 테이블 삭제
+        db!!.execSQL("DROP TABLE IF EXISTS login_info")  // 기존 login_info 테이블 삭제
         onCreate(db)  // 새로운 테이블 생성
     }
 
-    // <회원가입> 회원 정보를 저장하는 데이터 삽입 메서드
-    fun insertUserData(id: String?, password: String?, name: String?): Boolean {
+    // <회원가입> 로그인 정보 저장
+    fun saveLoginInfo(userId: String, password: String, name: String, loginType: String): Boolean {
         val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
         val contentValues = ContentValues().apply {
-            put("id", id)  // ID 추가
-            put("password", password)  // 비밀번호 추가
-            put("name", name)  // 닉네임 추가
-        }
-        val result = db.insertWithOnConflict("users", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE)
-        return result != -1L  // 삽입 성공 여부 반환
-    }
-
-    // 로그인 정보 저장
-    fun saveLoginInfo(userId: String, password: String, loginType: String): Boolean {
-        val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
-        val contentValues = ContentValues().apply {
-            put("user_id", userId)  // 사용자 ID 추가
-            put("password", password)  // 토큰 추가
-            put("login_type", loginType)  // 로그인 타입 추가
+            // id, password(토큰), 이름, 로그인 타입 추가
+            put("user_id", userId)
+            put("password", password)
+            put("name", name)
+            put("login_type", loginType)
         }
         val result = db.insertWithOnConflict("login_info", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE)
         return result != -1L  // 삽입 성공 여부 반환
@@ -89,7 +77,6 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // <로그아웃> 로컬 로그인 정보 삭제 메서드
     fun deleteLoginInfo() {
         writableDatabase.delete("login_info", null, null)  // login_info 테이블의 모든 데이터 삭제
-        writableDatabase.delete("users", null, null)  // users 테이블의 모든 데이터 삭제
     }
 
     // 특정 ID가 존재하는지 확인하는 메서드
@@ -149,10 +136,8 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         } else {
             cursorLoginInfo.close()
         }
-
         return userInfo
     }
-
 
     // TODO: 서버 연결 후 삭제
     // ID와 비밀번호가 일치하는지 확인하는 메서드

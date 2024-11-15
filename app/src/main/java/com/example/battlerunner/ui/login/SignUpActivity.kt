@@ -75,14 +75,15 @@ class SignUpActivity : AppCompatActivity() {
 
         // 회원가입 완료 버튼 클릭 시
         btnRegister.setOnClickListener {
-            val user = editTextId.text.toString()
+            val userId = editTextId.text.toString()
             val pass = editTextPassword.text.toString()
             val repass = editTextRePassword.text.toString()
-            val nick = editTextNick.text.toString()
             val pwPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{8,15}$" // 비밀번호 조건 설정
+            val name = editTextNick.text.toString()
+            val loginType = "custom"
 
             // 사용자 입력이 비었을 때
-            if (user.isEmpty() || pass.isEmpty() || repass.isEmpty() || nick.isEmpty()) {
+            if (userId.isEmpty() || pass.isEmpty() || repass.isEmpty() || name.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "회원정보를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
             } else {
                 // 아이디 중복 확인이 됐을 때
@@ -91,19 +92,21 @@ class SignUpActivity : AppCompatActivity() {
                     if (Pattern.matches(pwPattern, pass)) {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
-                            val insert = dbHelper.insertUserData(user, pass, nick)
+                            // SQLite에 정보 저장
+                            val insert = dbHelper.saveLoginInfo(userId, pass, name, loginType)
 
                             // insert 잘 됐는지 확인
                             if (insert) {
                                 Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
 
                                 // 자동 로그인 정보 저장
-                                dbHelper.saveLoginInfo(userId = user, password = pass, loginType = "custom")
+                                dbHelper.saveLoginInfo(userId, pass, name, loginType)
 
                                 // MainActivity 이동
                                 val intent = Intent(this, MainActivity::class.java)
                                 startActivity(intent)
                                 finish()
+
                             } else {
                                 Toast.makeText(this@SignUpActivity, "가입 실패하였습니다.", Toast.LENGTH_SHORT).show()
                             }

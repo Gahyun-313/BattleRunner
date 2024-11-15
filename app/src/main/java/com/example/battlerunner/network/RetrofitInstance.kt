@@ -1,13 +1,13 @@
 package com.example.battlerunner.network
 
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    // BASE_URL은 서버의 기본 URL 설정
-    // TODO URL 설정
+
     private const val BASE_URL = "http://192.168.1.71:8800/"
 
     // Logging interceptor 추가
@@ -21,13 +21,21 @@ object RetrofitInstance {
         .build()
 
     // Retrofit 인스턴스 생성
-    val api: ApiService by lazy {
+    val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(client) // OkHttpClient 추가
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java)
     }
+
+    val loginApi: LoginApi by lazy {
+        retrofit.create(LoginApi::class.java)
+    }
+
+    val userApi: UserApi by lazy{
+        retrofit.create(UserApi::class.java)
+    }
+
 }
 
