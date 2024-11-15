@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity() {
 
     // BattleFragment에서 경로 그리기 요청 시 호출할 메서드
     fun notifyStartPathDrawing() {
-        Log.d("MainActivity", "notifyStartPathDrawing invoked")
         startPathDrawing?.invoke()
     }
 

@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.battle
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentBattleBinding
@@ -34,9 +36,10 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap // GoogleMap 객체를 담아 지도를 제어
     private lateinit var locationCallback: LocationCallback // 위치 업데이트에 필요한 콜백 함수
     private lateinit var dbHelper: DBHelper // 데이터베이스 접근을 위한 DBHelper 인스턴스
-    private var gridInitialized = false // 그리드가 초기화되었는지 여부를 확인하는 플래그
+    private var gridInitialized = false // 지도 그리드 초기화 여부 확인하는 플래그
     private var trackingActive = false // 현재 소유권 추적 활성화 상태
 
+    // viewModel 초기화
     private val homeViewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
@@ -64,7 +67,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
         // DBHelper 싱글턴 인스턴스 초기화
         dbHelper = DBHelper.getInstance(requireContext())
 
-        // MapFragment 초기화 및 설정 (SupportMapFragment 동적으로 추가)
+        // MapFragment 초기화 (SupportMapFragment 동적으로 추가)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
             ?: SupportMapFragment.newInstance().also {
                 childFragmentManager.beginTransaction()
@@ -72,25 +75,61 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                     .commit()
             }
         mapFragment.getMapAsync(this) // getMapAsync 호출
-        Log.d("BattleFragment", "getMapAsync 호출 완료")
 
         // 위치 업데이트 시작 ***!!!! 이거 없으면 그리드 안 그려짐 GPT가 없애라고 해도 무시하고 남겨둬 !!!!***
         MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
-        initializeLocationUpdates() // 위치 업데이트 콜백 설정
-        Log.d("BattleFragment", "initializeLocationUpdates() 호출 완료")
+        initializeLocationUpdates() // 위치 업데이트 콜백 초기화
 
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
         binding.startBtn.visibility = View.VISIBLE
         binding.stopBtn.visibility = View.GONE
         binding.finishBtn.visibility = View.GONE
 
-        // 타이머 및 거리 업데이트 UI
-        homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
-            binding.todayTime.text = formatElapsedTime(elapsedTime)
+        // 배틀 상대 이름 설정
+        val user2Name = arguments?.getString("userName") ?: battleViewModel.user2Name.value ?: ""
+        binding.title.text = "$user2Name 님과의 배틀"
+        battleViewModel.setUser2Name(user2Name)
+        battleViewModel.user2Name.observe(viewLifecycleOwner) { name ->
+            binding.appliedUserName.text = name
         }
+
+        // 타이머 UI 업데이트
+        homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+            val seconds = (elapsedTime / 1000) % 60
+            val minutes = (elapsedTime / (1000 * 60)) % 60
+            val hours = (elapsedTime / (1000 * 60 * 60))
+            binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
+        // 거리 UI 업데이트
         homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance)
+        }
+
+        homeViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted) {
+                if (homeViewModel.isRunning.value == true) {
+                    binding.startBtn.visibility = View.GONE
+                    binding.stopBtn.visibility = View.VISIBLE
+                    binding.finishBtn.visibility = View.VISIBLE
+                } else {
+                    binding.startBtn.visibility = View.VISIBLE
+                    binding.stopBtn.visibility = View.GONE
+                    binding.finishBtn.visibility = View.GONE
+                }
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+
+        homeViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+            if (!isRunning) {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
         }
 
         // 시작 버튼 리스너
@@ -104,19 +143,51 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                     trackingActive = true // 추적 활성화 상태 변경
                     (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
 
+                    homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+
+                    // 버튼 상태 변경
+                    binding.startBtn.visibility = View.GONE
+                    binding.stopBtn.visibility = View.VISIBLE
+                    binding.finishBtn.visibility = View.VISIBLE
+
                 } else {
                     LocationUtils.requestLocationPermission(this)
                 }
             }
         }
 
-        binding.finishBtn.setOnClickListener {
+        // 정지 버튼 클릭 리스너
+        binding.stopBtn.setOnClickListener {
             if (trackingActive) { // 추적이 활성화된 경우에만 정지
                 stopLocationUpdates()
                 battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
-                homeViewModel.stopTimer() // 타이머 중지
+                homeViewModel.stopTimer() // 타이머 정지
                 trackingActive = false // 추적 비활성화 상태 변경
+
+                // 버튼 상태 변경
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
             }
+        }
+        // 종료 버튼 클릭 리스너
+        binding.finishBtn.setOnClickListener {
+            homeViewModel.stopTimer() // 타이머 정지
+            val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
+                putExtra("userName", binding.title.text.toString())
+            }
+            startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
+        }
+
+        // 배틀 종료 버튼 클릭 리스너
+        binding.BattlefinishBtn.setOnClickListener {
+            homeViewModel.stopTimer()
+            val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
+                putExtra("userName", binding.title.text.toString())
+            }
+            startActivity(intent)
         }
     }
     // GoogleMap이 준비되었을 때 호출되는 메서드
@@ -180,11 +251,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                     .build()
 
                 // 위치 업데이트 요청
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
                 Log.d("BattleFragment", "Location updates started.")
             } catch (e: SecurityException) {
                 Log.e("BattleFragment", "위치 권한이 없어 위치 업데이트를 요청할 수 없습니다.", e)
@@ -199,14 +266,6 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
         Log.d("BattleFragment", "Location updates stopped.")
-    }
-
-    // 경과 시간을 형식에 맞춰 반환
-    private fun formatElapsedTime(elapsedTime: Long): String {
-        val seconds = (elapsedTime / 1000) % 60
-        val minutes = (elapsedTime / (1000 * 60)) % 60
-        val hours = (elapsedTime / (1000 * 60 * 60))
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     // Fragment가 파괴될 때 호출되는 메서드
@@ -227,6 +286,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     }
 
     companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000 // 권한 요청 코드 상수
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+        const val REQUEST_CODE_PERSONAL_END = 1001
     }
 }

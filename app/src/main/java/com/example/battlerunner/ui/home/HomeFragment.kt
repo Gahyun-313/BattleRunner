@@ -1,6 +1,7 @@
 package com.example.battlerunner.ui.home
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -10,9 +11,12 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
+import com.example.battlerunner.ui.battle.BattleFragment.Companion.REQUEST_CODE_PERSONAL_END
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
@@ -80,21 +84,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             observePathUpdates() // 경로 관찰 시작
         }
 
-        // 타이머와 경과 시간을 ViewModel에서 관찰하여 UI 업데이트
+        // 초기 버튼 상태 설정: 시작 버튼만 보이도록
+        binding.startBtn.visibility = View.VISIBLE
+        binding.stopBtn.visibility = View.GONE
+        binding.finishBtn.visibility = View.GONE
+
+        // 타이머 UI 업데이트
         viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
         }
-
-        // 총 러닝 거리 관찰 및 UI 업데이트
+        // 거리 UI 업데이트
         viewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
         }
 
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
+            binding.startBtn.visibility = View.GONE
+            binding.stopBtn.visibility = View.VISIBLE
+            binding.finishBtn.visibility = View.VISIBLE
+
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
@@ -107,12 +119,42 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             observePathUpdates() // 경로 관찰 시작
         }
 
+        // 정지 버튼 리스너
+        binding.finishBtn.setOnClickListener {
+            binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
+
+            viewModel.stopTimer() // 타이머 중지
+            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+        }
+
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
             viewModel.setDrawingStatus(false) // 경로 그리기 중지
             MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+
+            // PersonalEndActivity 실행
+            val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
+                // 러닝 소요 시간, 거리 전달
+                putExtra("elapsedTime", viewModel.elapsedTime.value ?: 0L)
+                putExtra("distance", viewModel.distance.value ?: 0f)
+            }
+            startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
+
+        // Goal 버튼 리스너
+//        binding.GoalBtn?.setOnClickListener {
+//            try {
+//                val intent = Intent(requireContext(), HomeGoalActivity::class.java)
+//                startActivity(intent)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                Toast.makeText(requireContext(), "Error navigating to HomeGoalActivity", Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
     private fun observePathUpdates() {
@@ -128,5 +170,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onDestroyView()
         _binding = null
         viewModel.stopTimer() // 타이머 정지
+    }
+
+    companion object {
+        private const val REQUEST_CODE_PERSONAL_END = 1001
     }
 }

@@ -117,26 +117,16 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // <마이페이지> 프로필 정보 반환 - <id, name>
     fun getUserInfo(): Pair<String, String>? {
         val db = readableDatabase
-
-        // login_info 테이블에서 user_id를 가져옴
-        val cursorLoginInfo = db.rawQuery("SELECT user_id FROM login_info LIMIT 1", null)
         var userInfo: Pair<String, String>? = null
 
-        if (cursorLoginInfo.moveToFirst()) {
-            val userId = cursorLoginInfo.getString(cursorLoginInfo.getColumnIndexOrThrow("user_id"))
-            cursorLoginInfo.close()
-
-            // users 테이블에서 해당 user_id의 정보(id, name)를 가져옴
-            val cursorUser = db.rawQuery("SELECT id, name FROM users WHERE id = ?", arrayOf(userId))
-            if (cursorUser.moveToFirst()) {
-                val id = cursorUser.getString(cursorUser.getColumnIndexOrThrow("id"))
-                val name = cursorUser.getString(cursorUser.getColumnIndexOrThrow("name"))
-                userInfo = Pair(id, name)
-            }
-            cursorUser.close()
-        } else {
-            cursorLoginInfo.close()
+        // login_info 테이블에서 user_id와 name을 가져옴
+        val cursor = db.rawQuery("SELECT user_id, name FROM login_info LIMIT 1", null)
+        if (cursor.moveToFirst()) {
+            val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+            userInfo = Pair(userId, name) // id와 name을 Pair로 저장
         }
+        cursor.close()
         return userInfo
     }
 
