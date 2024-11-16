@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
     var startPathDrawing: (() -> Unit)? = null
+    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

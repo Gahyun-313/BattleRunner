@@ -21,6 +21,7 @@ import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
+import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
@@ -43,8 +44,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val viewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
-
-    private var isDrawing = false // 경로 그리기 상태 변수
 
     // 프래그먼트의 뷰를 생성하는 메서드
     override fun onCreateView(
@@ -101,40 +100,73 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
         }
 
+        // homeViewModel의 start, isRunning의 여부에 따른 버튼 변경
+        // battleFragment에서 시작, 정지 버튼을 눌렀을 때 homeFragment에도 적용
+        viewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted) {
+                if (viewModel.isRunning.value == true) {
+                    binding.startBtn.visibility = View.GONE
+                    binding.stopBtn.visibility = View.VISIBLE
+                    binding.finishBtn.visibility = View.VISIBLE
+                } else {
+                    binding.startBtn.visibility = View.VISIBLE
+                    binding.stopBtn.visibility = View.GONE
+                    binding.finishBtn.visibility = View.GONE
+                }
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+        viewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+            if (!isRunning) {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
-            binding.startBtn.visibility = View.GONE
-            binding.stopBtn.visibility = View.VISIBLE
-            binding.finishBtn.visibility = View.VISIBLE
-
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
+
+                viewModel.startTimer() // 타이머 시작
+                viewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+
+                viewModel.setDrawingStatus(true) // 경로 그리기 활성화
+                observePathUpdates() // 경로 관찰 시작
+
+                //추추
+                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> battleFragment 시작 버튼 공유
+
+                // 버튼 상태 변경
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
             } else {
                 LocationUtils.requestLocationPermission(this)
             }
-
-            viewModel.startTimer() // 타이머 시작
-            viewModel.setDrawingStatus(true) // 경로 그리기 활성화
-            observePathUpdates() // 경로 관찰 시작
         }
 
         // 정지 버튼 리스너
         binding.finishBtn.setOnClickListener {
+            viewModel.stopTimer() // 타이머 중지
+            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+
+            // 버튼 상태 변경
             binding.startBtn.visibility = View.VISIBLE
             binding.stopBtn.visibility = View.GONE
             binding.finishBtn.visibility = View.GONE
-
-            viewModel.stopTimer() // 타이머 중지
-            viewModel.setDrawingStatus(false) // 경로 그리기 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
         }
 
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
             viewModel.stopTimer() // 타이머 중지
             viewModel.setDrawingStatus(false) // 경로 그리기 중지
-            MapUtils.stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+            stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
@@ -142,6 +174,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 putExtra("elapsedTime", viewModel.elapsedTime.value ?: 0L)
                 putExtra("distance", viewModel.distance.value ?: 0f)
             }
+            viewModel.resetTimer()
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
 

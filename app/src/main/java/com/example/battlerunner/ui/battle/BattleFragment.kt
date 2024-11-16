@@ -106,6 +106,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             binding.todayDistance.text = String.format("%.2f m", totalDistance)
         }
 
+        // homeViewModel의 start, isRunning의 여부에 따른 버튼 변경
+        // homeFragment에서 시작, 정지 버튼을 눌렀을 때 battleFragment에도 적용
         homeViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
             if (hasStarted) {
                 if (homeViewModel.isRunning.value == true) {
@@ -123,7 +125,6 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 binding.finishBtn.visibility = View.GONE
             }
         }
-
         homeViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
             if (!isRunning) {
                 binding.startBtn.visibility = View.VISIBLE
@@ -138,12 +139,13 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
                 if (LocationUtils.hasLocationPermission(requireContext())) {
                     startLocationUpdates() // 위치 업데이트 시작 메서드 호출
-                    battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
+
                     homeViewModel.startTimer() // 타이머 시작
+                    homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+
+                    battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
                     trackingActive = true // 추적 활성화 상태 변경
                     (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
-
-                    homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
 
                     // 버튼 상태 변경
                     binding.startBtn.visibility = View.GONE
@@ -161,8 +163,9 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
             if (trackingActive) { // 추적이 활성화된 경우에만 정지
                 stopLocationUpdates()
                 battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
-                homeViewModel.stopTimer() // 타이머 정지
                 trackingActive = false // 추적 비활성화 상태 변경
+
+                homeViewModel.stopTimer() // 타이머 정지
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.VISIBLE
@@ -170,13 +173,17 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 binding.finishBtn.visibility = View.GONE
             }
         }
+
         // 종료 버튼 클릭 리스너
         binding.finishBtn.setOnClickListener {
             homeViewModel.stopTimer() // 타이머 정지
+
+            // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
                 putExtra("userName", binding.title.text.toString())
             }
+            homeViewModel.resetTimer()
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
 
@@ -217,7 +224,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 Log.d("BattleFragment", "현재 위치를 기준으로 그리드 생성 시작")
 
                 battleViewModel.createGrid(googleMap, currentLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
-                    // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 그리드의 행, 그리드의 열)
+                    // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 행 개수, 열 개수)
                 gridInitialized = true // 그리드가 초기화되었음을 표시
             }
         }

@@ -34,7 +34,7 @@ class BattleViewModel : ViewModel() {
     }
 
     // 초기 그리드를 생성하고 _gridPolygons LiveData에 추가
-    fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 250) {
+    fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 500) {
         Log.d("BattleViewModel", "createGrid 호출됨. Center: $centerLatLng")
 
         val polygons = mutableListOf<Polygon>() // 생성한 폴리곤 객체들을 저장할 리스트
