@@ -30,6 +30,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.random.Random
 
 class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -38,6 +39,9 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var closeBtn: ImageButton
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var currentLatitude: Double? = null
+    private var currentLongitude: Double? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,15 +76,29 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
             return
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                val currentLocation = LatLng(location.latitude, location.longitude)
+                currentLatitude = location.latitude
+                currentLongitude = location.longitude
+
+                val currentLocation = LatLng(currentLatitude!!, currentLongitude!!)
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 googleMap.addMarker(MarkerOptions().position(currentLocation).title("현재 위치"))
             } else {
@@ -88,6 +106,7 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
+
 
     // ChatGPT API로 추천 경로를 가져오는 함수
     private fun fetchRecommendedRoute(distance: Int) {
@@ -107,7 +126,7 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
                 val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json.toString())
                 val request = Request.Builder()
                     .url("https://api.openai.com/v1/chat/completions")
-                    .addHeader("Authorization", "ssss")
+                    .addHeader("Authorization", "Bearer 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")
                     .post(requestBody)
                     .build()
 
@@ -121,7 +140,7 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
                 if (response.isSuccessful && responseData != null) {
-                    val routeCoordinates = parseRouteCoordinates(responseData)
+                    val routeCoordinates = parseRouteCoordinates(responseData,distance)
                     withContext(Dispatchers.Main) {
                         displayRouteOnMap(routeCoordinates)
                     }
@@ -141,14 +160,60 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     // JSON 응답에서 경로 좌표를 추출하는 함수 (예시)
-    private fun parseRouteCoordinates(responseData: String): List<LatLng> {
-        // responseData에서 필요한 좌표를 추출
-        // 여기에 실제 좌표 추출 로직을 구현해야 합니다.
-        return listOf(
-            LatLng(37.5665, 126.9780), // 임의의 예시 좌표
-            LatLng(37.5765, 126.9780)
-        )
+    private fun parseRouteCoordinates(responseData: String, distance: Int): List<LatLng> {
+        val routeCoordinates = mutableListOf<LatLng>()
+        try {
+            // ChatGPT의 응답을 JSON으로 파싱
+            val jsonObject = JSONObject(responseData)
+            val choices = jsonObject.getJSONArray("choices")
+            val content = choices.getJSONObject(0).getJSONObject("message").getString("content").trim()
+
+            // 응답의 content에서 좌표 정보를 추출
+            val regex = Regex("Latitude: (\\d+\\.\\d+), Longitude: (\\d+\\.\\d+)")
+            val matches = regex.findAll(content)
+
+            // 모든 매칭된 좌표를 routeCoordinates에 추가
+            for (match in matches) {
+                val (lat, lng) = match.destructured
+                routeCoordinates.add(LatLng(lat.toDouble(), lng.toDouble()))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "경로 데이터를 처리하는 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        // 기본 좌표를 반환 (경로가 없을 경우 대비)
+        if (routeCoordinates.isEmpty() && currentLatitude != null && currentLongitude != null) {
+            val randomBearing = Random.nextDouble(0.0, 360.0) // 0부터 360도 사이의 랜덤 각도
+            routeCoordinates.add(LatLng(currentLatitude!!, currentLongitude!!)) // 현재 위치
+            routeCoordinates.add(calculateDestination(currentLatitude!!, currentLongitude!!, distance.toDouble(), randomBearing)) // 랜덤 방향 사용
+        }
+
+
+        return routeCoordinates
     }
+
+    private fun calculateDestination(lat: Double, lng: Double, distanceKm: Double, bearing: Double): LatLng {
+        val earthRadiusKm = 6371.0
+        val distanceRad = distanceKm / earthRadiusKm
+
+        val latRad = Math.toRadians(lat)
+        val lngRad = Math.toRadians(lng)
+        val bearingRad = Math.toRadians(bearing)
+
+        val newLatRad = Math.asin(
+            Math.sin(latRad) * Math.cos(distanceRad) +
+                    Math.cos(latRad) * Math.sin(distanceRad) * Math.cos(bearingRad)
+        )
+        val newLngRad = lngRad + Math.atan2(
+            Math.sin(bearingRad) * Math.sin(distanceRad) * Math.cos(latRad),
+            Math.cos(distanceRad) - Math.sin(latRad) * Math.sin(newLatRad)
+        )
+
+        return LatLng(Math.toDegrees(newLatRad), Math.toDegrees(newLngRad))
+    }
+
+
 
     // 지도에 추천 경로를 표시하는 함수
     private fun displayRouteOnMap(routeCoordinates: List<LatLng>) {
