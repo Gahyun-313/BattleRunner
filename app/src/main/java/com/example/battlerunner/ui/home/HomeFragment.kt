@@ -67,10 +67,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
         (activity as? MainActivity)?.startPathDrawing = {
-            Log.d("HomeFragment", "startPathDrawing called from MainActivity") // 로그 추가
-
             homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
             observePathUpdates() // 경로 관찰 시작
+        }
+        // MainActivity의 콜백 설정 (BattleFragment' 정지 버튼)
+        (activity as? MainActivity)?.stopPathDrawing = {
+            homeViewModel.setDrawingStatus(false) // 경로 그리기 활성화
         }
 
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
@@ -129,8 +131,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
                 observePathUpdates() // 경로 관찰 시작
 
-                //추추
-                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> battleFragment 시작 버튼 공유
+                (activity as? MainActivity)?.notifyStartTracking() // MainActivity에 알림 -> battleFragment 시작 버튼 공유
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.GONE
@@ -144,8 +145,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 정지 버튼 리스너
         binding.stopBtn.setOnClickListener {
             homeViewModel.stopTimer() // 타이머 중지
-
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
+
+            (activity as? MainActivity)?.notifyStopTracking() // MainActivity에 알림 -> battleFragment 정지 버튼 공유
 
             // 버튼 상태 변경
             binding.startBtn.visibility = View.VISIBLE

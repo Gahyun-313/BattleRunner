@@ -27,7 +27,11 @@ class MainActivity : AppCompatActivity() {
 
     // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
     var startPathDrawing: (() -> Unit)? = null
+    var stopPathDrawing: (() -> Unit)? = null
+
     // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정
+    var startTracking: (() -> Unit)? = null
+    var stopTracking: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,16 @@ class MainActivity : AppCompatActivity() {
     // BattleFragment에서 경로 그리기 요청 시 호출할 메서드
     fun notifyStartPathDrawing() {
         startPathDrawing?.invoke()
+    }
+    fun notifyStopPathDrawing() {
+        stopPathDrawing?.invoke()
+    }
+    // HomeFragment에서 그리드 소유권 추적 요청 시 호출할 메서드
+    fun notifyStartTracking() {
+        startTracking?.invoke()
+    }
+    fun notifyStopTracking() {
+        stopTracking?.invoke()
     }
 
     // 상태바 투명 설정 함수
