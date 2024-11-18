@@ -23,8 +23,18 @@ class BattleViewModel : ViewModel() {
         isTrackingActive = active
     }
 
+    // 배틀 상대 이름 가져오기
+    private val _user2Name = MutableLiveData<String>()
+    val user2Name: LiveData<String> get() = _user2Name
+    // 배틀 상대 이름 나타내는 메서드
+    fun setUser2Name(name: String) {
+        if (_user2Name.value != name) {
+            _user2Name.postValue(name)
+        }
+    }
+
     // 초기 그리드를 생성하고 _gridPolygons LiveData에 추가
-    fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 250) {
+    fun createGrid(map: GoogleMap, centerLatLng: LatLng, rows: Int, cols: Int, gridSize: Int = 500) {
         Log.d("BattleViewModel", "createGrid 호출됨. Center: $centerLatLng")
 
         val polygons = mutableListOf<Polygon>() // 생성한 폴리곤 객체들을 저장할 리스트

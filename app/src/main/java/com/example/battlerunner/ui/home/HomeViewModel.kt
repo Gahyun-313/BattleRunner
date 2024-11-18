@@ -24,22 +24,18 @@ class HomeViewModel : ViewModel() {
 
     private val _isDrawing = MutableLiveData<Boolean>(false)
     val isDrawing: LiveData<Boolean> get() = _isDrawing
-
     private var timer: CountDownTimer? = null // 타이머 객체
-
-    private var isRunning = false // 러닝 시작 여부를 나타내는 변수
-
+    private val _isRunning = MutableLiveData<Boolean>(false)
+    val isRunning: LiveData<Boolean> get() = _isRunning
     private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
-
-    // (추가)
     private val _hasStarted = MutableLiveData<Boolean>(false) // 시작 버튼 눌렀는지 여부 확인
     val hasStarted: LiveData<Boolean> get() = _hasStarted
 
     // 타이머 시작 메서드
     fun startTimer() {
-        if (!isRunning) { // 타이머가 이미 실행 중이 아닌 경우에만 시작
-            isRunning = true
-            _hasStarted.value = true // 추
+        if (_isRunning.value == false) { // 타이머가 이미 실행 중이 아닌 경우에만 시작
+            _isRunning.value = true
+            _hasStarted.value = true // 시작되었음을 표시
 
             timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -47,7 +43,7 @@ class HomeViewModel : ViewModel() {
                 }
 
                 override fun onFinish() {
-                    isRunning = false // 타이머 종료 시 실행 상태를 false로 설정
+                    _isRunning.value = false // 타이머 종료 시 실행 상태를 false로 설정
                 }
             }.start()
         }
@@ -56,19 +52,20 @@ class HomeViewModel : ViewModel() {
     // 타이머 중지 메서드
     fun stopTimer() {
         timer?.cancel() // 타이머 취소
-        isRunning = false // 실행 상태를 false로 설정
+        _isRunning.value = false // 실행 상태를 false로 설정
     }
 
-    // 경로 그리기 상태 변경 메서드 추가
+    // 경로 그리기 상태 변경 메서드
     fun setDrawingStatus(status: Boolean) {
         _isDrawing.value = status
     }
 
-    // 타이머 및 누적 시간 초기화 메서드
+    // 타이머 & 누적 & 시간 & 거리 초기화 메서드
     fun resetTimer() {
         _elapsedTime.value = 0L
-        isRunning = false
+        _isRunning.value = false
         _hasStarted.value = false // 타이머 상태 초기화
+        _distance.value  = 0f // 누적 거리 초기화
     }
 
     fun setHasStarted(value: Boolean) {
@@ -77,7 +74,7 @@ class HomeViewModel : ViewModel() {
 
     // 새로운 위치를 추가하고 거리를 계산하는 메서드
     fun addPathPoint(location: LatLng) {
-        if (!isRunning) return // 정지 상태에서는 업데이트하지 않음
+        if (_isRunning.value == false) return // 정지 상태에서는 업데이트하지 않음
 
         // 이전 위치가 있는 경우, 현재 위치와의 거리를 계산하여 누적
         lastLocation?.let {

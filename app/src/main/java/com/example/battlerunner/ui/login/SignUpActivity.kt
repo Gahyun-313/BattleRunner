@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
+import com.example.battlerunner.data.model.LoginInfo
 import java.util.regex.Pattern
 
 class SignUpActivity : AppCompatActivity() {
@@ -93,14 +94,15 @@ class SignUpActivity : AppCompatActivity() {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
                             // SQLite에 정보 저장
-                            val insert = dbHelper.saveLoginInfo(userId, pass, name, loginType)
+                            val loginInfo = LoginInfo(userId, pass, name, loginType)
+                            val insert = dbHelper.saveLoginInfo(loginInfo)
 
                             // insert 잘 됐는지 확인
                             if (insert) {
                                 Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
 
                                 // 자동 로그인 정보 저장
-                                dbHelper.saveLoginInfo(userId, pass, name, loginType)
+                                //dbHelper.saveLoginInfo(loginInfo)
 
                                 // MainActivity 이동
                                 val intent = Intent(this, MainActivity::class.java)
