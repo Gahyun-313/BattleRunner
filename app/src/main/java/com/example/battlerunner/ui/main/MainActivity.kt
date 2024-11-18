@@ -14,6 +14,7 @@ import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityMainBinding
 import com.example.battlerunner.ui.battle.BattleFragment
+import com.example.battlerunner.ui.battle.MatchingFragment
 import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.mypage.MyPageFragment
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     private val homeFragment by lazy { HomeFragment() }
     private val battleFragment by lazy { BattleFragment() }
+    private val matchingFragment by lazy { MatchingFragment() }
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
 
@@ -79,19 +81,21 @@ class MainActivity : AppCompatActivity() {
         transaction.commit()
     }
 
-    // BattleFragment에서 경로 그리기 요청 시 호출할 메서드
-    fun notifyStartPathDrawing() {
-        startPathDrawing?.invoke()
+    // Battle -> Home 경로 그리기 요청 메서드
+    fun notifyPathDrawing(boolean: Boolean) {
+        if (boolean) { // true -> 러닝 경로 그리기
+            startPathDrawing?.invoke()
+        } else { // true -> 러닝 경로 그리지 않기
+            stopPathDrawing?.invoke()
+        }
     }
-    fun notifyStopPathDrawing() {
-        stopPathDrawing?.invoke()
-    }
-    // HomeFragment에서 그리드 소유권 추적 요청 시 호출할 메서드
-    fun notifyStartTracking() {
-        startTracking?.invoke()
-    }
-    fun notifyStopTracking() {
-        stopTracking?.invoke()
+    // Home -> Battle 그리드 소유권 추적 요청 메서드
+    fun notifyTracking(boolean: Boolean) {
+        if (boolean) { // true -> 그리드 소유권 추적 시작
+            startTracking?.invoke()
+        } else { // false -> 그리드 소유권 추적 중지
+            stopTracking?.invoke()
+        }
     }
 
     // 상태바 투명 설정 함수

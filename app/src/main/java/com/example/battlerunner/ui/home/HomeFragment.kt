@@ -131,7 +131,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
                 observePathUpdates() // 경로 관찰 시작
 
-                (activity as? MainActivity)?.notifyStartTracking() // MainActivity에 알림 -> battleFragment 시작 버튼 공유
+                (activity as? MainActivity)?.notifyTracking(true) // MainActivity에 알림 -> battleFragment 시작 버튼 공유
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.GONE
@@ -147,7 +147,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             homeViewModel.stopTimer() // 타이머 중지
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
 
-            (activity as? MainActivity)?.notifyStopTracking() // MainActivity에 알림 -> battleFragment 정지 버튼 공유
+            (activity as? MainActivity)?.notifyTracking(false) // MainActivity에 알림 -> battleFragment 정지 버튼 공유
 
             // 버튼 상태 변경
             binding.startBtn.visibility = View.VISIBLE

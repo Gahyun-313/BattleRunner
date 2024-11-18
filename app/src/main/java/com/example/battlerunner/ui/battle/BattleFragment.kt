@@ -156,7 +156,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
                 trackingActive = true // 추적 활성화 상태 변경
 
-                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+                (activity as? MainActivity)?.notifyPathDrawing(true) // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.GONE
@@ -176,7 +176,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
             homeViewModel.stopTimer() // 타이머 정지
 
-            (activity as? MainActivity)?.notifyStopPathDrawing() // MainActivity에 알림 -> HomeFragment 정지 버튼 공유
+            (activity as? MainActivity)?.notifyPathDrawing(false) // MainActivity에 알림 -> HomeFragment 정지 버튼 공유
 
             // 버튼 상태 변경
             binding.startBtn.visibility = View.VISIBLE
