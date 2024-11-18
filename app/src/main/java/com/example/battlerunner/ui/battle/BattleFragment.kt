@@ -37,7 +37,7 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback // 위치 업데이트에 필요한 콜백 함수
     private lateinit var dbHelper: DBHelper // 데이터베이스 접근을 위한 DBHelper 인스턴스
     private var gridInitialized = false // 지도 그리드 초기화 여부 확인하는 플래그
-    private var trackingActive = false // 현재 소유권 추적 활성화 상태
+    private var trackingActive = false // 소유권 추적 활성화 상태
 
     // viewModel 초기화
     private val homeViewModel by lazy {
@@ -135,43 +135,71 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
         // 시작 버튼 리스너
         binding.startBtn.setOnClickListener {
-            if (!trackingActive) { // 추적이 비활성화된 경우에만 시작
+//            if (!trackingActive) { // 추적이 비활성화된 경우에만 시작
+//
+//                if (LocationUtils.hasLocationPermission(requireContext())) {
+//                    startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+//
+//                    homeViewModel.startTimer() // 타이머 시작
+//                    homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+//
+//                    battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
+//                    trackingActive = true // 추적 활성화 상태 변경
+//                    (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+//
+//                    // 버튼 상태 변경
+//                    binding.startBtn.visibility = View.GONE
+//                    binding.stopBtn.visibility = View.VISIBLE
+//                    binding.finishBtn.visibility = View.VISIBLE
+//
+//                } else {
+//                    LocationUtils.requestLocationPermission(this)
+//                }
+//            }
+            if (LocationUtils.hasLocationPermission(requireContext())) {
+                startLocationUpdates() // 위치 업데이트 시작 메서드 호출
 
-                if (LocationUtils.hasLocationPermission(requireContext())) {
-                    startLocationUpdates() // 위치 업데이트 시작 메서드 호출
+                homeViewModel.startTimer() // 타이머 시작
+                homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
 
-                    homeViewModel.startTimer() // 타이머 시작
-                    homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+                battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
+                trackingActive = true // 추적 활성화 상태 변경
+                (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
 
-                    battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
-                    trackingActive = true // 추적 활성화 상태 변경
-                    (activity as? MainActivity)?.notifyStartPathDrawing() // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+                // 버튼 상태 변경
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
 
-                    // 버튼 상태 변경
-                    binding.startBtn.visibility = View.GONE
-                    binding.stopBtn.visibility = View.VISIBLE
-                    binding.finishBtn.visibility = View.VISIBLE
-
-                } else {
-                    LocationUtils.requestLocationPermission(this)
-                }
+            } else {
+                LocationUtils.requestLocationPermission(this)
             }
         }
 
         // 정지 버튼 클릭 리스너
         binding.stopBtn.setOnClickListener {
-            if (trackingActive) { // 추적이 활성화된 경우에만 정지
-                stopLocationUpdates()
-                battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
-                trackingActive = false // 추적 비활성화 상태 변경
+//            if (trackingActive) { // 추적이 활성화된 경우에만 정지
+//                stopLocationUpdates()
+//                battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
+//                trackingActive = false // 추적 비활성화 상태 변경
+//
+//                homeViewModel.stopTimer() // 타이머 정지
+//
+//                // 버튼 상태 변경
+//                binding.startBtn.visibility = View.VISIBLE
+//                binding.stopBtn.visibility = View.GONE
+//                binding.finishBtn.visibility = View.GONE
+//            }
+            stopLocationUpdates()
+            battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
+            trackingActive = false // 추적 비활성화 상태 변경
 
-                homeViewModel.stopTimer() // 타이머 정지
+            homeViewModel.stopTimer() // 타이머 정지
 
-                // 버튼 상태 변경
-                binding.startBtn.visibility = View.VISIBLE
-                binding.stopBtn.visibility = View.GONE
-                binding.finishBtn.visibility = View.GONE
-            }
+            // 버튼 상태 변경
+            binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
         }
 
         // 종료 버튼 클릭 리스너
@@ -239,8 +267,13 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                     Log.d("BattleFragment", "User location updated: $userLocation")
 
                     // 현재 위치가 포함된 폴리곤을 찾아 소유권을 업데이트
-                    dbHelper.getUserInfo()?.let { userInfo ->
-                        battleViewModel.updateOwnership(userLocation, userInfo.second) // 소유권 업데이트
+//                    dbHelper.getUserInfo()?.let { userInfo ->
+//                        battleViewModel.updateOwnership(userLocation, userInfo.second) // 소유권 업데이트
+//                    }
+                    if (trackingActive) {
+                        dbHelper.getUserInfo()?.let { userInfo ->
+                            battleViewModel.updateOwnership(userLocation, userInfo.second) // 소유권 업데이트
+                        }
                     }
                 }
             }

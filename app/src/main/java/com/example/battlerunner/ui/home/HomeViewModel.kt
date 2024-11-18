@@ -55,16 +55,17 @@ class HomeViewModel : ViewModel() {
         _isRunning.value = false // 실행 상태를 false로 설정
     }
 
-    // 경로 그리기 상태 변경 메서드 추가
+    // 경로 그리기 상태 변경 메서드
     fun setDrawingStatus(status: Boolean) {
         _isDrawing.value = status
     }
 
-    // 타이머 및 누적 시간 초기화 메서드
+    // 타이머 & 누적 & 시간 & 거리 초기화 메서드
     fun resetTimer() {
         _elapsedTime.value = 0L
         _isRunning.value = false
         _hasStarted.value = false // 타이머 상태 초기화
+        _distance.value  = 0f // 누적 거리 초기화
     }
 
     fun setHasStarted(value: Boolean) {

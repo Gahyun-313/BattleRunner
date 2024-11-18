@@ -1,22 +1,16 @@
 package com.example.battlerunner.ui.home
 
-import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
-import com.example.battlerunner.ui.battle.BattleFragment.Companion.REQUEST_CODE_PERSONAL_END
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
@@ -25,11 +19,7 @@ import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -41,7 +31,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
 
     // ★ Activity 범위에서 HomeViewModel을 가져오기
-    private val viewModel by lazy {
+    private val homeViewModel by lazy {
         ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
     }
 
@@ -79,7 +69,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         (activity as? MainActivity)?.startPathDrawing = {
             Log.d("HomeFragment", "startPathDrawing called from MainActivity") // 로그 추가
 
-            viewModel.setDrawingStatus(true) // 경로 그리기 활성화
+            homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
             observePathUpdates() // 경로 관찰 시작
         }
 
@@ -89,22 +79,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.finishBtn.visibility = View.GONE
 
         // 타이머 UI 업데이트
-        viewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+        homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
             val seconds = (elapsedTime / 1000) % 60
             val minutes = (elapsedTime / (1000 * 60)) % 60
             val hours = (elapsedTime / (1000 * 60 * 60))
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
         }
         // 거리 UI 업데이트
-        viewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
+        homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
         }
 
         // homeViewModel의 start, isRunning의 여부에 따른 버튼 변경
         // battleFragment에서 시작, 정지 버튼을 눌렀을 때 homeFragment에도 적용
-        viewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+        homeViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
             if (hasStarted) {
-                if (viewModel.isRunning.value == true) {
+                if (homeViewModel.isRunning.value == true) {
                     binding.startBtn.visibility = View.GONE
                     binding.stopBtn.visibility = View.VISIBLE
                     binding.finishBtn.visibility = View.VISIBLE
@@ -119,7 +109,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 binding.finishBtn.visibility = View.GONE
             }
         }
-        viewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
+        homeViewModel.isRunning.observe(viewLifecycleOwner) { isRunning ->
             if (!isRunning) {
                 binding.startBtn.visibility = View.VISIBLE
                 binding.stopBtn.visibility = View.GONE
@@ -131,12 +121,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.startBtn.setOnClickListener {
             // 위치 권한이 있다면 위치 업데이트 시작
             if (LocationUtils.hasLocationPermission(requireContext())) {
-                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, viewModel)
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
-                viewModel.startTimer() // 타이머 시작
-                viewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
+                homeViewModel.startTimer() // 타이머 시작
+                homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
 
-                viewModel.setDrawingStatus(true) // 경로 그리기 활성화
+                homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
                 observePathUpdates() // 경로 관찰 시작
 
                 //추추
@@ -152,9 +142,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         // 정지 버튼 리스너
-        binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer() // 타이머 중지
-            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+        binding.stopBtn.setOnClickListener {
+            homeViewModel.stopTimer() // 타이머 중지
+
+            homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
 
             // 버튼 상태 변경
             binding.startBtn.visibility = View.VISIBLE
@@ -164,17 +155,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // 종료 버튼 리스너
         binding.finishBtn.setOnClickListener {
-            viewModel.stopTimer() // 타이머 중지
-            viewModel.setDrawingStatus(false) // 경로 그리기 중지
+            homeViewModel.stopTimer() // 타이머 중지
+            homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 러닝 소요 시간, 거리 전달
-                putExtra("elapsedTime", viewModel.elapsedTime.value ?: 0L)
-                putExtra("distance", viewModel.distance.value ?: 0f)
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
+                putExtra("distance", homeViewModel.distance.value ?: 0f)
             }
-            viewModel.resetTimer()
+            homeViewModel.resetTimer()
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
 
@@ -191,8 +182,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun observePathUpdates() {
-        viewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (viewModel.isDrawing.value == true) { // viewModel의 isDrawing을 사용
+        homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
+            if (homeViewModel.isDrawing.value == true) { // viewModel의 isDrawing을 사용
                 mapFragment.drawPath(pathPoints) // 경로 그리기
             }
         }
@@ -202,7 +193,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        viewModel.stopTimer() // 타이머 정지
+        homeViewModel.stopTimer() // 타이머 정지
     }
 
     companion object {
