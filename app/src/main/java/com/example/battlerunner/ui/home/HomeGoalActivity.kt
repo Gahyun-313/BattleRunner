@@ -68,7 +68,8 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         confirmBtn.setOnClickListener {
             val distance = distanceInput.text.toString().toIntOrNull()
             if (distance != null && distance > 0) {
-                fetchRecommendedRoute(distance)
+                fetchChatGPTRouteRecommendation(distance) // ChatGPT 호출
+                //fetchAIRecommendedRoute(distance)
             } else {
                 Toast.makeText(this, "올바른 거리를 입력해 주세요.", Toast.LENGTH_SHORT).show()
             }
@@ -135,73 +136,240 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
+    private fun fetchChatGPTRouteRecommendation(distance: Int) {
+        val openAiApiKey = "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" // 올바른 API 키
+        val url = "https://api.openai.com/v1/chat/completions"
 
-    // ChatGPT API로 추천 경로를 가져오는 함수
-    private fun fetchRecommendedRoute(distance: Int) {
-        if (currentLatitude == null || currentLongitude == null) {
-            Toast.makeText(this, "현재 위치를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            return
+        val requestBody = JSONObject().apply {
+            put("model", "gpt-3.5-turbo")
+            put("messages", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("role", "system")
+                    put("content", "당신은 경로 추천을 담당하는 AI입니다.")
+                })
+                put(JSONObject().apply {
+                    put("role", "user")
+                    put("content", "사용자가 현재 위치에서 $distance km 거리를 걷고 싶어합니다. 추천 경로를 생성해주세요.")
+                })
+            })
+            put("max_tokens", 100)
+            put("temperature", 0.7)
         }
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val json = JSONObject().apply {
-                    put("model", "gpt-3.5-turbo")
-                    put("messages", JSONArray().apply {
-                        put(JSONObject().apply {
-                            put("role", "user")
-                            put("content", "현재 위치 (${currentLatitude}, ${currentLongitude})에서 ${distance}km 이내의 추천 경로를 JSON 형태로 좌표 리스트로 제공해 주세요.")
-                        })
-                    })
-                    put("max_tokens", 100)
-                    put("temperature", 0.7)
-                }
-
-                val apiKey = "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"
                 val client = OkHttpClient()
-                val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json.toString())
+                val body = RequestBody.create("application/json".toMediaTypeOrNull(), requestBody.toString())
                 val request = Request.Builder()
-                    .url("https://api.openai.com/v1/chat/completions")
-                    .addHeader("Authorization", "Bearer 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")
-                    .post(requestBody)
+                    .url(url)
+                    .addHeader("Authorization", "Bearer $openAiApiKey")
+                    .post(body)
                     .build()
 
                 val response = client.newCall(request).execute()
                 val responseData = response.body?.string()
 
-                println("Response Code: ${response.code}")
-                println("Response Data: $responseData")
-
-
-
                 if (response.isSuccessful && responseData != null) {
-                    val routeCoordinates = parseRouteCoordinates(responseData)
-                    withContext(Dispatchers.Main) {
-                        displayRouteOnMap(routeCoordinates)
+                    try {
+                        val jsonObject = JSONObject(responseData)
+                        val choices = jsonObject.getJSONArray("choices")
+                        val content = choices.getJSONObject(0).getJSONObject("message").getString("content").trim()
+
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@HomeGoalActivity, "추천 경로: $content", Toast.LENGTH_LONG).show()
+                        }
+                    } catch (e: JSONException) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@HomeGoalActivity,
+                                "JSON 파싱 오류: ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        val errorMessage = when (response.code) {
-                            400 -> "잘못된 요청입니다."
-                            401 -> "API 키가 유효하지 않습니다."
-                            500 -> "서버 오류입니다. 잠시 후 다시 시도해주세요."
-                            else -> "추천 경로를 가져올 수 없습니다. 코드: ${response.code}"
-                        }
-                        Toast.makeText(this@HomeGoalActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@HomeGoalActivity,
+                            "AI 경로 추천 실패: ${response.code}\nResponse Body: $responseData",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@HomeGoalActivity, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@HomeGoalActivity, "오류 발생: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                e.printStackTrace()
             }
         }
     }
 
 
 
+    /*
+        // ChatGPT API로 추천 경로를 가져오는 함수
+        private fun fetchAIRecommendedRoute(distance: Int) {
+            if (currentLatitude == null || currentLongitude == null) {
+                Toast.makeText(this, "현재 위치를 확인할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return
+            }
 
+            val originLat = currentLatitude!!
+            val originLng = currentLongitude!!
+            val apiKey = "AIzaSyC21ZOMbiLf9LxoZ4V4dBqd-Nddfd-dlIc" // Google Maps API 키를 입력하세요.
+
+            // 목적지 좌표 계산 (테스트용, 원하는 방식으로 변경 가능)
+            val destinationLat = originLat + 0.01
+            val destinationLng = originLng + 0.01
+
+            val url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "origin=$originLat,$originLng&destination=$destinationLat,$destinationLng&mode=walking&key=$apiKey"
+
+            println("Directions API URL: $url") // 요청 URL 디버깅 로그
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val client = OkHttpClient()
+                    val request = Request.Builder().url(url).build()
+                    val response = client.newCall(request).execute()
+                    val responseData = response.body?.string()
+
+                    println("API Response Data: $responseData") // 응답 데이터 출력
+
+
+                    if (response.isSuccessful && responseData != null) {
+                        val jsonObject = JSONObject(responseData)
+                        val status = jsonObject.getString("status")
+                        println("API Response Status: $status") // 상태 출력
+                        if (status == "OK") {
+                            val routeCoordinates = parseDirectionsApiResponse(responseData)
+                            withContext(Dispatchers.Main) {
+                                displayRouteOnMap(routeCoordinates)
+                            }
+                        } else {
+                            val errorMessage = jsonObject.optString("error_message", "알 수 없는 오류")
+                            println("Error Message: $errorMessage") // 에러 메시지 출력
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    this@HomeGoalActivity,
+                                    "경로를 찾을 수 없습니다. 상태: $status, 오류: $errorMessage",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    } else {
+                        println("Network Error: ${response.code}") // HTTP 상태 코드 출력
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@HomeGoalActivity,
+                                "네트워크 오류: ${response.code}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        println("API Request Error: ${e.message}") // 에러 로그
+                        Toast.makeText(this@HomeGoalActivity, "오류 발생: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }*/
+
+    private fun parseDirectionsApiResponse(responseData: String): List<LatLng> {
+        val routeCoordinates = mutableListOf<LatLng>()
+        try {
+            val jsonObject = JSONObject(responseData)
+            val routes = jsonObject.getJSONArray("routes")
+            println("Routes found: ${routes.length()}") // 경로 수 출력
+            if (routes.length() > 0) {
+                val firstRoute = routes.getJSONObject(0)
+                val overviewPolyline = firstRoute.getJSONObject("overview_polyline")
+                val points = overviewPolyline.getString("points")
+                println("Polyline points: $points") // Polyline 데이터 출력
+                routeCoordinates.addAll(decodePolyline(points))
+            } else {
+                println("Routes 배열이 비어 있습니다.")
+            }
+        } catch (e: JSONException) {
+            println("JSON Parsing Error: ${e.message}") // JSON 파싱 오류 출력
+            e.printStackTrace()
+        }
+        return routeCoordinates
+    }
+
+
+
+
+    /*private fun parseDirectionsApiResponse(responseData: String): List<LatLng> {
+        val routeCoordinates = mutableListOf<LatLng>()
+
+        try {
+            val jsonObject = JSONObject(responseData)
+            val routes = jsonObject.getJSONArray("routes")
+            if (routes.length() > 0) {
+                val firstRoute = routes.getJSONObject(0)
+                val overviewPolyline = firstRoute.getJSONObject("overview_polyline")
+                val points = overviewPolyline.getString("points")
+
+                // Polyline 데이터를 LatLng 리스트로 변환
+                routeCoordinates.addAll(decodePolyline(points))
+            }
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+        return routeCoordinates
+    }*/
+
+    private fun decodePolyline(encoded: String): List<LatLng> {
+        val poly = ArrayList<LatLng>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+
+            val p = LatLng(lat / 1E5, lng / 1E5)
+            poly.add(p)
+        }
+
+        return poly
+    }
+
+
+
+
+
+
+    private fun validateAndFixJson(responseData: String): String? {
+        return if (responseData.trim().endsWith("}")) {
+            responseData // JSON이 올바르게 닫혀 있음
+        } else {
+            null // 잘린 데이터로 간주
+        }
+    }
 
 
 
@@ -210,60 +378,61 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         val routeCoordinates = mutableListOf<LatLng>()
 
         try {
+            // JSON 응답 파싱
             val jsonObject = JSONObject(responseData)
             val choices = jsonObject.getJSONArray("choices")
             val content = choices.getJSONObject(0).getJSONObject("message").getString("content")
 
-            // content를 JSONObject로 변환
+            // content를 JSON Object로 변환
             val contentJson = JSONObject(content)
+            val routesArray = contentJson.getJSONArray("routes")
 
-            // route 또는 routes 키 확인
-            if (contentJson.has("route")) {
-                // route 키를 사용
-                val routeArray = contentJson.getJSONArray("route")
-                for (i in 0 until routeArray.length()) {
-                    val point = routeArray.getJSONObject(i)
-                    val lat = point.getDouble("latitude")
-                    val lng = point.getDouble("longitude")
-                    routeCoordinates.add(LatLng(lat, lng))
-                }
-            } else if (contentJson.has("routes")) {
-                // routes 키를 사용
-                val routesArray = contentJson.getJSONArray("routes")
+            // 첫 번째 route 처리
+            if (routesArray.length() > 0) {
+                val firstRoute = routesArray.getJSONObject(0)
 
-                // routes 배열 내부 확인
-                for (i in 0 until routesArray.length()) {
-                    val element = routesArray.get(i)
+                // "coordinates" 키에 좌표 배열이 존재
+                if (firstRoute.has("coordinates")) {
+                    val coordinatesArray = firstRoute.getJSONArray("coordinates")
 
-                    // 배열 안에 바로 좌표 객체가 있는 경우
-                    if (element is JSONObject && element.has("latitude") && element.has("longitude")) {
-                        val lat = element.getDouble("latitude")
-                        val lng = element.getDouble("longitude")
+                    // Coordinates 추가
+                    for (i in 0 until coordinatesArray.length()) {
+                        val coordinateArray = coordinatesArray.getJSONArray(i)
+                        val lat = coordinateArray.getDouble(0) // 첫 번째 값: 위도
+                        val lng = coordinateArray.getDouble(1) // 두 번째 값: 경도
                         routeCoordinates.add(LatLng(lat, lng))
                     }
-                    // 배열 안에 coordinates 배열이 있는 경우
-                    else if (element is JSONObject && element.has("coordinates")) {
-                        val coordinatesArray = element.getJSONArray("coordinates")
-                        for (j in 0 until coordinatesArray.length()) {
-                            val point = coordinatesArray.getJSONObject(j)
-                            val lat = point.getDouble("latitude")
-                            val lng = point.getDouble("longitude")
-                            routeCoordinates.add(LatLng(lat, lng))
-                        }
-                    }
+                } else {
+                    throw JSONException("coordinates 데이터를 찾을 수 없습니다.")
                 }
             } else {
-                throw JSONException("route 또는 routes 키를 찾을 수 없습니다.")
+                throw JSONException("routes 배열이 비어 있습니다.")
             }
-        } catch (e: Exception) {
+        } catch (e: JSONException) {
             e.printStackTrace()
             CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(this@HomeGoalActivity, "추천 경로 데이터를 처리하는 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@HomeGoalActivity,
+                    "추천 경로 데이터를 불러올 수 없습니다: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
         return routeCoordinates
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -297,21 +466,21 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
 
             googleMap.addMarker(MarkerOptions().position(startPoint).title("출발"))
             googleMap.addMarker(MarkerOptions().position(endPoint).title("도착"))
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 13f))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 15f))
 
-            for (i in 0 until routeCoordinates.size - 1) {
-                val segmentStart = routeCoordinates[i]
-                val segmentEnd = routeCoordinates[i + 1]
-                googleMap.addPolyline(
-                    PolylineOptions().add(segmentStart, segmentEnd).width(5f)
-                )
-            }
+            val polylineOptions = PolylineOptions().addAll(routeCoordinates).width(10f)
+            googleMap.addPolyline(polylineOptions)
 
-            Toast.makeText(this, "${routeCoordinates.size}개의 추천 경로가 표시되었습니다.", Toast.LENGTH_SHORT).show()
+            // 디버깅 로그 추가
+            println("Polyline coordinates: $routeCoordinates")
+            Toast.makeText(this, "경로가 표시되었습니다.", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "추천 경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "경로 데이터를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
