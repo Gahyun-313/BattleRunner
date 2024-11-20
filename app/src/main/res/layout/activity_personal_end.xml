@@ -29,12 +29,12 @@
         android:paddingHorizontal="30dp"
         android:paddingBottom="8dp"/>
 
-    <!-- 지도 Fragment가 들어갈 부분 -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapFragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="351dp"
-        tools:ignore="MissingConstraints" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="20dp" />
 
     <Space
         android:layout_width="match_parent"
