@@ -8,12 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import com.example.battlerunner.R
-import com.example.battlerunner.databinding.ActivityMainBinding
-import com.example.battlerunner.databinding.FragmentBattleBinding
-import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.databinding.FragmentMapBinding
-import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -23,7 +20,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
 class MapFragment : Fragment(), OnMapReadyCallback {
@@ -59,6 +55,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // custom 내 위치 버튼 리스너
         // TODO: 버튼은 눌리는데 내 위치로 이동이 안 됨 // 일단 앱 실행에는 문제 없으니 기본 내 위치 버튼으로 구현하고 여유 생기면 고치기
         binding.customLocationButton.setOnClickListener {
+            enableMyLocation()
             moveToCurrentLocationImmediate()
         }
     }
@@ -70,7 +67,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if (!isAdded) return  // Fragment가 Activity에 연결되었는지 확인
 
         // TODO: false로 설정해 기본 버튼을 숨기고 customBtn 활성화 해야 하나, customBtn 미작동 이슈로 임시 사용함
-        googleMap.uiSettings.isMyLocationButtonEnabled = true // 기본 내 위치 버튼 숨기기
+        googleMap.uiSettings.isMyLocationButtonEnabled = true // 기본 내 위치 버튼
 
         if (LocationUtils.hasLocationPermission(requireContext())) {
             enableMyLocation() // 내 위치 활성화
@@ -130,7 +127,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         onMapReadyCallback = callback
     }
 
-    // 경로를 그리는 메서드
+    // 경로를 그리는 메서드 (여러 경로 표현 가능)
     fun drawPath(pathPoints: List<LatLng>) {
         val polylineOptions = MapUtils.createPolylineOptions(pathPoints)
         googleMap.addPolyline(polylineOptions)

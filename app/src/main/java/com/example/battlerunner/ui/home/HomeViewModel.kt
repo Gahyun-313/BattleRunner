@@ -24,10 +24,14 @@ class HomeViewModel : ViewModel() {
 
     private val _isDrawing = MutableLiveData<Boolean>(false)
     val isDrawing: LiveData<Boolean> get() = _isDrawing
+
     private var timer: CountDownTimer? = null // 타이머 객체
+
     private val _isRunning = MutableLiveData<Boolean>(false)
     val isRunning: LiveData<Boolean> get() = _isRunning
+
     private var lastLocation: LatLng? = null // 이전 위치를 저장하는 변수
+
     private val _hasStarted = MutableLiveData<Boolean>(false) // 시작 버튼 눌렀는지 여부 확인
     val hasStarted: LiveData<Boolean> get() = _hasStarted
 

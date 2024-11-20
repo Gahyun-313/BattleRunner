@@ -67,7 +67,7 @@
             android:name=".ui.battle.BattleEndActivity"
             android:exported="false" />
         <activity
-            android:name=".PersonalEndActivity"
+            android:name=".ui.home.PersonalEndActivity"
             android:exported="false" />
     </application>
 

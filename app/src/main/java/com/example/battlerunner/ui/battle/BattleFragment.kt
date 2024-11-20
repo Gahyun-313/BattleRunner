@@ -10,25 +10,22 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.battlerunner.PersonalEndActivity
+import com.example.battlerunner.ui.home.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentBattleBinding
 import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.main.MainActivity
-import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
-import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polygon
 
-class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
+class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
     private var _binding: FragmentBattleBinding? = null
     private val binding get() = _binding!!
@@ -156,7 +153,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
                 trackingActive = true // 추적 활성화 상태 변경
 
-                (activity as? MainActivity)?.notifyPathDrawing(true) // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+                // MainActivity에 알림 -> HomeFragment 시작 버튼 공유
+                (activity as? MainActivity)?.notifyPathDrawing(true)
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.GONE
@@ -194,6 +192,8 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
                 putExtra("userName", binding.title.text.toString())
             }
             homeViewModel.resetTimer()
+            (activity as? MainActivity)?.notifyPathReset() // MainActivity에 알림 -> HomeFragment 러닝 경로 지우기
+
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
 
@@ -210,34 +210,42 @@ class BattleFragment : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
     // GoogleMap이 준비되었을 때 호출되는 메서드
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-        Log.d("BattleFragment", "onMapReady called")
-
-        // Google Map 기본 내 위치 버튼 활성화
-        googleMap.uiSettings.isMyLocationButtonEnabled = true
 
         // 권한 확인 후 내 위치 표시
         if (LocationUtils.hasLocationPermission(requireContext())) {
             enableMyLocation() // 내 위치 활성화
-            initializeGridWithCurrentLocation() // 현재 위치 기준으로 그리드 초기화
+            fetchCurrentLocationAndInitializeGrid() // 현재 위치 가져오기 및 그리드 초기화
+
+            // TODO: 서버에서 그리드 시작 위치 받아오기
+            // val startLatLng = LatLng(37.222101, 127.187709)
+            //initializeGridWithCurrentLocation(startLatLng) // 현재 위치 기준으로 그리드 초기화
+
         } else {
             LocationUtils.requestLocationPermission(this)
         }
     }
 
-    // 현재 위치 기반으로 그리드 초기화
-    private fun initializeGridWithCurrentLocation() {
+    // 현재 위치 가져오고 그리드 초기화 메서드
+    private fun fetchCurrentLocationAndInitializeGrid() {
         MapUtils.currentLocation.observe(viewLifecycleOwner) { location ->
             if (location != null && !gridInitialized) {
-                val currentLatLng = LatLng(location.latitude, location.longitude)
 
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16f)) // 지도를 현재 위치로 이동
-                Log.d("BattleFragment", "현재 위치를 기준으로 그리드 생성 시작")
+                // TODO: 서버에서 그리드 시작 위치 받아오기
+                val startLatLng = LatLng(location.latitude, location.longitude)
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f)) // 현재 위치로 카메라 이동
+                initializeGridWithCurrentLocation(startLatLng) // 그리드 초기화
 
-                battleViewModel.createGrid(googleMap, currentLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
-                    // * battleViewModel.createGrid(지도 객체, 그리드 생성 기준이 되는 중심 위치, 행 개수, 열 개수)
-                gridInitialized = true // 그리드가 초기화되었음을 표시
+            } else if (location == null) {
+                Toast.makeText(requireContext(), "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    // 현재 위치 기반으로 그리드 초기화 메서드
+    private fun initializeGridWithCurrentLocation(startLatLng: LatLng) { // Argument 에 "startLatLng: LatLng" 추가
+        battleViewModel.createGrid(googleMap, startLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
+        gridInitialized = true // 그리드가 초기화되었음을 표시
+        Log.d("BattleFragment", "그리드가 초기화되었습니다: $startLatLng")
     }
 
     // 위치 업데이트를 설정하는 메서드

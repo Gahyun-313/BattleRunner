@@ -130,7 +130,6 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         return userInfo
     }
 
-    // TODO: 서버 연결 후 삭제
     // ID와 비밀번호가 일치하는지 확인하는 메서드
     fun checkUserPass(id: String, password: String): Boolean {
         val db = readableDatabase  // 읽기 가능한 데이터베이스 인스턴스 가져오기

@@ -12,8 +12,11 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.RoundCap
+import com.google.gson.Gson
 
 // 지도 권한에 대한 유틸리티 클래스
 object MapUtils {
@@ -64,7 +67,6 @@ object MapUtils {
         }
     }
 
-
     // 경로를 그릴 PolylineOptions 생성
     fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
         return PolylineOptions()
@@ -72,6 +74,9 @@ object MapUtils {
             .width(10f)  // 두께
             .color(Color.BLUE)  // 경로 색상
             .geodesic(true)  // 지오데식 경로 설정
+            .startCap(RoundCap())  // 시작점 둥글게
+            .endCap(RoundCap())  // 끝점 둥글게
+            .jointType(JointType.ROUND)  // 경로 연결 부분 둥글게
     }
 
     // 위치 업데이트 중지
@@ -84,6 +89,21 @@ object MapUtils {
         val newPathPoints = _pathPoints.value?.toMutableList() ?: mutableListOf()
         newPathPoints.add(LatLng(location.latitude, location.longitude))
         _pathPoints.value = newPathPoints
+    }
+
+    // 경로 초기화 - 그려진 경로 지우기(리셋)
+    fun clearPathPoints() {
+        _pathPoints.value = emptyList()
+    }
+
+    // HomeFragment -> PersonalEndActivity : 경로 보내기 (pathPotins -> Json 변환)
+    fun pathPointsToJson(pathPoints: List<LatLng>): String {
+        return Gson().toJson(pathPoints)
+    }
+
+    // HomeFragment -> PersonalEndActivity : 경로 Json 파일을 다시 pathPoints로 변환
+    fun jsonToPathPoints(json: String): List<LatLng> {
+        return Gson().fromJson(json, Array<LatLng>::class.java).toList()
     }
 }
 

@@ -46,7 +46,8 @@
             android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="?android:attr/buttonBarButtonStyle"
+            android:elevation="5dp"/>
 
     </LinearLayout>
 
@@ -74,7 +75,8 @@
         android:orientation="vertical"
         android:paddingVertical="10dp"
         android:background="@drawable/bottom_sheet"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:elevation="5dp">
 
         <TextView
             android:layout_width="wrap_content"

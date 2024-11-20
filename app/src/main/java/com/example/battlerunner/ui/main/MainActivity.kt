@@ -21,24 +21,32 @@ import com.example.battlerunner.ui.mypage.MyPageFragment
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private val homeFragment by lazy { HomeFragment() }
     private val battleFragment by lazy { BattleFragment() }
     private val matchingFragment by lazy { MatchingFragment() }
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
 
-    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
+    // 배틀 여부 및 매칭 상태 확인 변수
+    private var isInBattle = false // 배틀 중 여부
+    private var isMatched = false // 매칭 성공 여부를 저장
+
+    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정 (Battle -> Home)
     var startPathDrawing: (() -> Unit)? = null
     var stopPathDrawing: (() -> Unit)? = null
 
-    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정
+    // HomeFragment에서 그려진 경로를 리셋하도록 콜백 설정 (Battle -> Home)
+    var resetPathDrawing: (() -> Unit)? = null
+
+    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정 (Home -> Battle)
     var startTracking: (() -> Unit)? = null
     var stopTracking: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
@@ -52,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         // 초기 네비게이션 홈바 설정
         binding.bottomNavigationMenu.selectedItemId = R.id.home
 
-        //네비게이션 클릭에 따른 프래그먼트 화면 전환
+        // 네비게이션 클릭에 따른 프래그먼트 화면 전환
         binding.bottomNavigationMenu.setOnItemSelectedListener{
             when(it.itemId) {
                 R.id.home -> showFragment(homeFragment, "HomeFragment")
@@ -89,6 +97,11 @@ class MainActivity : AppCompatActivity() {
             stopPathDrawing?.invoke()
         }
     }
+    // Battle -> Home 그렸던 경로 지우는(리셋) 요청 메서드
+    fun notifyPathReset() {
+        resetPathDrawing?.invoke()
+    }
+
     // Home -> Battle 그리드 소유권 추적 요청 메서드
     fun notifyTracking(boolean: Boolean) {
         if (boolean) { // true -> 그리드 소유권 추적 시작

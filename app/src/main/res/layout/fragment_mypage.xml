@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment"
     android:background="@color/blue0">
 
     <LinearLayout
@@ -112,13 +111,16 @@
             android:background="@color/grey_lite"
             android:text="@string/myPage_personalRunning"
             android:gravity="center_vertical"
-            android:paddingHorizontal="20dp"/>
+            android:paddingHorizontal="20dp"
+            android:elevation="1dp"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white"
             android:textSize="17sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:elevation="0dp"
             android:text="@string/myPage_weekGoal"/>
         <Button
             android:layout_width="match_parent"
@@ -126,6 +128,8 @@
             android:layout_weight="1"
             android:background="@color/white"
             android:textSize="17sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:elevation="0dp"
             android:text="@string/myPage_calendar"/>
 
         <!--배틀 기록-->
@@ -136,13 +140,16 @@
             android:background="@color/grey_lite"
             android:text="@string/myPage_battle"
             android:gravity="center_vertical"
-            android:paddingHorizontal="20dp"/>
+            android:paddingHorizontal="20dp"
+            android:elevation="1dp"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@color/white"
             android:textSize="17sp"
+            android:fontFamily="@font/pretendard_medium"
+            android:elevation="0dp"
             android:text="@string/myPage_record"/>
 
         <!--카카오톡 로그아웃-->
@@ -153,7 +160,8 @@
             android:background="@color/grey_lite"
             android:text="@string/myPage_logout_text"
             android:gravity="center_vertical"
-            android:paddingHorizontal="20dp"/>
+            android:paddingHorizontal="20dp"
+            android:elevation="1dp"/>
         <Button
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
@@ -163,6 +171,7 @@
             android:text="@string/myPage_logout"
             android:fontFamily="@font/pretendard_medium"
             android:textSize="17sp"
+            android:elevation="0dp"
             android:textColor="@color/red0" />
 
         <!--여백-->
