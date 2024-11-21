@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.battlerunner.BattleApplyActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.model.User
 
@@ -33,6 +32,7 @@ class UserAdapter(private var userList: List<User>, private val activity: Fragme
         holder.userId.text = user.userId
         holder.userName.text = user.username
 
+        // 신청 버튼 클릭 리스너
         holder.matchButton.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, BattleApplyActivity::class.java).apply {

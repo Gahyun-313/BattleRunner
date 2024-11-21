@@ -67,7 +67,7 @@ object MapUtils {
         }
     }
 
-    // 경로를 그릴 PolylineOptions 생성
+    // [경로] 경로를 그릴 PolylineOptions 생성
     fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
         return PolylineOptions()
             .addAll(points)
@@ -84,24 +84,24 @@ object MapUtils {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    // 경로를 업데이트
+    // [경로] 경로를 업데이트
     private fun updatePathPoints(location: Location) {
         val newPathPoints = _pathPoints.value?.toMutableList() ?: mutableListOf()
         newPathPoints.add(LatLng(location.latitude, location.longitude))
         _pathPoints.value = newPathPoints
     }
 
-    // 경로 초기화 - 그려진 경로 지우기(리셋)
+    // [경로] 경로 초기화 - 그려진 경로 지우기(리셋)
     fun clearPathPoints() {
         _pathPoints.value = emptyList()
     }
 
-    // HomeFragment -> PersonalEndActivity : 경로 보내기 (pathPotins -> Json 변환)
+    // [경로] HomeFragment -> PersonalEndActivity : 경로 보내기 (pathPotins -> Json 변환)
     fun pathPointsToJson(pathPoints: List<LatLng>): String {
         return Gson().toJson(pathPoints)
     }
 
-    // HomeFragment -> PersonalEndActivity : 경로 Json 파일을 다시 pathPoints로 변환
+    // [경로] PersonalEndActivity : 경로 Json 파일을 다시 pathPoints로 변환
     fun jsonToPathPoints(json: String): List<LatLng> {
         return Gson().fromJson(json, Array<LatLng>::class.java).toList()
     }

@@ -26,7 +26,7 @@
             android:fontFamily="@font/pretendard_extrabold"
             android:paddingTop="10dp"
             android:paddingBottom="25dp"
-            android:paddingLeft="20dp"/>
+            android:paddingStart="20dp"/>
 
         <!--프로필카드-->
         <LinearLayout

@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:ignore="UselessParent">
+        tools:ignore="UselessParent"
+        android:layout_marginTop="20dp">
 
         <TextView
             android:id="@+id/logo_text"
@@ -23,9 +24,10 @@
             android:background="@color/white"
             android:layout_gravity="center"
             android:fontFamily="@font/pretendard_extrabold"
-            android:paddingTop="5dp"
+            android:paddingTop="10dp"
             android:paddingBottom="25dp"
-            android:paddingLeft="20dp"/>
+            android:paddingStart="20dp"
+            tools:ignore="RtlSymmetry" />
 
         <TextView
             android:layout_width="match_parent"

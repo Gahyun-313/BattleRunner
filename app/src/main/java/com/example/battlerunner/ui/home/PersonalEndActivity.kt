@@ -20,7 +20,7 @@ class PersonalEndActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityPersonalEndBinding.inflate(layoutInflater)
-        setContentView(binding.root)  // 레이아웃을 화면에 표시
+        setContentView(binding.root)
 
         // MapFragment 초기화 및 설정
         supportFragmentManager.beginTransaction()

@@ -20,6 +20,8 @@ class BattleEndActivity : AppCompatActivity() {
 
         binding = ActivityBattleEndBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.setBackgroundDrawableResource(android.R.color.transparent) // 배경 투명
+
 
         // 창닫기 버튼 클릭 리스너
         binding.closeBtn.setOnClickListener{
