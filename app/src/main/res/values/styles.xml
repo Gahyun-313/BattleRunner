@@ -19,4 +19,12 @@
         <item name="android:enforceStatusBarContrast" >false</item>
     </style>
 
+    <style name="PopupTheme" parent="Theme.AppCompat.Light.Dialog">
+        <!-- 배경 흐림 효과 -->
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item> <!-- 흐림 정도 -->
+        <item name="android:windowBackground">@android:color/transparent</item> <!-- 배경 투명 -->
+        <item name="android:windowIsFloating">true</item> <!-- 팝업처럼 동작 -->
+    </style>
+
 </resources>

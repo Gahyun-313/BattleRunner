@@ -2,19 +2,18 @@ package com.example.battlerunner.ui.home
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.battlerunner.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
+import com.example.battlerunner.utils.MapUtils.pathPoints
 import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -72,7 +71,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         // MainActivity의 콜백 설정 (BattleFragment' 정지 버튼)
         (activity as? MainActivity)?.stopPathDrawing = {
-            homeViewModel.setDrawingStatus(false) // 경로 그리기 활성화
+            homeViewModel.setDrawingStatus(false) // 경로 그리기 비활성화
+        }
+
+        // MainActivity의 콜백 설정 (BattleFragment' 오늘의 러닝 종료 버튼)
+        (activity as? MainActivity)?.resetPathDrawing = {
+            homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
+            stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
+
+            onDestroyView()
         }
 
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
@@ -131,7 +138,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
                 observePathUpdates() // 경로 관찰 시작
 
-                (activity as? MainActivity)?.notifyTracking(true) // MainActivity에 알림 -> battleFragment 시작 버튼 공유
+                // MainActivity에 알림 -> battleFragment 시작 버튼 공유
+                (activity as? MainActivity)?.notifyTracking(true)
 
                 // 버튼 상태 변경
                 binding.startBtn.visibility = View.GONE
@@ -161,14 +169,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
+            // pathPoint(경로 데이터)를 json 형태로 변환해 PersonalEndActivity에 전달
+            val pathPointsJson = MapUtils.pathPointsToJson(homeViewModel.pathPoints.value ?: emptyList())
+
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
-                // 러닝 소요 시간, 거리 전달
-                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
-                putExtra("distance", homeViewModel.distance.value ?: 0f)
+                // 데이터 전달
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L) // 러닝 소요 시간 전달
+                putExtra("distance", homeViewModel.distance.value ?: 0f) // 러닝 거리 전달
+                putExtra("pathPoints", pathPointsJson) // 경로 데이터 전달
             }
-            homeViewModel.resetTimer()
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
+
+            onDestroyView()
         }
 
         // Goal 버튼 리스너
@@ -194,8 +207,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     // 프래그먼트가 파괴될 때 호출되는 메서드
     override fun onDestroyView() {
         super.onDestroyView()
+        homeViewModel.resetTimer() // 타이머 & 누적 거리 종료(리셋)
+
         _binding = null
-        homeViewModel.stopTimer() // 타이머 정지
     }
 
     companion object {

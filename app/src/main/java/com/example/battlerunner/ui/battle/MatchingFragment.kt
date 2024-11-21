@@ -56,7 +56,6 @@ class MatchingFragment : Fragment() {
                 }
                 return false
             }
-
             override fun onQueryTextChange(newText: String?): Boolean {
                 return false
             }
@@ -66,6 +65,7 @@ class MatchingFragment : Fragment() {
     // 사용자를 검색하는 메서드
     private fun searchUser(query: String) {
         val filteredList = userList.filter { it.userId.contains(query, ignoreCase = true) }
+
         if (filteredList.isNotEmpty()) {
             userAdapter.updateUserList(filteredList)
             binding.userRecyclerView.visibility = View.VISIBLE // 검색 결과가 있을 때만 리사이클러뷰 표시

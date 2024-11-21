@@ -25,7 +25,10 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+        // 상태바 색상 변경
         window.statusBarColor = ContextCompat.getColor(this, R.color.blue0)
+        // 내비게이션 바 색상 변경
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.blue0)
 
         // ViewModel 초기화
         viewModel = ViewModelProvider(this, SplashViewModelFactory(application)).get(SplashViewModel::class.java)

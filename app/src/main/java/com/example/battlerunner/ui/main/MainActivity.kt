@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.main
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
@@ -21,42 +22,70 @@ import com.example.battlerunner.ui.mypage.MyPageFragment
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private val homeFragment by lazy { HomeFragment() }
     private val battleFragment by lazy { BattleFragment() }
     private val matchingFragment by lazy { MatchingFragment() }
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
 
-    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정
+    // 배틀 여부 및 매칭 상태 확인 변수
+    private var isInBattle = false // 배틀 중 여부
+    private var isMatched = false // 매칭 성공 여부를 저장
+
+    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정 (Battle -> Home)
     var startPathDrawing: (() -> Unit)? = null
     var stopPathDrawing: (() -> Unit)? = null
 
-    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정
+    // HomeFragment에서 그려진 경로를 리셋하도록 콜백 설정 (Battle -> Home)
+    var resetPathDrawing: (() -> Unit)? = null
+
+    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정 (Home -> Battle)
     var startTracking: (() -> Unit)? = null
     var stopTracking: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
 
-        // 초기 프래그먼트 설정
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .add(R.id.fragmentContainer, homeFragment, "HomeFragment")
-                .commit()
-        }
-        // 초기 네비게이션 홈바 설정
-        binding.bottomNavigationMenu.selectedItemId = R.id.home
+        // BattleApplyActivity에서 전달받은 데이터 확인
+        if (intent.getBooleanExtra("loadBattleFragment", false)) {
 
-        //네비게이션 클릭에 따른 프래그먼트 화면 전환
+            val userName = intent.getStringExtra("userName")
+
+            isMatched = true // 외부에서 매칭이 설정되었다고 가정
+
+            val newBattleFragment = BattleFragment() // BattleFragment 인스턴스 생성
+            newBattleFragment.arguments = Bundle().apply {
+                putString("userName", userName)
+            }
+
+            // showFragment 호출 시 tag를 함께 전달
+            showFragment(newBattleFragment, "BattleFragment")
+            binding.bottomNavigationMenu.selectedItemId = R.id.battle
+
+        } else {
+
+            // 앱 시작할 때 초기 프래그먼트 설정
+            if (savedInstanceState == null) {
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.fragmentContainer, homeFragment, "HomeFragment")
+                    .commit()
+            }
+            // 초기 네비게이션 홈바 설정
+            binding.bottomNavigationMenu.selectedItemId = R.id.home
+
+        }
+
+        // 네비게이션 클릭에 따른 프래그먼트 화면 전환
         binding.bottomNavigationMenu.setOnItemSelectedListener{
             when(it.itemId) {
                 R.id.home -> showFragment(homeFragment, "HomeFragment")
-                R.id.battle -> showFragment(battleFragment, "BattleFragment")
+                R.id.battle -> navigateToBattleOrMatchingFragment() // 배틀 여부 및 매칭 상태에 따른 이동 설정
                 R.id.community -> showFragment(communityFragment, "CommunityFragment")
                 R.id.myPage -> showFragment(myPageFragment, "MyPageFragment")
             }
@@ -64,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 프래그먼트를 전환하는 함수
+    // 프래그먼트 전환 메서드
     private fun showFragment(fragment: Fragment, tag: String) {
         val transaction = supportFragmentManager.beginTransaction()
 
@@ -81,6 +110,44 @@ class MainActivity : AppCompatActivity() {
         transaction.commit()
     }
 
+    // 배틀 여부 및 매칭 상태에 따라 BattleFragment 또는 MatchingFragment로 이동하는 함수
+    private fun navigateToBattleOrMatchingFragment() {
+        val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
+
+        val fragment = if (isInBattle || isMatched) {
+            if (existingBattleFragment != null) {
+
+                // 이미 BattleFragment가 존재하면 해당 프래그먼트를 재사용
+                existingBattleFragment as BattleFragment
+            } else {
+
+                // BattleFragment가 없으면 새로 생성
+                BattleFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("userName", intent.getStringExtra("userName"))
+                    }
+                }
+            }
+        } else {
+            matchingFragment
+        }
+        // 배틀 중 또는 매칭된 상태라면 BattleFragment로 설정, 아니라면 MatchingFragment 설정
+        showFragment(fragment, if (isInBattle || isMatched) "BattleFragment" else "MatchingFragment")
+    }
+
+    // 외부에서 매칭 성공을 설정하는 메서드
+    fun setMatched(matched: Boolean) {
+        isMatched = matched
+    }
+
+    // 상태바 투명 설정 함수
+    private fun Activity.setStatusBarTransparent() {
+        window.apply {
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            statusBarColor = Color.TRANSPARENT
+        }
+    }
+
     // Battle -> Home 경로 그리기 요청 메서드
     fun notifyPathDrawing(boolean: Boolean) {
         if (boolean) { // true -> 러닝 경로 그리기
@@ -89,20 +156,17 @@ class MainActivity : AppCompatActivity() {
             stopPathDrawing?.invoke()
         }
     }
+    // Battle -> Home 그렸던 경로 지우는(리셋) 요청 메서드
+    fun notifyPathReset() {
+        resetPathDrawing?.invoke()
+    }
+
     // Home -> Battle 그리드 소유권 추적 요청 메서드
     fun notifyTracking(boolean: Boolean) {
         if (boolean) { // true -> 그리드 소유권 추적 시작
             startTracking?.invoke()
         } else { // false -> 그리드 소유권 추적 중지
             stopTracking?.invoke()
-        }
-    }
-
-    // 상태바 투명 설정 함수
-    private fun Activity.setStatusBarTransparent() {
-        window.apply {
-            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            statusBarColor = Color.TRANSPARENT
         }
     }
 }

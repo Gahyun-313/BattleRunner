@@ -71,7 +71,7 @@ class BattleViewModel : ViewModel() {
                     .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상
 
                 val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
-                ownershipMap[polygon] = "neutral" // 초기 소유자-> "neutral"
+                ownershipMap[polygon] = "neutral" // 초기 소유자 설정 -> "neutral"
                 polygons.add(polygon) // 생성한 폴리곤을 리스트에 추가
             }
         }
@@ -80,26 +80,30 @@ class BattleViewModel : ViewModel() {
 
     }
 
-    // 폴리곤 소유권(+색칠하기) 메서드
+    // 폴리곤 소유권 메서드 (폴리곤 색칠 메서드)
     fun updateOwnership(userLocation: LatLng, userId: String) {
         // 소유권 추적이 비활성화된 경우 => 실행하지 않음
         if (!isTrackingActive) return
 
         // 소유권 추적이 활성화 된 경우
         _gridPolygons.value?.forEach { polygon -> // 각 폴리곤에 대해 반복
+            // TODO: 서버에서 소유권 가져오기
 
-            if (polygon.isPointInside(userLocation)) { // 사용자가 폴리곤 내부에 있는지 확인
-                val currentOwner = ownershipMap[polygon] // 현재 폴리곤의 소유자
+            if (polygon.isPointInside(userLocation)) {
+                // 사용자가 해당 폴리곤 내부에 있다면
 
-                if (currentOwner != userId) { // 현재 소유자와 사용자가 다를 경우,
+                val currentOwner = ownershipMap[polygon] // 변수: 현재 폴리곤의 소유자
+
+                if (currentOwner != userId) { // 현재 소유자가 사용자("나")가 아닐 경우,
+
                     ownershipMap[polygon] = userId // 폴리곤의 소유권을 사용자 ID로 업데이트
                     polygon.fillColor = Color.BLUE // 파란색으로 변경
-                    Log.d("BattleViewModel", "Polygon ownership updated for user: $userId")
+
+                    // TODO: 서버로 소유권 전송(
                     // sendOwnershipToServer(polygon.id.toString(), userId) // 서버로 소유권 전송 예시
-                    // TODO: 서버로 소유권 전송
                 }
             } else {
-                Log.d("BattleViewModel", "User location $userLocation not inside polygon: ${polygon.points}")
+                // 사용자가 해당 폴리곤 내부에 없다면
 
             }
         }
