@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BattleRunner"
         android:usesCleartextTraffic="true"
-        tools:ignore="MissingClass">  <!-- 추가 -->>
+        tools:ignore="MissingClass">
 
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"

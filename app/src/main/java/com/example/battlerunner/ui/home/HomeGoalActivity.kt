@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.R
 import com.naver.maps.geometry.LatLng
@@ -66,27 +67,32 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
             // Set up location source
             naverMap.locationSource = locationSource
 
+            // Enable location tracking
+            naverMap.locationTrackingMode = LocationTrackingMode.Follow
+
+
             // Configure UI settings
             naverMap.uiSettings.apply {
                 isLocationButtonEnabled = true
                 isZoomControlEnabled = true
                 isCompassEnabled = true
             }
-
+            /*
             // Set initial camera position (Seoul)
             val seoulLatLng = LatLng(37.5665, 126.9780)
             naverMap.moveCamera(CameraUpdate.scrollTo(seoulLatLng))
-            naverMap.moveCamera(CameraUpdate.zoomTo(15.0))
+            naverMap.moveCamera(CameraUpdate.zoomTo(15.0))*/
 
-            // Add marker
-            val marker = Marker().apply {
-                position = seoulLatLng
-                captionText = "서울"
+            val marker = Marker()
+            naverMap.addOnLocationChangeListener { location ->
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                marker.position = currentLatLng
+                marker.map = naverMap // Update marker's position on the map
+                naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng)) // Move camera to current location
             }
-            marker.map = naverMap // Marker와 지도 연결
         } catch (e: Exception) {
             e.printStackTrace()
-            // Handle map initialization errors
+            Toast.makeText(this, "Error initializing the map.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -101,6 +107,7 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         if (locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
             if (!locationSource.isActivated) {
                 naverMap.locationTrackingMode = LocationTrackingMode.None
+                Toast.makeText(this, "Location permissions denied.", Toast.LENGTH_SHORT).show()
             }
             return
         }

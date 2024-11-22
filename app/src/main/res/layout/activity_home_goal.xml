@@ -25,9 +25,18 @@
         <!-- 확인 버튼 -->
         <Button
             android:id="@+id/confirmBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="확인" />
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/blue0"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="@string/confirmBtn"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
         <!-- 'X' 버튼 -->
         <ImageButton
@@ -38,6 +47,10 @@
             android:scaleType="fitCenter"
             android:src="@drawable/close" />
     </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
 
     <com.naver.maps.map.MapView
         android:id="@+id/naverMapView"
