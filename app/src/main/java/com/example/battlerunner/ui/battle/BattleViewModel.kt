@@ -5,10 +5,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.battlerunner.network.RetrofitInstance
 import com.google.android.gms.maps.GoogleMap // 수정: GoogleMap 임포트 추가
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
+import com.google.common.collect.Table
+import com.google.gson.Gson
 
 class BattleViewModel : ViewModel() {
 
@@ -18,6 +21,8 @@ class BattleViewModel : ViewModel() {
     private val ownershipMap = mutableMapOf<Polygon, String>() // 각 폴리곤의 소유자를 추적하기 위한 맵 => <폴리곤 객체, 소유자ID>
     private var isTrackingActive = false // 소유권 추적 활성화 상태 플래그
 
+    // TODO Retrofit 서비스 초기화
+
     // 소유권 추적 활성화/비활성화 설정 메서드
     fun setTrackingActive(active: Boolean) {
         isTrackingActive = active
@@ -26,6 +31,7 @@ class BattleViewModel : ViewModel() {
     // 배틀 상대 이름 가져오기
     private val _user2Name = MutableLiveData<String>()
     val user2Name: LiveData<String> get() = _user2Name
+
     // 배틀 상대 이름 나타내는 메서드
     fun setUser2Name(name: String) {
         if (_user2Name.value != name) {
@@ -38,13 +44,13 @@ class BattleViewModel : ViewModel() {
         Log.d("BattleViewModel", "createGrid 호출됨. Center: $centerLatLng")
 
         val polygons = mutableListOf<Polygon>() // 생성한 폴리곤 객체들을 저장할 리스트
-        val metersToLatLng = 0.00000225     // 약 1m를 위도/경도로 변환한 값
+        val metersToLatLng = 0.000009    // 약 1m를 위도/경도로 변환한 값
 
-        // 시작 좌표 -> 사용자의 위치 기준 그리드의 왼쪽 하단 모서리에 맞추어 설정
+        // 시작 좌표
         // TODO: 사용자가 중심 그리드의 중앙 위치에서 시작하도록
         val startLatLng = LatLng(
-            centerLatLng.latitude - (rows / 2) * gridSize * metersToLatLng, // 남쪽으로 이동하여 그리드 시작점의 위도 설정
-            centerLatLng.longitude - (cols / 2) * gridSize * metersToLatLng // 서쪽으로 이동하여 그리드 시작점의 경도 설정
+            centerLatLng.latitude - (rows / 2) * gridSize * metersToLatLng,
+            centerLatLng.longitude - (cols / 2) * gridSize * metersToLatLng
         )
 
         // 그리드의 행, 열 개수에 맞춰 폴리곤 생성해 지도에 추가
@@ -68,7 +74,7 @@ class BattleViewModel : ViewModel() {
                     )
                     .strokeColor(Color.GRAY) // 경계선 색상
                     .strokeWidth(0.5f) // 경계선 두께
-                    .fillColor(Color.argb(10, 0, 0, 0)) // 폴리곤 채우기 색상
+                    .fillColor(Color.argb(10, 0, 0, 0)) // 초기 폴리곤 채우기 색상
 
                 val polygon = map.addPolygon(polygonOptions) // 설정한 옵션을 사용해 폴리곤을 지도에 추가
                 ownershipMap[polygon] = "neutral" // 초기 소유자 설정 -> "neutral"
@@ -87,27 +93,47 @@ class BattleViewModel : ViewModel() {
 
         // 소유권 추적이 활성화 된 경우
         _gridPolygons.value?.forEach { polygon -> // 각 폴리곤에 대해 반복
-            // TODO: 서버에서 소유권 가져오기
 
+            // 사용자가 해당 폴리곤 내부에 있다면
             if (polygon.isPointInside(userLocation)) {
-                // 사용자가 해당 폴리곤 내부에 있다면
-
                 val currentOwner = ownershipMap[polygon] // 변수: 현재 폴리곤의 소유자
 
-                if (currentOwner != userId) { // 현재 소유자가 사용자("나")가 아닐 경우,
-
+                if (currentOwner != userId) { // 현재 소유자가 사용자가 아닐 경우,
                     ownershipMap[polygon] = userId // 폴리곤의 소유권을 사용자 ID로 업데이트
                     polygon.fillColor = Color.BLUE // 파란색으로 변경
 
-                    // TODO: 서버로 소유권 전송(
-                    // sendOwnershipToServer(polygon.id.toString(), userId) // 서버로 소유권 전송 예시
+                    // TODO: 서버로 소유권 전송
+                    // sendOwnershipToServer(polygon.id.toString(), userId)
                 }
-            } else {
-                // 사용자가 해당 폴리곤 내부에 없다면
-
             }
         }
     }
+
+    // 상대방의 소유권 업데이트하는 메서드
+    fun updateOpponentOwnership(polygonId: String, opponentId: String) {
+        _gridPolygons.value?.find { it.id.toString() == polygonId }?.let { polygon ->
+            ownershipMap[polygon] = opponentId
+            polygon.fillColor = Color.RED // 상대방 점유
+        }
+    }
+
+    //TODO 서버로 소유권 보내는 메서드
+//    private fun sendOwnershipToServer(polygonId: String, userId: String) {
+//        val ownershipData = OwnershipData(polygonId, userId)
+//        apiService.sendOwnershipData(ownershipData).enqueue(object : Callback<OwnershipResponse> {
+//            override fun onResponse(call: Call<OwnershipResponse>, response: Response<OwnershipResponse>) {
+//                if (response.isSuccessful) {
+//                    Log.d("BattleViewModel", "Ownership sent successfully: $response")
+//                } else {
+//                    Log.e("BattleViewModel", "Failed to send ownership: ${response.errorBody()}")
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<OwnershipResponse>, t: Throwable) {
+//                Log.e("BattleViewModel", "Error sending ownership", t)
+//            }
+//        })
+//    }
 
     // Polygon 객체에 대해 확장 함수 정의 (포함 여부를 판단)
     private fun Polygon.isPointInside(point: LatLng): Boolean {
@@ -127,4 +153,33 @@ class BattleViewModel : ViewModel() {
         }
         return contains // Polygon 내부 여부를 반환 -> 내부 true, 외부 false
     }
+
+    // 그리드 데이터를 Json으로 변환
+    fun getGridDataAsJson(): String {
+        val gridData = ownershipMap.map { (polygon, owner) ->
+            mapOf(
+                "corners" to polygon.points.map { point ->
+                    mapOf("latitude" to point.latitude, "longitude" to point.longitude)
+                },
+                "owner" to owner
+            )
+        }
+        return Gson().toJson(gridData)
+    }
+
+    // 그리드 초기화 메서드
+    fun clearGrid() {
+        // 소유권 맵 초기화
+        ownershipMap.clear()
+
+        // 그리드 폴리곤 초기화
+        _gridPolygons.value?.forEach { polygon ->
+            polygon.remove() // 지도에서 제거
+        }
+        _gridPolygons.value = emptyList() // LiveData를 빈 리스트로 업데이트
+
+        Log.d("BattleViewModel", "Grid가 초기화되었습니다.")
+    }
+
+
 }

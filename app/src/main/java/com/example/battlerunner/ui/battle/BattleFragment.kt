@@ -10,10 +10,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.ui.home.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentBattleBinding
+import com.example.battlerunner.ui.home.HomeFragment
+import com.example.battlerunner.ui.home.HomeFragment.Companion
 import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.utils.LocationUtils
@@ -37,8 +40,9 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private var trackingActive = false // 소유권 추적 활성화 상태
 
     // viewModel 초기화
-    private val homeViewModel by lazy {
-        ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
+    // ★ GlobalApplication에서 HomeViewModel을 가져오기
+    private val homeViewModel: HomeViewModel by lazy {
+        (requireActivity().application as GlobalApplication).homeViewModel
     }
     private val battleViewModel by lazy {
         ViewModelProvider(this).get(BattleViewModel::class.java)
@@ -184,26 +188,43 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 오늘의 러닝 종료 버튼 클릭 리스너
         binding.finishBtn.setOnClickListener {
-            homeViewModel.stopTimer() // 타이머 정지
+            homeViewModel.stopTimer() // 타이머 중지
 
-            // PersonalEndActivity 실행
+            // PersonalEndActivity 실행 (데이터 전송x)
+//            val intent = Intent(requireContext(), PersonalEndActivity::class.java)
+//            startActivity(intent)
+
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
-                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
-                putExtra("userName", binding.title.text.toString())
+                // 데이터 전달
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L) // 러닝 소요 시간 전달
+                putExtra("distance", homeViewModel.distance.value ?: 0f) // 러닝 거리 전달
             }
-            homeViewModel.resetTimer()
-            (activity as? MainActivity)?.notifyPathReset() // MainActivity에 알림 -> HomeFragment 러닝 경로 지우기
+            startActivity(intent)
 
-            startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
         }
 
         // 배틀 종료 버튼 클릭 리스너
         binding.BattlefinishBtn.setOnClickListener {
+
+            // 러닝 중이라면 경고 안내 후 무시
+            if (homeViewModel.isRunning.value == true) {
+                Toast.makeText(requireContext(), "러닝 중에는 배틀을 종료할 수 없습니다", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             homeViewModel.stopTimer()
+
+            // 현재 그리드 데이터를 JSON으로 변환
+            val gridDataJson = battleViewModel.getGridDataAsJson()
+
+            // BattleEndActivity 실행
             val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
+                putExtra("gridData", gridDataJson) // Grid 데이터 전달
                 putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
                 putExtra("userName", binding.title.text.toString())
             }
+            battleViewModel.clearGrid() // BattleViewModel -> 그리드를 초기화
+
             startActivity(intent)
         }
     }

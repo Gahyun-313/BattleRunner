@@ -1,17 +1,19 @@
 // HomeViewModel.kt
 package com.example.battlerunner.ui.home
 
+import android.app.Application
 import android.location.Location
 import android.os.CountDownTimer
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     // 경과 시간을 저장하는 LiveData
-    private var _elapsedTime = MutableLiveData<Long>()
+    private var _elapsedTime = MutableLiveData<Long>(0L)
     val elapsedTime: LiveData<Long> get() = _elapsedTime
 
     // 경로의 위치 좌표 리스트를 저장하는 LiveData
@@ -69,7 +71,16 @@ class HomeViewModel : ViewModel() {
         _elapsedTime.value = 0L
         _isRunning.value = false
         _hasStarted.value = false // 타이머 상태 초기화
-        _distance.value  = 0f // 누적 거리 초기화
+    }
+
+    fun resetPathPoints() {
+        _pathPoints.value = emptyList() // 경로 데이터를 초기화
+    }
+
+    fun resetAllData() {
+        resetTimer()       // 타이머 초기화
+        _distance.value = 0f // 누적 거리 초기화
+        resetPathPoints()  // 경로 데이터 초기화
     }
 
     fun setHasStarted(value: Boolean) {
@@ -80,23 +91,30 @@ class HomeViewModel : ViewModel() {
     fun addPathPoint(location: LatLng) {
         if (_isRunning.value == false) return // 정지 상태에서는 업데이트하지 않음
 
+        // 로그 추가: 위치 데이터 확인
+        println("New Location: ${location.latitude}, ${location.longitude}")
+
         // 이전 위치가 있는 경우, 현재 위치와의 거리를 계산하여 누적
-        lastLocation?.let {
-            val results = FloatArray(1) // 거리 결과를 저장할 배열
-            Location.distanceBetween(
-                it.latitude, it.longitude, // 이전 위치 좌표
-                location.latitude, location.longitude, // 현재 위치 좌표
-                results // 결과 배열에 거리 값 저장
-            )
-            _distance.value = (_distance.value ?: 0f) + results[0] // 누적 거리 업데이트
-        }
-        // 현재 위치를 이전 위치로 설정하여 다음 위치 추가 시 사용할 수 있게 함
-        lastLocation = location
+//        lastLocation?.let {
+//            val results = FloatArray(1) // 거리 결과를 저장할 배열
+//            Location.distanceBetween(
+//                it.latitude, it.longitude, // 이전 위치 좌표
+//                location.latitude, location.longitude, // 현재 위치 좌표
+//                results // 결과 배열에 거리 값 저장
+//            )
+//            _distance.value = (_distance.value ?: 0f) + results[0] // 누적 거리 업데이트
+//            println("Updated Distance: ${_distance.value}") // 거리 로그
+//        }
+//        // 현재 위치를 이전 위치로 설정하여 다음 위치 추가 시 사용할 수 있게 함
+//        lastLocation = location
 
         // 경로 리스트에 현재 위치를 추가하고 LiveData 업데이트
         val updatedPoints = _pathPoints.value?.toMutableList() ?: mutableListOf()
         updatedPoints.add(location)
         _pathPoints.value = updatedPoints
+
+        // 경로 데이터 확인
+        println("Path Points Updated: ${_pathPoints.value?.size} points")
     }
 }
 

@@ -11,6 +11,8 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityMainBinding
@@ -18,6 +20,7 @@ import com.example.battlerunner.ui.battle.BattleFragment
 import com.example.battlerunner.ui.battle.MatchingFragment
 import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
+import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.mypage.MyPageFragment
 
 class MainActivity : AppCompatActivity() {
@@ -29,47 +32,49 @@ class MainActivity : AppCompatActivity() {
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
 
-    // 배틀 여부 및 매칭 상태 확인 변수
-    private var isInBattle = false // 배틀 중 여부
-    private var isMatched = false // 매칭 성공 여부를 저장
+    val homeViewModel: HomeViewModel by lazy {
+        (application as GlobalApplication).homeViewModel
+    }
 
-    // HomeFragment에서 경로 그리기를 시작하도록 콜백 설정 (Battle -> Home)
-    var startPathDrawing: (() -> Unit)? = null
-    var stopPathDrawing: (() -> Unit)? = null
+    // [ 배틀 매칭 ]
+    private var isInBattle = false // 배틀 중 여부를 저장
+    // isMatched 삭제 -> isInBattle과 합침
 
-    // HomeFragment에서 그려진 경로를 리셋하도록 콜백 설정 (Battle -> Home)
-    var resetPathDrawing: (() -> Unit)? = null
-
-    // BattleFragment에서 소유권 업데이트 메서드 시작하도록 콜백 설정 (Home -> Battle)
-    var startTracking: (() -> Unit)? = null
-    var stopTracking: (() -> Unit)? = null
+    var startPathDrawing: (() -> Unit)? = null  // Home 경로 그리기 시작 콜백
+    var stopPathDrawing: (() -> Unit)? = null   // Home 경로 그리기 중지 콜백
+    var resetPathDrawing: (() -> Unit)? = null  // Home 경로 초기화 콜백
+    var startTracking: (() -> Unit)? = null     // Battle 소유권 추적 시작 콜백
+    var stopTracking: (() -> Unit)? = null      // Battle 소유권 추적 중지 콜백
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        println("HomeViewModel Instance in MainActivity: ${homeViewModel.hashCode()}")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
 
-        // BattleApplyActivity에서 전달받은 데이터 확인
+        // BattleApplyActivity 에서 데이터 전달 시 처리
         if (intent.getBooleanExtra("loadBattleFragment", false)) {
-
-            val userName = intent.getStringExtra("userName")
-
-            isMatched = true // 외부에서 매칭이 설정되었다고 가정
+            val userName = intent.getStringExtra("userName") // 배틀 상대 이름
+            isInBattle = true // 배틀(매칭) 상태 설정
 
             val newBattleFragment = BattleFragment() // BattleFragment 인스턴스 생성
             newBattleFragment.arguments = Bundle().apply {
-                putString("userName", userName)
+                putString("userName", userName) // Battle Fragment 배틀 상대 이름 전달
             }
 
-            // showFragment 호출 시 tag를 함께 전달
-            showFragment(newBattleFragment, "BattleFragment")
-            binding.bottomNavigationMenu.selectedItemId = R.id.battle
+            showFragment(newBattleFragment, "BattleFragment") // BattleFragment로 전환
+            binding.bottomNavigationMenu.selectedItemId = R.id.battle // 네비게이션 메뉴 업데이트
 
+        } else if (intent.getBooleanExtra("showMatchingFragment", false)) {
+            isInBattle = false // 배틀(매칭) 상태를 초기화
+
+            showFragment(matchingFragment, "MatchingFragment") // MatchingFragment로 전환
+            binding.bottomNavigationMenu.selectedItemId = R.id.battle // 네비게이션 메뉴 업데이트
         } else {
-
             // 앱 시작할 때 초기 프래그먼트 설정
             if (savedInstanceState == null) {
                 supportFragmentManager.beginTransaction()
@@ -110,34 +115,28 @@ class MainActivity : AppCompatActivity() {
         transaction.commit()
     }
 
-    // 배틀 여부 및 매칭 상태에 따라 BattleFragment 또는 MatchingFragment로 이동하는 함수
+    // 배틀 상태에 따라 Battle Fragment 또는 Matching Fragment로 이동
     private fun navigateToBattleOrMatchingFragment() {
         val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
 
-        val fragment = if (isInBattle || isMatched) {
+        val fragment = if (isInBattle) { // 배틀 중인지 확인
             if (existingBattleFragment != null) {
-
-                // 이미 BattleFragment가 존재하면 해당 프래그먼트를 재사용
-                existingBattleFragment as BattleFragment
+                existingBattleFragment as BattleFragment // 기존 BattleFragment 재사용
             } else {
-
-                // BattleFragment가 없으면 새로 생성
-                BattleFragment().apply {
+                BattleFragment().apply { // 새 BattleFragment 생성
                     arguments = Bundle().apply {
-                        putString("userName", intent.getStringExtra("userName"))
+                        putString("userName", intent.getStringExtra("userName")) // 배틀 상대 이름 전달
                     }
                 }
             }
         } else {
-            matchingFragment
+            matchingFragment // MatchingFragment 사용
         }
-        // 배틀 중 또는 매칭된 상태라면 BattleFragment로 설정, 아니라면 MatchingFragment 설정
-        showFragment(fragment, if (isInBattle || isMatched) "BattleFragment" else "MatchingFragment")
-    }
 
-    // 외부에서 매칭 성공을 설정하는 메서드
-    fun setMatched(matched: Boolean) {
-        isMatched = matched
+        showFragment(fragment,
+            if (isInBattle) "BattleFragment"
+            else "MatchingFragment"
+        )
     }
 
     // 상태바 투명 설정 함수
@@ -148,25 +147,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Battle -> Home 경로 그리기 요청 메서드
+    // 경로 그리기 요청 메서드 (Battle -> Home)
     fun notifyPathDrawing(boolean: Boolean) {
-        if (boolean) { // true -> 러닝 경로 그리기
-            startPathDrawing?.invoke()
-        } else { // true -> 러닝 경로 그리지 않기
-            stopPathDrawing?.invoke()
+        if (boolean) {
+            startPathDrawing?.invoke() // 경로 그리기 시작
+        } else {
+            stopPathDrawing?.invoke() // 경로 그리기 중지
         }
     }
-    // Battle -> Home 그렸던 경로 지우는(리셋) 요청 메서드
+    // 그렸던 경로 지우는(리셋) 요청 메서드 (Battle -> Home)
     fun notifyPathReset() {
         resetPathDrawing?.invoke()
     }
 
-    // Home -> Battle 그리드 소유권 추적 요청 메서드
+    // 그리드 소유권 추적 요청 메서드 (Home -> Battle)
     fun notifyTracking(boolean: Boolean) {
-        if (boolean) { // true -> 그리드 소유권 추적 시작
-            startTracking?.invoke()
-        } else { // false -> 그리드 소유권 추적 중지
-            stopTracking?.invoke()
+        if (boolean) {
+            startTracking?.invoke() // 그리드 소유권 추적 시작
+        } else {
+            stopTracking?.invoke() // 그리드 소유권 추적 중지
         }
     }
 }
