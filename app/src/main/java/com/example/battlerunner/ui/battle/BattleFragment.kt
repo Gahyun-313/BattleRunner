@@ -21,6 +21,7 @@ import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
+import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -38,21 +39,21 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private lateinit var dbHelper: DBHelper // 데이터베이스 접근을 위한 DBHelper 인스턴스
     private var gridInitialized = false // 지도 그리드 초기화 여부 확인하는 플래그
     private var trackingActive = false // 소유권 추적 활성화 상태
+    private var startLatLng: LatLng? = null // 그리드 시작 위치 저장
 
     // viewModel 초기화
     // ★ GlobalApplication에서 HomeViewModel을 가져오기
     private val homeViewModel: HomeViewModel by lazy {
         (requireActivity().application as GlobalApplication).homeViewModel
     }
-    private val battleViewModel by lazy {
-        ViewModelProvider(this).get(BattleViewModel::class.java)
+    private val battleViewModel: BattleViewModel by lazy {
+        (requireActivity().application as GlobalApplication).battleViewModel
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("BattleFragment", "onCreateView called")
         _binding = FragmentBattleBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -60,7 +61,8 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     // 뷰가 생성된 후 호출되는 메서드
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("BattleFragment", "onViewCreated called")
+        Log.d("BattleViewModel", "BattleEndActivity ViewModel instance: $this")
+
 
         // 위치 서비스 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -190,10 +192,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         binding.finishBtn.setOnClickListener {
             homeViewModel.stopTimer() // 타이머 중지
 
-            // PersonalEndActivity 실행 (데이터 전송x)
-//            val intent = Intent(requireContext(), PersonalEndActivity::class.java)
-//            startActivity(intent)
-
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달
                 putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L) // 러닝 소요 시간 전달
@@ -205,27 +203,19 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 배틀 종료 버튼 클릭 리스너
         binding.BattlefinishBtn.setOnClickListener {
-
-            // 러닝 중이라면 경고 안내 후 무시
-            if (homeViewModel.isRunning.value == true) {
+            if (homeViewModel.hasStarted.value == true) {
+                // 러닝 중이라면 경고 안내 후 무시
                 Toast.makeText(requireContext(), "러닝 중에는 배틀을 종료할 수 없습니다", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
+            } else {
+                // BattleEndActivity 실행
+                val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
+                    putExtra("oppositeName", user2Name) // 배틀 상대 이름
+                    putExtra("userName", dbHelper.getUserInfo()?.second) // 유저 이름
+                }
+                //battleViewModel.clearGrid() // 그리드 초기화
+                startActivity(intent)
             }
-
-            homeViewModel.stopTimer()
-
-            // 현재 그리드 데이터를 JSON으로 변환
-            val gridDataJson = battleViewModel.getGridDataAsJson()
-
-            // BattleEndActivity 실행
-            val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
-                putExtra("gridData", gridDataJson) // Grid 데이터 전달
-                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
-                putExtra("userName", binding.title.text.toString())
-            }
-            battleViewModel.clearGrid() // BattleViewModel -> 그리드를 초기화
-
-            startActivity(intent)
         }
     }
     // GoogleMap이 준비되었을 때 호출되는 메서드
@@ -234,39 +224,56 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 권한 확인 후 내 위치 표시
         if (LocationUtils.hasLocationPermission(requireContext())) {
-            enableMyLocation() // 내 위치 활성화
-            fetchCurrentLocationAndInitializeGrid() // 현재 위치 가져오기 및 그리드 초기화
-
-            // TODO: 서버에서 그리드 시작 위치 받아오기
-            // val startLatLng = LatLng(37.222101, 127.187709)
-            //initializeGridWithCurrentLocation(startLatLng) // 현재 위치 기준으로 그리드 초기화
-
+            if (LocationUtils.hasLocationPermission(requireContext())) {
+                enableMyLocation()
+                fetchCurrentLocation()
+            } else {
+                LocationUtils.requestLocationPermission(this)
+            }
         } else {
             LocationUtils.requestLocationPermission(this)
         }
     }
 
     // 현재 위치 가져오고 그리드 초기화 메서드
-    private fun fetchCurrentLocationAndInitializeGrid() {
+    private fun fetchCurrentLocation() {
         MapUtils.currentLocation.observe(viewLifecycleOwner) { location ->
-            if (location != null && !gridInitialized) {
+            if (location != null) {
 
                 // TODO: 서버에서 그리드 시작 위치 받아오기
                 val startLatLng = LatLng(location.latitude, location.longitude)
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f)) // 현재 위치로 카메라 이동
-                initializeGridWithCurrentLocation(startLatLng) // 그리드 초기화
+                initializeGrid(startLatLng) // 그리드 초기화
 
-            } else if (location == null) {
+            } else {
                 Toast.makeText(requireContext(), "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     // 현재 위치 기반으로 그리드 초기화 메서드
-    private fun initializeGridWithCurrentLocation(startLatLng: LatLng) { // Argument 에 "startLatLng: LatLng" 추가
-        battleViewModel.createGrid(googleMap, startLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
-        gridInitialized = true // 그리드가 초기화되었음을 표시
-        Log.d("BattleFragment", "그리드가 초기화되었습니다: $startLatLng")
+    private fun initializeGrid(startLatLng: LatLng) { // Argument 에 "startLatLng: LatLng" 추가
+        if (!gridInitialized) {
+            battleViewModel.createGrid(googleMap, startLatLng, 29, 29) // 현재 위치 기준으로 그리드 생성
+            gridInitialized = true // 그리드가 초기화되었음을 표시
+
+            Log.d("BattleFragment", "Grid initialized: ${battleViewModel.gridPolygons.value}")
+            Log.d("BattleFragment", "Ownership Map: ${battleViewModel.ownershipMap}")
+
+            // TODO: 그리드가 그려진 후 서버로 시작 위치 전송
+            //sendStartLocationToServer(startLatLng)
+        }
+    }
+
+    // TODO: 서버로 그리드 시작 위치 전송하는 메서드
+    // TODO: 서버에서 그리드 시작 위치 받아오는 메서드
+
+    private fun startBattle() {
+        if (startLatLng != null) {
+            Toast.makeText(requireContext(), "배틀 시작!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "그리드가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // 위치 업데이트를 설정하는 메서드
@@ -279,7 +286,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
                     if (trackingActive) {
                         dbHelper.getUserInfo()?.let { userInfo ->
-                            battleViewModel.updateOwnership(userLocation, userInfo.second) // 소유권 업데이트
+                            battleViewModel.updateOwnership(userLocation, userInfo.first) // 소유권 업데이트
                         }
                     }
                 }

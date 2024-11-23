@@ -72,7 +72,7 @@ object MapUtils {
     fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
         return PolylineOptions()
             .addAll(points)
-            .width(500f)  // 두께
+            .width(100f)  // 두께
             .color(Color.BLUE)  // 경로 색상
             .geodesic(true)  // 지오데식 경로 설정
             .startCap(RoundCap())  // 시작점 둥글게

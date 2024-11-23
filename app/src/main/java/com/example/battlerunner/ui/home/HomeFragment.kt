@@ -191,6 +191,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
+            (activity as? MainActivity)?.notifyTracking(false) // MainActivity에 알림 -> battleFragment 소유권 추적 중지
+
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달

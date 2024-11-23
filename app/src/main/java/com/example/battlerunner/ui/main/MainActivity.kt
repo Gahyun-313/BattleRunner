@@ -17,6 +17,7 @@ import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityMainBinding
 import com.example.battlerunner.ui.battle.BattleFragment
+import com.example.battlerunner.ui.battle.BattleViewModel
 import com.example.battlerunner.ui.battle.MatchingFragment
 import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
@@ -36,6 +37,10 @@ class MainActivity : AppCompatActivity() {
         (application as GlobalApplication).homeViewModel
     }
 
+    val battleViewModel: BattleViewModel by lazy {
+        (application as GlobalApplication).battleViewModel
+    }
+
     // [ 배틀 매칭 ]
     private var isInBattle = false // 배틀 중 여부를 저장
     // isMatched 삭제 -> isInBattle과 합침
@@ -48,8 +53,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        println("HomeViewModel Instance in MainActivity: ${homeViewModel.hashCode()}")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

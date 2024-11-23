@@ -23,8 +23,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.common.collect.Table
+import com.google.gson.Gson
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -126,26 +128,31 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    // Json 데이터를 기반으로 그리드 복원 (BattleFragment -> BattleEndActivity)
-    fun drawGridFromData(gridData: List<Map<String, Any>>) {
-        for (cell in gridData) {
-            val corners = (cell["corners"] as List<Map<String, Double>>).map { corner ->
-                LatLng(corner["latitude"]!!, corner["longitude"]!!)
-            }
-            val owner = cell["owner"] as String
-            val fillColor = when (owner) {
+    // BattleEndActivity에서 그리드 복원
+    fun drawGridFromPolygons(polygons: List<Polygon>, ownershipMap: Map<String, String>) {
+
+        polygons.forEach { polygon ->
+
+            val polygonId = polygon.id.toString()
+            val ownerId = ownershipMap[polygonId] // 소유자 확인
+
+            val fillColor = when (ownerId) {
+                "neutral" -> Color.argb(10, 0, 0, 0)
                 userId -> Color.BLUE
                 "opponent" -> Color.RED
                 else -> Color.argb(0, 0, 0, 0)
             }
 
-            // 폴리곤 그리기
-            val polygonOptions = PolygonOptions()
-                .addAll(corners)
-                .strokeColor(Color.GRAY)
-                .fillColor(fillColor)
+            Log.d("MapFragment", "Polygon ID: ${polygonId}, Owner: $ownerId, userId: $userId")
 
-            googleMap.addPolygon(polygonOptions)
+            // 새로운 Polygon 추가
+            googleMap.addPolygon(
+                PolygonOptions()
+                    .addAll(polygon.points)
+                    .strokeWidth(0.5f)
+                    .strokeColor(Color.GRAY)
+                    .fillColor(fillColor)
+            )
         }
     }
 
