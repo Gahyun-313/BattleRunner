@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.shared
 
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import com.example.battlerunner.R
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentMapBinding
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
@@ -21,6 +23,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polygon
+import com.google.android.gms.maps.model.PolygonOptions
+import com.google.common.collect.Table
+import com.google.gson.Gson
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -29,6 +35,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     lateinit var googleMap: GoogleMap // 구글 맵 객체
     private lateinit var fusedLocationClient: FusedLocationProviderClient // 위치 제공자 클라이언트
     private var onMapReadyCallback: (() -> Unit)? = null
+    private lateinit var dbHelper: DBHelper
+    lateinit var userId: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +52,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // 위치 제공자 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        // DBHelper 싱글턴 인스턴스 초기화
+        dbHelper = DBHelper.getInstance(requireContext())
+        userId = dbHelper.getUserInfo()?.first.toString() // 사용자 ID
 
         // 지도 프래그먼트 설정 및 콜백
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer)
@@ -116,6 +128,41 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    // BattleEndActivity에서 그리드 복원
+    fun drawGridFromPolygons(polygons: List<Polygon>, ownershipMap: Map<String, String>) {
+
+        polygons.forEach { polygon ->
+
+            val polygonId = polygon.id.toString()
+            val ownerId = ownershipMap[polygonId] // 소유자 확인
+
+            val fillColor = when (ownerId) {
+                "neutral" -> Color.argb(10, 0, 0, 0)
+                userId -> Color.BLUE
+                "opponent" -> Color.RED
+                else -> Color.argb(0, 0, 0, 0)
+            }
+
+            Log.d("MapFragment", "Polygon ID: ${polygonId}, Owner: $ownerId, userId: $userId")
+
+            // 새로운 Polygon 추가
+            googleMap.addPolygon(
+                PolygonOptions()
+                    .addAll(polygon.points)
+                    .strokeWidth(0.5f)
+                    .strokeColor(Color.GRAY)
+                    .fillColor(fillColor)
+            )
+        }
+    }
+
+    // 경로 제거 메서드
+    fun clearMapPath() {
+        if (::googleMap.isInitialized) {
+            googleMap.clear() // 지도에 그려진 모든 오버레이(Polyline 포함)를 제거
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         MapUtils.stopLocationUpdates(fusedLocationClient)
@@ -127,9 +174,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         onMapReadyCallback = callback
     }
 
-    // 경로를 그리는 메서드 (여러 경로 표현 가능)
+    // 경로를 그리는 메서드
     fun drawPath(pathPoints: List<LatLng>) {
-        val polylineOptions = MapUtils.createPolylineOptions(pathPoints)
-        googleMap.addPolyline(polylineOptions)
+        if (::googleMap.isInitialized && pathPoints.isNotEmpty()) {
+            googleMap.clear() // 기존 경로 제거
+            val polylineOptions = MapUtils.createPolylineOptions(pathPoints)
+            googleMap.addPolyline(polylineOptions) // 새로운 경로 그리기
+
+        }
     }
+
 }

@@ -20,6 +20,7 @@ class BattleApplyActivity : AppCompatActivity() {
 
         // Intent로부터 전달된 사용자 이름 가져오기
         val userName = intent.getStringExtra("userName")
+        val userId = intent.getStringExtra("userId")
 
         // 가져온 이름을 텍스트뷰에 표시
         val userNameTextView = findViewById<TextView>(R.id.userNameTextView)
@@ -31,9 +32,10 @@ class BattleApplyActivity : AppCompatActivity() {
         applyButton.setOnClickListener {
             // MainActivity를 시작하면서 BattleFragment로 전환하도록 지시
             val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP // 기존 MainActivity를 스택 최상단으로
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("loadBattleFragment", true)
-                putExtra("userName", userName) // 사용자 이름 전달
+                putExtra("userName", userName) // 이름 전달
+                putExtra("userId", userId) // ID 전달
             }
             startActivity(intent)
             finish()
@@ -43,7 +45,6 @@ class BattleApplyActivity : AppCompatActivity() {
         val closeButton = findViewById<ImageButton>(R.id.closeBtn)
         closeButton.setOnClickListener {
             finish() // 액티비티 종료
-
         }
     }
 }

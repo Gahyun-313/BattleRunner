@@ -1,12 +1,16 @@
 package com.example.battlerunner.ui.home
 
+import android.app.Activity
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
 import com.example.battlerunner.ui.main.MainActivity
@@ -29,9 +33,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
     private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
 
-    // ★ Activity 범위에서 HomeViewModel을 가져오기
-    private val homeViewModel by lazy {
-        ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
+    // ★ GlobalApplication에서 HomeViewModel을 가져오기
+    private val homeViewModel: HomeViewModel by lazy {
+        (requireActivity().application as GlobalApplication).homeViewModel
     }
 
     // 프래그먼트의 뷰를 생성하는 메서드
@@ -46,6 +50,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     // 뷰가 생성된 후 호출되는 메서드, 주요 초기화 작업 수행
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        println("HomeViewModel Instance in HomeFragment: ${homeViewModel.hashCode()}")
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -79,7 +85,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
-            onDestroyView()
+            // 새로운 MapFragment 생성하여 경로 제거
+            childFragmentManager.beginTransaction()
+                .replace(R.id.mapFragmentContainer, MapFragment())
+                .commitNow()
         }
 
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
@@ -97,6 +106,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 거리 UI 업데이트
         homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
+        }
+        homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
+            if (pathPoints.isEmpty()) {
+                mapFragment.clearMapPath() // 지도에서 경로 제거
+            }
+        }
+
+        homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
+            if (pathPoints.isEmpty()) {
+                mapFragment.clearMapPath() // 경로 제거
+            } else {
+                mapFragment.drawPath(pathPoints) // 경로 다시 그리기
+            }
         }
 
         // homeViewModel의 start, isRunning의 여부에 따른 버튼 변경
@@ -169,17 +191,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             homeViewModel.setDrawingStatus(false) // 경로 그리기 중지
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
-            // pathPoint(경로 데이터)를 json 형태로 변환해 PersonalEndActivity에 전달
-            val pathPointsJson = MapUtils.pathPointsToJson(homeViewModel.pathPoints.value ?: emptyList())
+            (activity as? MainActivity)?.notifyTracking(false) // MainActivity에 알림 -> battleFragment 소유권 추적 중지
 
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달
                 putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L) // 러닝 소요 시간 전달
                 putExtra("distance", homeViewModel.distance.value ?: 0f) // 러닝 거리 전달
-                putExtra("pathPoints", pathPointsJson) // 경로 데이터 전달
             }
             startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
+            /*
+                (기존) _binding = null 으로 프래그먼트를 종료하는 대신,
+                프래그먼트에 나타나는 데이터 값들을 초기화하는 형태로 리셋
+                */
 
             onDestroyView()
         }
@@ -198,21 +222,33 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun observePathUpdates() {
         homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
-            if (homeViewModel.isDrawing.value == true) { // viewModel의 isDrawing을 사용
-                mapFragment.drawPath(pathPoints) // 경로 그리기
+            if (pathPoints.isNotEmpty()) {
+                println("Observed Path Points: ${pathPoints.size}") // 로그 추가
+                mapFragment.drawPath(pathPoints)
             }
         }
     }
 
-    // 프래그먼트가 파괴될 때 호출되는 메서드
-    override fun onDestroyView() {
-        super.onDestroyView()
-        homeViewModel.resetTimer() // 타이머 & 누적 거리 종료(리셋)
-
-        _binding = null
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
+            homeViewModel.resetAllData() // ViewModel 데이터 초기화
+            mapFragment.clearMapPath() // 지도 경로 초기화
+        }
     }
 
     companion object {
         private const val REQUEST_CODE_PERSONAL_END = 1001
     }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
+//            // PersonalEndActivity 종료 후 추가 초기화 작업이 필요하면 여기에 작성
+//            mapFragment.clearMapPath() // 지도에서 경로 제거
+//            homeViewModel.resetPathPoints() // ViewModel에서 경로 데이터 초기화
+//        }
+//    }
+
 }

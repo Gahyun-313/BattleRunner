@@ -34,7 +34,8 @@ object MapUtils {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.locations.lastOrNull()?.let { location ->
                 _currentLocation.value = location
-                updatePathPoints(location)
+                println("Location Update: ${location.latitude}, ${location.longitude}")
+                updatePathPoints(location) // 위치 경로 업데이트
             }
         }
     }
@@ -71,7 +72,7 @@ object MapUtils {
     fun createPolylineOptions(points: List<LatLng>): PolylineOptions {
         return PolylineOptions()
             .addAll(points)
-            .width(10f)  // 두께
+            .width(100f)  // 두께
             .color(Color.BLUE)  // 경로 색상
             .geodesic(true)  // 지오데식 경로 설정
             .startCap(RoundCap())  // 시작점 둥글게
@@ -94,16 +95,6 @@ object MapUtils {
     // [경로] 경로 초기화 - 그려진 경로 지우기(리셋)
     fun clearPathPoints() {
         _pathPoints.value = emptyList()
-    }
-
-    // [경로] HomeFragment -> PersonalEndActivity : 경로 보내기 (pathPotins -> Json 변환)
-    fun pathPointsToJson(pathPoints: List<LatLng>): String {
-        return Gson().toJson(pathPoints)
-    }
-
-    // [경로] PersonalEndActivity : 경로 Json 파일을 다시 pathPoints로 변환
-    fun jsonToPathPoints(json: String): List<LatLng> {
-        return Gson().fromJson(json, Array<LatLng>::class.java).toList()
     }
 }
 

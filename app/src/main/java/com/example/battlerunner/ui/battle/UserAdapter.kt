@@ -37,6 +37,7 @@ class UserAdapter(private var userList: List<User>, private val activity: Fragme
             val context = holder.itemView.context
             val intent = Intent(context, BattleApplyActivity::class.java).apply {
                 putExtra("userName", user.username)
+                putExtra("userId", user.userId)
             }
             context.startActivity(intent)
         }
