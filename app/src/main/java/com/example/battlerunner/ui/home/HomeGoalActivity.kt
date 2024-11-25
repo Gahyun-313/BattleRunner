@@ -14,6 +14,7 @@ import com.example.battlerunner.network.GPTApiClient
 import com.example.battlerunner.network.GPTRequest
 import com.example.battlerunner.network.Message
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
@@ -63,17 +64,16 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupUI() {
-        // '확인' 버튼 클릭 이벤트 설정
         findViewById<Button>(R.id.confirmBtn)?.setOnClickListener {
             val distanceInput = findViewById<EditText>(R.id.distanceInput)
             val distance = distanceInput?.text.toString().toIntOrNull()
             if (distance != null) {
-                // 유효한 거리 입력 처리
-                handleDistanceInput(distance)
+                fetchRouteRecommendation(distance)
+            } else {
+                Toast.makeText(this, "유효한 거리를 입력해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // '닫기' 버튼 클릭 시 액티비티 종료
         findViewById<ImageButton>(R.id.closeBtn)?.setOnClickListener {
             finish()
         }
@@ -118,9 +118,10 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
 
-        val coordinates = path.map { LatLng(it[1], it[0]) } // [경도, 위도]를 [위도, 경도]로 변환
+        // [위도, 경도] 좌표로 변환
+        val coordinates = path.map { LatLng(it[1], it[0]) }
 
-        Log.d("Route", "Coordinates: $coordinates") // 디버깅용 로그
+        Log.d("Route", "Coordinates: $coordinates") // 경로 디버깅
 
         // 기존 폴리라인 제거
         polyline?.map = null
@@ -133,9 +134,15 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
             this.map = naverMap
         }
 
-        // 카메라를 경로 시작점으로 이동
-        naverMap.moveCamera(CameraUpdate.scrollTo(coordinates.first()))
+        // 경로 전체를 화면에 맞추기 위해 카메라 이동
+        val bounds = coordinates.fold(LatLngBounds.Builder()) { builder, coord ->
+            builder.include(coord)
+        }.build()
+
+        naverMap.moveCamera(CameraUpdate.fitBounds(bounds, 100)) // 패딩 100 적용
     }
+
+
 
 
 
@@ -181,6 +188,127 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun fetchRouteRecommendation(distance: Int) {
+        fetchCurrentLocation { currentLocation ->
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // GPT API 요청
+                    val request = GPTRequest(
+                        model = "gpt-3.5-turbo",
+                        messages = listOf(
+                            Message(
+                                "user",
+                                "현재 위치 (${currentLocation.latitude}, ${currentLocation.longitude})를 기준으로 $distance km 반경 내에서 목표 지점을 추천해주세요. 동, 서, 남, 북 다양한 방향을 고려해주세요."
+                                        + "응답 형식은 반드시 '위도: <숫자>, 경도: <숫자>'로 작성해주세요."
+                            )
+                        )
+                    )
+                    val response = GPTApiClient.instance.getRecommendation(request)
+                    val recommendation = response.choices.firstOrNull()?.message?.content
+
+                    withContext(Dispatchers.Main) {
+                        if (recommendation != null) {
+                            Log.d("GPT Response", "추천 경로 응답: $recommendation")
+                            val goalLocation = parseGoalLocationFromGPT(recommendation)
+
+                            if (goalLocation != null) {
+                                // Naver Directions API 호출
+                                getWalkingDirections(currentLocation, goalLocation)
+                            } else {
+                                Log.e("ParseError", "GPT 응답에서 좌표를 찾을 수 없습니다. 응답 내용: $recommendation")
+                                Toast.makeText(
+                                    this@HomeGoalActivity,
+                                    "추천 경로를 파싱할 수 없어 랜덤 목표 지점을 설정합니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // 랜덤 목표 지점 설정
+                                val randomGoal = generateRandomGoal(currentLocation, distance)
+                                getWalkingDirections(currentLocation, randomGoal)
+                            }
+                        } else {
+                            Log.e("GPT Response", "추천 경로 응답이 없습니다.")
+                            Toast.makeText(
+                                this@HomeGoalActivity,
+                                "GPT 추천이 없어 랜덤 목표 지점을 설정합니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            // 랜덤 목표 지점 설정
+                            val randomGoal = generateRandomGoal(currentLocation, distance)
+                            getWalkingDirections(currentLocation, randomGoal)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@HomeGoalActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    // 랜덤 목표 지점을 생성하는 함수
+    private fun generateRandomGoal(currentLocation: LatLng, distance: Int): LatLng {
+        val randomDirection = (0..3).random() // 0: 북, 1: 남, 2: 동, 3: 서
+        val distanceInDegrees = distance * 0.009 // 1km ≈ 0.009° (위도 기준)
+
+        return when (randomDirection) {
+            0 -> LatLng(currentLocation.latitude + distanceInDegrees, currentLocation.longitude) // 북쪽
+            1 -> LatLng(currentLocation.latitude - distanceInDegrees, currentLocation.longitude) // 남쪽
+            2 -> LatLng(currentLocation.latitude, currentLocation.longitude + distanceInDegrees) // 동쪽
+            else -> LatLng(currentLocation.latitude, currentLocation.longitude - distanceInDegrees) // 서쪽
+        }
+    }
+
+
+
+    private fun parseGoalLocationFromGPT(response: String): LatLng? {
+        val regex = """\((\d+\.\d+),\s*(\d+\.\d+)\)""".toRegex() // "(위도, 경도)" 형식 추출
+        val matchResult = regex.find(response)
+
+        return if (matchResult != null && matchResult.groupValues.size == 3) {
+            val lat = matchResult.groupValues[1].toDoubleOrNull()
+            val lng = matchResult.groupValues[2].toDoubleOrNull()
+
+            if (lat != null && lng != null) {
+                LatLng(lat, lng)
+            } else {
+                null
+            }
+        } else {
+            null // 파싱 실패 시 null 반환
+        }
+    }
+
+
+
+
+    private fun displayRecommendation(recommendation: String) {
+        Log.d("Recommendation", "추천 경로: $recommendation") // 추천 경로 로그 출력
+
+        // Toast 메시지를 한글로 변경
+        Toast.makeText(this, "추천 경로: $recommendation", Toast.LENGTH_LONG).show()
+
+        // 예시 좌표 - GPT 응답을 실제 경로 데이터로 사용해야 함
+        val start = LatLng(37.6045645, 127.0167655) // 가상 출발지 좌표
+        val goal = LatLng(37.6075645, 127.0167655) // 가상 도착지 좌표
+
+        // 지도에 마커 추가
+        addMarkers(start, goal)
+
+        // 임시 경로 데이터 (예: 실제 응답 데이터를 경로로 변환해야 함)
+        val path = listOf(
+            listOf(start.latitude, start.longitude),
+            listOf(goal.latitude, goal.longitude)
+        )
+
+        // 지도에 경로 표시
+        displayRouteOnMap(path)
+    }
+
+
 
 
     private fun getWalkingDirections(start: LatLng, goal: LatLng) {
@@ -217,8 +345,8 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (path != null) {
                         val startPoint = LatLng(path.first()[1], path.first()[0])
                         val endPoint = LatLng(path.last()[1], path.last()[0])
-                        addMarkers(startPoint, endPoint)
-                        displayRouteOnMap(path)
+                        addMarkers(startPoint, endPoint) // 마커 업데이트
+                        displayRouteOnMap(path) // 경로 표시
                         Toast.makeText(this@HomeGoalActivity, "경로를 성공적으로 표시했습니다.", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@HomeGoalActivity, "경로 데이터를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
