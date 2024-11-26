@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.databinding.FragmentHomeBinding
+import com.example.battlerunner.service.LocationService
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.LocationUtils
@@ -51,8 +52,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        println("HomeViewModel Instance in HomeFragment: ${homeViewModel.hashCode()}")
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         // MapFragment 초기화 및 설정
@@ -72,6 +71,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
         (activity as? MainActivity)?.startPathDrawing = {
+            // Foreground Service 시작 (백그라운드)
+            val serviceIntent = Intent(requireContext(), LocationService::class.java)
+            requireContext().startService(serviceIntent)
+
             homeViewModel.setDrawingStatus(true) // 경로 그리기 활성화
             observePathUpdates() // 경로 관찰 시작
         }
@@ -103,6 +106,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val hours = (elapsedTime / (1000 * 60 * 60))
             binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
         }
+
         // 거리 UI 업데이트
         homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
             binding.todayDistance.text = String.format("%.2f m", totalDistance) // 'm' 단위로 표시
@@ -154,6 +158,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
+                // Foreground Service 시작
+                (activity as? MainActivity)?.startLocationService()
+
                 homeViewModel.startTimer() // 타이머 시작
                 homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
 
@@ -192,6 +199,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             stopLocationUpdates(fusedLocationClient) // 경로 업데이트 중지
 
             (activity as? MainActivity)?.notifyTracking(false) // MainActivity에 알림 -> battleFragment 소유권 추적 중지
+
+            // Foreground Service 중지
+            (activity as? MainActivity)?.stopLocationService()
+
+            Toast.makeText(requireContext(), "러닝을 종료합니다.", Toast.LENGTH_SHORT).show()
 
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {

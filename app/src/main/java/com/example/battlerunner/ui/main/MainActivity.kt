@@ -2,8 +2,11 @@ package com.example.battlerunner.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,6 +19,7 @@ import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityMainBinding
+import com.example.battlerunner.service.LocationService
 import com.example.battlerunner.ui.battle.BattleFragment
 import com.example.battlerunner.ui.battle.BattleViewModel
 import com.example.battlerunner.ui.battle.MatchingFragment
@@ -41,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         (application as GlobalApplication).battleViewModel
     }
 
+    private var isServiceRunning = false // LocationService가 실행 중인지 확인하는 플래그
+
     // [ 배틀 매칭 ]
     private var isInBattle = false // 배틀 중 여부를 저장
     // isMatched 삭제 -> isInBattle과 합침
@@ -56,6 +62,14 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 알림 권한 요청
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+            }
+        }
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
 
@@ -170,5 +184,27 @@ class MainActivity : AppCompatActivity() {
         } else {
             stopTracking?.invoke() // 그리드 소유권 추적 중지
         }
+    }
+
+    fun startLocationService() {
+        if (!isServiceRunning) { // 서비스가 실행 중이 아닌 경우
+            val serviceIntent = Intent(this, LocationService::class.java) // LocationService로 Intent 생성
+            startService(serviceIntent) // 서비스 시작
+            isServiceRunning = true // 플래그 업데이트
+        }
+    }
+
+    // LocationService 중지 메서드
+    fun stopLocationService() {
+        if (isServiceRunning) { // 서비스가 실행 중인 경우
+            val serviceIntent = Intent(this, LocationService::class.java) // LocationService로 Intent 생성
+            stopService(serviceIntent) // 서비스 중지
+            isServiceRunning = false // 플래그 업데이트
+        }
+    }
+
+    // LocationService의 실행 상태 확인
+    fun isLocationServiceRunning(): Boolean {
+        return isServiceRunning // 서비스 실행 상태 반환
     }
 }

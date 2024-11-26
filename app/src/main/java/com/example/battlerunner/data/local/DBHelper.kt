@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.battlerunner.data.model.LoginInfo
+import com.google.android.gms.maps.model.LatLng
 
 class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 4) {
 
@@ -138,4 +139,5 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         cursor.close()  // 커서 닫기
         return exists  // 결과 반환
     }
+
 }
