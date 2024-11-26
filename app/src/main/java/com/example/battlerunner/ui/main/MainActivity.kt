@@ -2,8 +2,10 @@ package com.example.battlerunner.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -56,6 +58,14 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 알림 권한 요청
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+            }
+        }
 
         setStatusBarTransparent() // 상태바를 투명하게 설정
 

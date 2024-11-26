@@ -62,8 +62,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     // 뷰가 생성된 후 호출되는 메서드
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("BattleViewModel", "BattleEndActivity ViewModel instance: $this")
-
+        Log.d("BattleViewModel", "BattleEndAㅗctivity ViewModel instance: $this")
 
         // 위치 서비스 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
