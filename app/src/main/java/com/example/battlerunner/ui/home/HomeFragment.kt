@@ -220,16 +220,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             onDestroyView()
         }
 
-        // Goal 버튼 리스너
-//        binding.GoalBtn?.setOnClickListener {
-//            try {
-//                val intent = Intent(requireContext(), HomeGoalActivity::class.java)
-//                startActivity(intent)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                Toast.makeText(requireContext(), "Error navigating to HomeGoalActivity", Toast.LENGTH_SHORT).show()
-//            }
-//        }
+        // Goal_Btn 클릭 시 HomeGoalActivity로 이동
+        binding.GoalBtn?.setOnClickListener {
+            try {
+                val intent = Intent(requireContext(), HomeGoalActivity::class.java)
+                startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(requireContext(), "Error navigating to HomeGoalActivity", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observePathUpdates() {
