@@ -15,6 +15,7 @@ import com.example.battlerunner.ui.home.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentBattleBinding
+import com.example.battlerunner.service.LocationService
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.home.HomeFragment.Companion
 import com.example.battlerunner.ui.home.HomeViewModel
@@ -111,6 +112,10 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // MainActivity의 콜백 설정 (HomeFragment' 시작 버튼)
         (activity as? MainActivity)?.startTracking = {
+            // Foreground Service 시작 (백그라운드)
+            val serviceIntent = Intent(requireContext(), LocationService::class.java)
+            requireContext().startService(serviceIntent)
+
             battleViewModel.setTrackingActive(true) // 소유권 추적 활성화
             trackingActive = true // 추적 활성화 상태 변경
             startLocationUpdates() // 위치 업데이트 시작 메서드 호출
@@ -153,6 +158,11 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 startLocationUpdates() // 위치 업데이트 시작 메서드 호출
 
+                // Foreground Service 시작 (백그라운드)
+                val serviceIntent = Intent(requireContext(), LocationService::class.java)
+                requireContext().startService(serviceIntent)
+
+
                 homeViewModel.startTimer() // 타이머 시작
                 homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
 
@@ -190,7 +200,15 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 오늘의 러닝 종료 버튼 클릭 리스너
         binding.finishBtn.setOnClickListener {
+            stopLocationUpdates()
+            battleViewModel.setTrackingActive(false) // 소유권 추적 비활성화
+            trackingActive = false // 추적 비활성화 상태 변경
+
             homeViewModel.stopTimer() // 타이머 중지
+
+            // foreground service 종료
+            val serviceIntent = Intent(requireContext(), LocationService::class.java)
+            requireContext().stopService(serviceIntent)
 
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달

@@ -73,14 +73,16 @@ class HomeViewModel : ViewModel() {
         _hasStarted.value = false // 타이머 상태 초기화
     }
 
-    fun resetPathPoints() {
-        _pathPoints.value = emptyList() // 경로 데이터를 초기화
-    }
-
     fun resetAllData() {
-        resetTimer()       // 타이머 초기화
+        // 타이머 초기화
+        resetTimer()
+
+        // 경로 및 거리 초기화
+        _pathPoints.value = emptyList() // 경로 데이터를 빈 리스트로 초기화
         _distance.value = 0f // 누적 거리 초기화
-        resetPathPoints()  // 경로 데이터 초기화
+
+        // 마지막 위치 초기화
+        lastLocation = null // 마지막 위치 데이터를 초기화
     }
 
     fun setHasStarted(value: Boolean) {
