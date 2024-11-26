@@ -84,10 +84,7 @@ class LocationService : LifecycleService() {
             val distanceString = String.format("%.2f m", distance)
 
             // 알림 내용 업데이트
-            val updatedNotification = createNotification(
-                "러닝 중",
-                "시간: $timeString, 거리: $distanceString"
-            )
+            val updatedNotification = createNotification("러닝 중", "시간: $timeString\n거리: $distanceString")
 
             // 알림 갱신
             notificationManager.notify(1, updatedNotification)
@@ -103,10 +100,7 @@ class LocationService : LifecycleService() {
             val distanceString = String.format("%.2f m", distance)
 
             // 알림 내용 업데이트
-            val updatedNotification = createNotification(
-                "러닝 중",
-                "시간: $timeString, 거리: $distanceString"
-            )
+            val updatedNotification = createNotification("러닝 중", "시간: $timeString\n거리: $distanceString")
 
             // 알림 갱신
             notificationManager.notify(1, updatedNotification)

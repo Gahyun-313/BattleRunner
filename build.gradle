@@ -4,6 +4,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://naver.jfrog.io/artifactory/maven/' }
     }
     dependencies {  // dependencies 블록 추가
         classpath 'com.google.gms:google-services:4.4.2' // Google Services classpath 추가
@@ -24,6 +26,7 @@ subprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://naver.jfrog.io/artifactory/maven/' }
         maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
     }
 }
