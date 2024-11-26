@@ -9,14 +9,26 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.Observer
 import com.example.battlerunner.R
+import com.example.battlerunner.ui.home.HomeViewModel
+import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.utils.LocationUtils
 import com.google.android.gms.location.*
 
-class LocationService : Service() {
+class LocationService : LifecycleService() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+
+    // 알림 채널 ID
+    private val channelId = "running_service_channel"
+
+    // HomeViewModel 인스턴스 가져오기
+    private val homeViewModel: HomeViewModel by lazy {
+        (application as GlobalApplication).homeViewModel
+    }
 
     // Foreground 서비스가 시작될 때 호출
     override fun onCreate() {
@@ -28,41 +40,77 @@ class LocationService : Service() {
 
     // 알림 채널 초기화
     private fun initializeNotificationChannel() {
-        val channelId = "running_service_channel" // 알림 채널 ID
-        val channelName = "Running Tracker" // 알림 채널 이름
+        val channelName = "Running Tracker"
         val notificationManager = getSystemService(NotificationManager::class.java)
 
-        // 알림 채널 생성
         val channel = NotificationChannel(
             channelId,
             channelName,
-            NotificationManager.IMPORTANCE_DEFAULT // 높은 중요도
-
-            //NotificationManager.IMPORTANCE_LOW // 낮은 중요도 (소음 없음)
+            NotificationManager.IMPORTANCE_LOW // 낮은 중요도
         )
         notificationManager.createNotificationChannel(channel)
     }
 
     // Foreground 서비스 설정
     private fun startForegroundService() {
-        val channelId = "running_service_channel" // 알림 채널 ID
-
-        // 상태바에 표시될 알림 설정
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("러닝 중") // 알림 제목
-            .setContentText("러닝 경로가 추적 중입니다.") // 알림 내용
-            .setSmallIcon(R.drawable.logo1) // 테스트용 기본 아이콘
-            .setPriority(NotificationCompat.PRIORITY_LOW) // 알림 우선순위
-            .build()
-
-        // 알림 생성 완료 로그
-        Log.d("LocationService", "알림 생성 완료.")
-
-        // Foreground 서비스 시작
+        // 초기 알림 생성
+        val notification = createNotification("러닝 경로가 추적 중입니다.", "시간: 00:00:00\n거리: 0.00 m")
         startForeground(1, notification)
 
-        // Foreground 서비스 시작 로그
-        Log.d("LocationService", "Foreground 서비스가 시작되었습니다.")
+        // Foreground 알림 동적 업데이트 설정
+        observeViewModelForNotificationUpdates()
+    }
+
+    // 알림 생성 메서드
+    private fun createNotification(title: String, content: String): Notification {
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title) // 알림 제목
+            .setContentText(content) // 알림 내용
+            .setSmallIcon(R.drawable.logo1) // 아이콘
+            .setPriority(NotificationCompat.PRIORITY_LOW) // 알림 우선순위
+            .build()
+    }
+
+    // ViewModel 데이터를 관찰하여 알림 업데이트
+    private fun observeViewModelForNotificationUpdates() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        homeViewModel.elapsedTime.observe(this, Observer { elapsedTime ->
+            val distance = homeViewModel.distance.value ?: 0f
+
+            val seconds = (elapsedTime / 1000) % 60
+            val minutes = (elapsedTime / (1000 * 60)) % 60
+            val hours = (elapsedTime / (1000 * 60 * 60))
+            val timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            val distanceString = String.format("%.2f m", distance)
+
+            // 알림 내용 업데이트
+            val updatedNotification = createNotification(
+                "러닝 중",
+                "시간: $timeString, 거리: $distanceString"
+            )
+
+            // 알림 갱신
+            notificationManager.notify(1, updatedNotification)
+        })
+
+        homeViewModel.distance.observe(this, Observer { distance ->
+            val elapsedTime = homeViewModel.elapsedTime.value ?: 0L
+
+            val seconds = (elapsedTime / 1000) % 60
+            val minutes = (elapsedTime / (1000 * 60)) % 60
+            val hours = (elapsedTime / (1000 * 60 * 60))
+            val timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            val distanceString = String.format("%.2f m", distance)
+
+            // 알림 내용 업데이트
+            val updatedNotification = createNotification(
+                "러닝 중",
+                "시간: $timeString, 거리: $distanceString"
+            )
+
+            // 알림 갱신
+            notificationManager.notify(1, updatedNotification)
+        })
     }
 
     // 위치 업데이트 초기화
@@ -72,7 +120,6 @@ class LocationService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
-                    // 위치 업데이트 처리
                     Log.d("LocationService", "Location: ${location.latitude}, ${location.longitude}")
                 }
             }
@@ -83,7 +130,6 @@ class LocationService : Service() {
             .build()
 
         try {
-            // 권한이 승인되었는지 확인
             if (LocationUtils.hasLocationPermission(this)) {
                 fusedLocationClient.requestLocationUpdates(
                     locationRequest,
@@ -92,12 +138,11 @@ class LocationService : Service() {
                 )
             } else {
                 Log.w("LocationService", "Location permissions not granted. Cannot request updates.")
-                stopSelf() // 권한 없으면 서비스 종료
+                stopSelf()
             }
         } catch (e: SecurityException) {
-            // 권한 부족으로 발생하는 예외 처리
             Log.e("LocationService", "SecurityException: ${e.message}")
-            stopSelf() // 예외 발생 시 서비스 종료
+            stopSelf()
         }
     }
 
@@ -105,13 +150,12 @@ class LocationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         if (::locationCallback.isInitialized) {
-            fusedLocationClient.removeLocationUpdates(locationCallback) // 위치 업데이트 중지
+            fusedLocationClient.removeLocationUpdates(locationCallback)
         }
-        stopForeground(true) // Foreground 서비스를 종료
+        stopForeground(true)
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        // 이 서비스는 바인딩되지 않으며, Foreground 서비스로만 동작
-        return null
-    }
+//    override fun onBind(intent: Intent?): IBinder? {
+//        return null
+//    }
 }

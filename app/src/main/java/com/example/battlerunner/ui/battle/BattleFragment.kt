@@ -157,10 +157,8 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 startLocationUpdates() // 위치 업데이트 시작 메서드 호출
 
-                // Foreground Service 시작 (백그라운드)
-                val serviceIntent = Intent(requireContext(), LocationService::class.java)
-                requireContext().startService(serviceIntent)
-
+                // Foreground Service 시작
+                (activity as? MainActivity)?.startLocationService()
 
                 homeViewModel.startTimer() // 타이머 시작
                 homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
@@ -205,9 +203,10 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
             homeViewModel.stopTimer() // 타이머 중지
 
-            // foreground service 종료
-            val serviceIntent = Intent(requireContext(), LocationService::class.java)
-            requireContext().stopService(serviceIntent)
+            // Foreground Service 중지
+            (activity as? MainActivity)?.stopLocationService()
+
+            Toast.makeText(requireContext(), "러닝을 종료합니다.", Toast.LENGTH_SHORT).show()
 
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달

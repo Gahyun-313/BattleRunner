@@ -158,9 +158,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (LocationUtils.hasLocationPermission(requireContext())) {
                 MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
-                // Foreground Service 시작 (백그라운드)
-                val serviceIntent = Intent(requireContext(), LocationService::class.java)
-                requireContext().startService(serviceIntent)
+                // Foreground Service 시작
+                (activity as? MainActivity)?.startLocationService()
 
                 homeViewModel.startTimer() // 타이머 시작
                 homeViewModel.setHasStarted(true) // 타이머 시작 상태를 true로 설정
@@ -201,9 +200,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             (activity as? MainActivity)?.notifyTracking(false) // MainActivity에 알림 -> battleFragment 소유권 추적 중지
 
-            // foreground service 종료
-            val serviceIntent = Intent(requireContext(), LocationService::class.java)
-            requireContext().stopService(serviceIntent)
+            // Foreground Service 중지
+            (activity as? MainActivity)?.stopLocationService()
+
+            Toast.makeText(requireContext(), "러닝을 종료합니다.", Toast.LENGTH_SHORT).show()
 
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
