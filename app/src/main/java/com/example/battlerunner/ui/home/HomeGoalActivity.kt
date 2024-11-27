@@ -41,9 +41,6 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
     private var startMarker: Marker? = null
     private var goalMarker: Marker? = null
 
-
-
-
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
@@ -91,10 +88,6 @@ class HomeGoalActivity : AppCompatActivity(), OnMapReadyCallback {
             getWalkingDirections(currentLocation, goalLocation)
         }
     }
-
-
-
-
 
     private fun fetchCurrentLocation(onLocationFetched: (LatLng) -> Unit) {
         // FusedLocationSource에서 현재 위치 가져오기

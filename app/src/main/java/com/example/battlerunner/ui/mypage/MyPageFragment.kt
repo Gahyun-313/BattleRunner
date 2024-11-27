@@ -48,13 +48,19 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
         // DBHelper를 통해 사용자 정보 가져와 화면에 표시
         val userInfo = dbHelper.getUserInfo()
-
         if (userInfo != null) {
             userIdTextView.text = userInfo.first    // ID 표시
             userNameTextView.text = userInfo.second // 이름 표시
         } else {
             userIdTextView.text = "ID not found"
             userNameTextView.text = "Name not found"
+        }
+
+        // 캘린더 버튼 클릭 리스너
+        val calendarButton = view.findViewById<Button>(R.id.calendarBtn)
+        calendarButton.setOnClickListener {
+            val intent = Intent(requireContext(), CalendarActivity::class.java)
+            startActivity(intent)
         }
 
         // 로그아웃 버튼 클릭 시 ViewModel을 통해 로그아웃 실행

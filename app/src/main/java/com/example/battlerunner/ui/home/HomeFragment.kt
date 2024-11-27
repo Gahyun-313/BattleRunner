@@ -203,8 +203,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             // Foreground Service 중지
             (activity as? MainActivity)?.stopLocationService()
 
-            Toast.makeText(requireContext(), "러닝을 종료합니다.", Toast.LENGTH_SHORT).show()
-
             // PersonalEndActivity 실행
             val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
                 // 데이터 전달
