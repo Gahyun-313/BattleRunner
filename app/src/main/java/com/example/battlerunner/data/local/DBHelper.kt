@@ -8,7 +8,7 @@ import android.util.Log
 import com.example.battlerunner.data.model.LoginInfo
 import com.google.android.gms.maps.model.LatLng
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 4) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 5) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴
@@ -23,15 +23,114 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
 
     // 데이터베이스 테이블 생성 메서드
     override fun onCreate(db: SQLiteDatabase?) {
-        db!!.execSQL("CREATE TABLE IF NOT EXISTS login_info(user_id TEXT PRIMARY KEY, password TEXT, name TEXT, login_type TEXT)")  // login_info 테이블 생성
+        // login_info 테이블 생성
+        db!!.execSQL("""
+        CREATE TABLE IF NOT EXISTS login_info(
+            user_id TEXT PRIMARY KEY,
+            password TEXT,
+            name TEXT,
+            login_type TEXT
+        )
+    """)
+        // running_records 테이블 생성
+        db.execSQL("""
+        CREATE TABLE IF NOT EXISTS running_records(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            image_path TEXT NOT NULL,
+            elapsed_time INTEGER NOT NULL,
+            distance REAL NOT NULL
+        )
+    """)
+
     }
 
     // 데이터베이스 버전 업그레이드 시 호출되는 메서드 ??
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         Log.d("DBHelper", "onUpgrade 호출됨: oldVersion = $oldVersion, newVersion = $newVersion")  // 업그레이드 로그 출력
-        db!!.execSQL("DROP TABLE IF EXISTS login_info")  // 기존 login_info 테이블 삭제
-        onCreate(db)  // 새로운 테이블 생성
+        // 기존 테이블 삭제 후 새로 생성
+        db!!.execSQL("DROP TABLE IF EXISTS running_records")
+        db.execSQL("DROP TABLE IF EXISTS login_info")
+        onCreate(db)
     }
+
+    // 러닝 기록 저장 메서드
+    fun insertRunningRecord(date: String, imagePath: String, elapsedTime: Long, distance: Float): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put("date", date) // 날짜와 시간을 포함 (ex. "2023-11-26_12-45-00")
+            put("image_path", imagePath)
+            put("elapsed_time", elapsedTime)
+            put("distance", distance)
+        }
+        val result = db.insert("running_records", null, contentValues)
+        return result != -1L // 삽입 성공 여부 반환
+    }
+
+    // 러닝 경로 이미지 가져오기
+    fun getRunningImageByDate(date: String): String? {
+        val db = this.readableDatabase
+        val query = "SELECT image_path FROM running_records WHERE date = ?"
+        val cursor = db.rawQuery(query, arrayOf("$date%"))
+        return if (cursor.moveToFirst()) {
+            cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
+    }
+
+    // 러닝 데이터 가져오기
+    fun getRunningMetaData(date: String): Pair<Long, Float>? {
+        val db = this.readableDatabase
+        val query = "SELECT elapsed_time, distance FROM running_records WHERE date = ?"
+        val cursor = db.rawQuery(query, arrayOf(date))
+        return if (cursor.moveToFirst()) {
+            val elapsedTime = cursor.getLong(cursor.getColumnIndexOrThrow("elapsed_time"))
+            val distance = cursor.getFloat(cursor.getColumnIndexOrThrow("distance"))
+            Pair(elapsedTime, distance)
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
+    }
+
+    // 러닝 기록 - 캘린더에서 특정 날짜의 기록을 가져오는 메서드
+    fun getRecordsByDate(date: String): List<Triple<String, Long, Float>> {
+        val db = readableDatabase
+        val query = "SELECT image_path, elapsed_time, distance FROM running_records WHERE date LIKE ?"
+        val cursor = db.rawQuery(query, arrayOf("$date%")) // 해당 날짜로 시작하는 모든 기록 조회
+        val records = mutableListOf<Triple<String, Long, Float>>()
+        if (cursor.moveToFirst()) {
+            do {
+                val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
+                val elapsedTime = cursor.getLong(cursor.getColumnIndexOrThrow("elapsed_time"))
+                val distance = cursor.getFloat(cursor.getColumnIndexOrThrow("distance"))
+                records.add(Triple(imagePath, elapsedTime, distance))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return records
+    }
+
+    // 기록이 있는 날짜를 반환하는 메서드
+    fun getAllRunningDates(): List<String> {
+        val db = this.readableDatabase
+        val query = "SELECT DISTINCT SUBSTR(date, 1, 10) AS date FROM running_records" // 날짜 부분만 추출
+        val cursor = db.rawQuery(query, null)
+
+        val dates = mutableListOf<String>()
+        if (cursor.moveToFirst()) {
+            do {
+                dates.add(cursor.getString(cursor.getColumnIndexOrThrow("date")))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return dates
+    }
+
 
     // <회원가입> 로그인 정보 저장
     fun saveLoginInfo(loginInfo: LoginInfo): Boolean {

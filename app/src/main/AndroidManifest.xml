@@ -94,7 +94,15 @@
             android:launchMode="singleTop" />
         <activity
             android:name=".ui.battle.BattleEndActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/PopupTheme"
+            android:launchMode="singleTop"/>
+
+        <!-- 마이페이지 관련 -->
+        <activity android:name=".ui.mypage.CalendarActivity"
+            android:exported="false"
+            android:theme="@style/PopupTheme"
+            android:launchMode="singleTop" />
 
         <!-- Foreground Service -->
         <service

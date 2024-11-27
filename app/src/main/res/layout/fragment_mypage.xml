@@ -107,22 +107,15 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.7"
+            android:layout_weight="0.6"
             android:background="@color/grey_lite"
             android:text="@string/myPage_personalRunning"
             android:gravity="center_vertical"
             android:paddingHorizontal="20dp"
             android:elevation="1dp"/>
+
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:textSize="17sp"
-            android:fontFamily="@font/pretendard_medium"
-            android:elevation="0dp"
-            android:text="@string/myPage_weekGoal"/>
-        <Button
+            android:id="@+id/calendarBtn"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -136,13 +129,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.7"
+            android:layout_weight="0.6"
             android:background="@color/grey_lite"
             android:text="@string/myPage_battle"
             android:gravity="center_vertical"
             android:paddingHorizontal="20dp"
             android:elevation="1dp"/>
         <Button
+            android:id="@+id/battleRecordBtn"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -156,7 +150,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.7"
+            android:layout_weight="0.6"
             android:background="@color/grey_lite"
             android:text="@string/myPage_logout_text"
             android:gravity="center_vertical"

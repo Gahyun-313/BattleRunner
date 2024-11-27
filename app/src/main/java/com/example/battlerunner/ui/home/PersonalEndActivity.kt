@@ -3,15 +3,21 @@ package com.example.battlerunner.ui.home
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityPersonalEndBinding
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
 import com.example.battlerunner.utils.MapUtils
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class PersonalEndActivity : AppCompatActivity() {
 
@@ -22,6 +28,38 @@ class PersonalEndActivity : AppCompatActivity() {
     private val homeViewModel: HomeViewModel by lazy {
         (application as GlobalApplication).homeViewModel
     }
+
+    // 러닝 데이터 저장 디렉토리 생성 함수
+    private fun getStorageDir(): File {
+        val dir = File(filesDir, "running_records")
+        if (!dir.exists()) dir.mkdir()
+        return dir
+    }
+
+    // 러닝 데이터 저장 메서드
+    private fun saveRunningData(bitmap: Bitmap, elapsedTime: Long, distance: Float) {
+        val dateKey = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(System.currentTimeMillis())
+        val dir = getStorageDir()
+        val imageFile = File(dir, "$dateKey.png")
+
+        // 이미지 저장
+        FileOutputStream(imageFile).use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+
+        // 데이터베이스에 저장
+        val dbHelper = DBHelper.getInstance(this)
+        val success = dbHelper.insertRunningRecord(
+            date = dateKey,
+            imagePath = imageFile.absolutePath,
+            elapsedTime = elapsedTime,
+            distance = distance
+        )
+        if (!success) {
+            println("Failed to save running record in database.")
+        }
+    }
+
 
     @SuppressLint("DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +108,11 @@ class PersonalEndActivity : AppCompatActivity() {
 
         // 창닫기 버튼 클릭 리스너
         binding.closeBtn.setOnClickListener {
+            mapFragment.takeMapSnapshot { bitmap ->
+                if (bitmap != null) {
+                    saveRunningData(bitmap, elapsedTime, distance)
+                }
+            }
             // 지도 초기화 전에 경로를 먼저 그리고 데이터를 초기화
             mapFragment.clearMapPath() // 지도에서 경로 제거
             homeViewModel.resetAllData() // ViewModel 데이터 초기화

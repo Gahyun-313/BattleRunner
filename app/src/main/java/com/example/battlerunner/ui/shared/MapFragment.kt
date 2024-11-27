@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.shared
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -153,6 +154,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     .strokeColor(Color.GRAY)
                     .fillColor(fillColor)
             )
+        }
+    }
+
+    // 지도를 이미지로 저장하는 메서드
+    fun takeMapSnapshot(callback: (Bitmap?) -> Unit) {
+        googleMap?.snapshot { snapshot ->
+            callback(snapshot)
         }
     }
 
