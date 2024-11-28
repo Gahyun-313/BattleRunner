@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.battle
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
 import androidx.lifecycle.LiveData

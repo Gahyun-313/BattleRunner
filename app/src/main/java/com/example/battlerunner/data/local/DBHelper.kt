@@ -5,13 +5,19 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.battlerunner.data.model.BattleRecord
 import com.example.battlerunner.data.model.LoginInfo
 import com.google.android.gms.maps.model.LatLng
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 5) {
+/**
+ * SQLite 데이터베이스 관리 클래스
+ * 싱글턴 패턴을 사용 -> 애플리케이션 전역에서 동일한 인스턴스를 사용
+ */
+
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 6) {
 
     companion object {
-        @Volatile private var instance: DBHelper? = null  // 싱글턴
+        @Volatile private var instance: DBHelper? = null  // 싱글턴 인스턴스
 
         // 싱글턴 인스턴스를 반환하는 메서드
         fun getInstance(context: Context): DBHelper {
@@ -42,7 +48,15 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
             distance REAL NOT NULL
         )
     """)
-
+        // battle_records 테이블 생성
+        db.execSQL("""
+        CREATE TABLE IF NOT EXISTS battle_records(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            opponent_name TEXT NOT NULL,
+            image_path TEXT NOT NULL
+        )
+    """)
     }
 
     // 데이터베이스 버전 업그레이드 시 호출되는 메서드 ??
@@ -51,10 +65,11 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         // 기존 테이블 삭제 후 새로 생성
         db!!.execSQL("DROP TABLE IF EXISTS running_records")
         db.execSQL("DROP TABLE IF EXISTS login_info")
+        db.execSQL("DROP TABLE IF EXISTS battle_records")
         onCreate(db)
     }
 
-    // 러닝 기록 저장 메서드
+    // <러닝 기록> 러닝 기록 저장 메서드
     fun insertRunningRecord(date: String, imagePath: String, elapsedTime: Long, distance: Float): Boolean {
         val db = writableDatabase
         val contentValues = ContentValues().apply {
@@ -67,7 +82,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         return result != -1L // 삽입 성공 여부 반환
     }
 
-    // 러닝 경로 이미지 가져오기
+    // <러닝 기록> 러닝 경로 이미지 가져오기
     fun getRunningImageByDate(date: String): String? {
         val db = this.readableDatabase
         val query = "SELECT image_path FROM running_records WHERE date = ?"
@@ -81,7 +96,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         }
     }
 
-    // 러닝 데이터 가져오기
+    // <러닝 기록> 러닝 데이터 가져오기
     fun getRunningMetaData(date: String): Pair<Long, Float>? {
         val db = this.readableDatabase
         val query = "SELECT elapsed_time, distance FROM running_records WHERE date = ?"
@@ -97,7 +112,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         }
     }
 
-    // 러닝 기록 - 캘린더에서 특정 날짜의 기록을 가져오는 메서드
+    // <러닝 기록> 캘린더에서 특정 날짜의 기록을 가져오는 메서드
     fun getRecordsByDate(date: String): List<Triple<String, Long, Float>> {
         val db = readableDatabase
         val query = "SELECT image_path, elapsed_time, distance FROM running_records WHERE date LIKE ?"
@@ -115,7 +130,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         return records
     }
 
-    // 기록이 있는 날짜를 반환하는 메서드
+    // <러닝 기록> 기록이 있는 날짜를 반환하는 메서드
     fun getAllRunningDates(): List<String> {
         val db = this.readableDatabase
         val query = "SELECT DISTINCT SUBSTR(date, 1, 10) AS date FROM running_records" // 날짜 부분만 추출
@@ -129,6 +144,55 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         }
         cursor.close()
         return dates
+    }
+
+    // <배틀 기록> 배틀 기록 저장 메서드
+    fun insertBattleRecord(date: String, opponentName: String, imagePath: String): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put("date", date)
+            put("opponent_name", opponentName)
+            put("image_path", imagePath)
+        }
+        val result = db.insert("battle_records", null, contentValues)
+        return result != -1L
+    }
+
+    // <배틀 기록> 배틀 기록 조회 메서드
+    fun getBattleRecords(): List<BattleRecord> {
+        val db = readableDatabase
+        val query = "SELECT date, opponent_name, image_path FROM battle_records"
+        val cursor = db.rawQuery(query, null)
+
+        val records = mutableListOf<BattleRecord>()
+        if (cursor.moveToFirst()) {
+            do {
+                val date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val opponentName = cursor.getString(cursor.getColumnIndexOrThrow("opponent_name"))
+                val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
+                records.add(BattleRecord(date, opponentName, imagePath))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return records
+    }
+
+    // 특정 배틀 기록 조회 메서드
+    fun getBattleRecord(date: String): BattleRecord? {
+        val db = readableDatabase
+        val query = "SELECT date, opponent_name, image_path FROM battle_records WHERE date = ?"
+        val cursor = db.rawQuery(query, arrayOf(date))
+
+        return if (cursor.moveToFirst()) {
+            val battleDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+            val opponentName = cursor.getString(cursor.getColumnIndexOrThrow("opponent_name"))
+            val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
+            BattleRecord(battleDate, opponentName, imagePath)
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
     }
 
 

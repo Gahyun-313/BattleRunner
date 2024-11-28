@@ -32,3 +32,12 @@ data class Battle(
     val gridStartLat: Double,   // 그리드 시작(중심) 위도
     val gridStartLng: Double    // 그리드 시작(중심) 경도
 )
+
+// 배틀 기록 저장
+data class BattleRecord(
+    val date: String,
+    val opponentName: String,
+    val imagePath: String
+    // val result: String
+)
+
