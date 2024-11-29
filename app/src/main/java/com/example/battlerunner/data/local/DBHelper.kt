@@ -278,5 +278,12 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         return friends
     }
 
+    fun deleteFriend(userId: String): Boolean {
+        val db = writableDatabase
+        val result = db.delete("friends", "user_id = ?", arrayOf(userId))
+        return result > 0 // 삭제 성공 여부 반환
+    }
+
+
 
 }

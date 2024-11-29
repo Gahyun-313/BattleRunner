@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.community
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -53,9 +54,18 @@ class CommunityFragment : Fragment() {
         binding.communityRecyclerView.adapter = userAdapter
 
         // 친구 목록 RecyclerView 설정
-        friendAdapter = FriendAdapter(friendList)
+        friendAdapter = FriendAdapter(
+            friendList,
+            onDeleteClicked = { user ->
+                onDeleteFriend(user) // 친구 삭제 버튼 클릭 시 로직
+            },
+            onBragClicked = { user ->
+                onBrag(user) // 자랑하기 버튼 클릭 시 로직
+            }
+        )
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.friendRecyclerView.adapter = friendAdapter
+
 
         // SearchView 설정
         binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -101,6 +111,30 @@ class CommunityFragment : Fragment() {
             dbHelper.addFriend(user.userId, user.username, user.profileImageResId) // SQLite에 저장
             Toast.makeText(requireContext(), "${user.username}님이 친구로 추가되었습니다.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // 친구 삭제 로직
+    private fun onDeleteFriend(user: User) {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("친구 삭제")
+            .setMessage("${user.username}님을 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                // 목록에서 삭제
+                friendAdapter.removeFriend(user)
+
+                // 데이터베이스에서도 삭제
+                dbHelper.deleteFriend(user.userId)
+
+                Toast.makeText(requireContext(), "${user.username}님이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("취소", null)
+            .create()
+        dialog.show()
+    }
+
+    // 자랑하기 로직
+    private fun onBrag(user: User) {
+        Toast.makeText(requireContext(), "${user.username}님에게 자랑하기 버튼 실행!", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
