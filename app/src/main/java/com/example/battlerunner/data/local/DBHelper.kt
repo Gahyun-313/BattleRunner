@@ -6,9 +6,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.battlerunner.data.model.LoginInfo
+import com.example.battlerunner.data.model.User
 import com.google.android.gms.maps.model.LatLng
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 5) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 6) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴
@@ -42,6 +43,14 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
             distance REAL NOT NULL
         )
     """)
+        // friends 테이블 생성
+        db.execSQL("""
+        CREATE TABLE IF NOT EXISTS friends(
+            user_id TEXT PRIMARY KEY,
+            username TEXT,
+            profile_image INTEGER
+        )
+    """)
 
     }
 
@@ -51,6 +60,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         // 기존 테이블 삭제 후 새로 생성
         db!!.execSQL("DROP TABLE IF EXISTS running_records")
         db.execSQL("DROP TABLE IF EXISTS login_info")
+        db.execSQL("DROP TABLE IF EXISTS friends") // friends 테이블 삭제
         onCreate(db)
     }
 
@@ -238,5 +248,35 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         cursor.close()  // 커서 닫기
         return exists  // 결과 반환
     }
+
+    // 친구 추가 메서드
+    fun addFriend(userId: String, username: String, profileImage: Int): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put("user_id", userId)
+            put("username", username)
+            put("profile_image", profileImage)
+        }
+        val result = db.insertWithOnConflict("friends", null, contentValues, SQLiteDatabase.CONFLICT_IGNORE)
+        return result != -1L // 삽입 성공 여부 반환
+    }
+
+    // 친구 목록 가져오기 메서드
+    fun getFriends(): List<User> {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM friends", null)
+        val friends = mutableListOf<User>()
+        if (cursor.moveToFirst()) {
+            do {
+                val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
+                val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
+                val profileImage = cursor.getInt(cursor.getColumnIndexOrThrow("profile_image"))
+                friends.add(User(userId, username, profileImageResId = profileImage))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return friends
+    }
+
 
 }
