@@ -1,10 +1,14 @@
 package com.example.battlerunner.ui.community
 
 import android.app.AlertDialog
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,8 +64,9 @@ class CommunityFragment : Fragment() {
                 onDeleteFriend(user) // 친구 삭제 버튼 클릭 시 로직
             },
             onBragClicked = { user ->
-                onBrag(user) // 자랑하기 버튼 클릭 시 로직
+                showBragRecordsPopup() // 기록 선택 팝업 표시
             }
+
         )
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.friendRecyclerView.adapter = friendAdapter
@@ -133,9 +138,87 @@ class CommunityFragment : Fragment() {
     }
 
     // 자랑하기 로직
-    private fun onBrag(user: User) {
-        Toast.makeText(requireContext(), "${user.username}님에게 자랑하기 버튼 실행!", Toast.LENGTH_SHORT).show()
+    private fun showBragRecordsPopup() {
+        val allDates = dbHelper.getAllRunningDates() // 날짜만 가져오기
+
+        if (allDates.isEmpty()) {
+            Toast.makeText(requireContext(), "기록이 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val items = allDates.map { date ->
+            "기록 날짜: $date"
+        }.toTypedArray()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("기록을 선택하세요")
+            .setItems(items) { _, which ->
+                val selectedDate = allDates[which]
+                showRecordDetailsForDate(selectedDate) // 선택한 날짜의 상세 기록 팝업 표시
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
+
+    private fun showRecordDetailsForDate(date: String) {
+        val recordData = dbHelper.getRecordsByDate(date) // 해당 날짜의 기록 가져오기
+
+        if (recordData.isEmpty()) {
+            Toast.makeText(requireContext(), "해당 날짜에 기록이 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val items = recordData.map { record ->
+            "소요 시간: ${record.second / 1000 / 60} 분, 거리: ${record.third} m"
+        }.toTypedArray()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("$date 기록 목록")
+            .setItems(items) { _, which ->
+                val selectedRecord = recordData[which]
+                showRecordDetailsPopup(
+                    Triple(date, selectedRecord.second, selectedRecord.third),
+                    useBragLayout = true
+                ) // 상세 팝업 표시
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun showRecordDetailsPopup(record: Triple<String, Long, Float>, useBragLayout: Boolean) {
+        val layout = if (useBragLayout) R.layout.popup_running_data_with_brag else R.layout.popup_running_data
+        val dialogView = LayoutInflater.from(requireContext()).inflate(layout, null)
+
+        val popupImage = dialogView.findViewById<ImageView>(R.id.popupRunningImage)
+        val popupElapsedTime = dialogView.findViewById<TextView>(R.id.popupElapsedTime)
+        val popupDistance = dialogView.findViewById<TextView>(R.id.popupDistance)
+
+        // 소요 시간 및 거리 설정
+        popupElapsedTime.text = "소요 시간: ${record.second / 1000 / 60} 분"
+        popupDistance.text = "달린 거리: ${record.third} m"
+
+        // 이미지 설정
+        val bitmap = BitmapFactory.decodeFile(record.first)
+        if (bitmap != null) {
+            popupImage.setImageBitmap(bitmap)
+        } else {
+            popupImage.setImageResource(R.drawable.placeholder)
+        }
+
+        if (useBragLayout) {
+            val bragButton = dialogView.findViewById<Button>(R.id.popupBragButton)
+            bragButton.setOnClickListener {
+                Toast.makeText(requireContext(), "자랑하기 기능 실행!", Toast.LENGTH_SHORT).show()
+                // 자랑하기 로직 추가
+            }
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("닫기", null)
+            .show()
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
