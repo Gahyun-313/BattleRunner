@@ -18,6 +18,9 @@ import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.model.User
 import com.example.battlerunner.databinding.FragmentCommunityBinding
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CommunityFragment : Fragment() {
 
@@ -174,10 +177,32 @@ class CommunityFragment : Fragment() {
             return
         }
 
-        val items = recordData.mapIndexed { index, record ->
-            "[$index] 거리: ${record.third} m, 시간: ${record.second / 1000 / 60} 분"
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+
+        // 리스트 아이템 생성
+        val items = recordData.map { record ->
+            val filePath = record.first
+            val fileName = File(filePath).nameWithoutExtension // 파일 이름 추출
+            val startDate = try {
+                dateFormat.parse(fileName) // 파일 이름에서 날짜 파싱
+            } catch (e: Exception) {
+                Log.e("CommunityFragment", "Invalid date format in file name: $fileName")
+                null
+            }
+
+            if (startDate != null) {
+                val endDate = Date(startDate.time + record.second) // 종료 시각 계산
+                val endTimeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault()) // 종료 시각 포맷
+                val formattedEndTime = endTimeFormat.format(endDate) // 종료 시각 포맷팅
+
+                // 종료 시각 및 거리 표시
+                "종료 시각: $formattedEndTime, 거리: ${String.format("%.2f", record.third)} m"
+            } else {
+                "잘못된 날짜 형식: $filePath"
+            }
         }.toTypedArray()
 
+        // 팝업 생성 및 표시
         AlertDialog.Builder(requireContext())
             .setTitle("$date 기록 목록")
             .setItems(items) { _, which ->
@@ -188,6 +213,8 @@ class CommunityFragment : Fragment() {
             .setNegativeButton("취소", null)
             .show()
     }
+
+
 
 
     private fun showRecordDetailsPopup(record: Triple<String, Long, Float>, useBragLayout: Boolean) {
