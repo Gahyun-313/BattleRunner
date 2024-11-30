@@ -110,20 +110,22 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     // 러닝 기록 - 캘린더에서 특정 날짜의 기록을 가져오는 메서드
     fun getRecordsByDate(date: String): List<Triple<String, Long, Float>> {
         val db = readableDatabase
-        val query = "SELECT image_path, elapsed_time, distance FROM running_records WHERE date LIKE ?"
-        val cursor = db.rawQuery(query, arrayOf("$date%")) // 해당 날짜로 시작하는 모든 기록 조회
+        val query = "SELECT image_path, elapsed_time, distance FROM running_records WHERE date LIKE ? || '%'"
+        val cursor = db.rawQuery(query, arrayOf(date)) // 정확한 날짜로 조회
         val records = mutableListOf<Triple<String, Long, Float>>()
         if (cursor.moveToFirst()) {
             do {
                 val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
                 val elapsedTime = cursor.getLong(cursor.getColumnIndexOrThrow("elapsed_time"))
                 val distance = cursor.getFloat(cursor.getColumnIndexOrThrow("distance"))
+                Log.d("DBHelper", "Fetched Record: ImagePath=$imagePath, Time=$elapsedTime, Distance=$distance")
                 records.add(Triple(imagePath, elapsedTime, distance))
             } while (cursor.moveToNext())
         }
         cursor.close()
         return records
     }
+
 
     // 기록이 있는 날짜를 반환하는 메서드
     fun getAllRunningDates(): List<String> {

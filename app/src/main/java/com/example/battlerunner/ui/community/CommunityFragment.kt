@@ -3,6 +3,7 @@ package com.example.battlerunner.ui.community
 import android.app.AlertDialog
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.model.User
 import com.example.battlerunner.databinding.FragmentCommunityBinding
+import java.io.File
 
 class CommunityFragment : Fragment() {
 
@@ -139,12 +141,15 @@ class CommunityFragment : Fragment() {
 
     // 자랑하기 로직
     private fun showBragRecordsPopup() {
-        val allDates = dbHelper.getAllRunningDates() // 날짜만 가져오기
-
+        val allDates = dbHelper.getAllRunningDates()
         if (allDates.isEmpty()) {
             Toast.makeText(requireContext(), "기록이 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
+
+        val selectedDate = allDates.first() // 예: 첫 번째 날짜 선택
+        val recordsFromCommunity = dbHelper.getRecordsByDate(selectedDate)
+        Log.d("Comparison", "Community: $recordsFromCommunity") // 디버깅 로그 추가
 
         val items = allDates.map { date ->
             "기록 날짜: $date"
@@ -154,36 +159,36 @@ class CommunityFragment : Fragment() {
             .setTitle("기록을 선택하세요")
             .setItems(items) { _, which ->
                 val selectedDate = allDates[which]
-                showRecordDetailsForDate(selectedDate) // 선택한 날짜의 상세 기록 팝업 표시
+                showRecordDetailsForDate(selectedDate)
             }
             .setNegativeButton("취소", null)
             .show()
     }
 
+
     private fun showRecordDetailsForDate(date: String) {
-        val recordData = dbHelper.getRecordsByDate(date) // 해당 날짜의 기록 가져오기
+        val recordData = dbHelper.getRecordsByDate(date)
 
         if (recordData.isEmpty()) {
             Toast.makeText(requireContext(), "해당 날짜에 기록이 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val items = recordData.map { record ->
-            "소요 시간: ${record.second / 1000 / 60} 분, 거리: ${record.third} m"
+        val items = recordData.mapIndexed { index, record ->
+            "[$index] 거리: ${record.third} m, 시간: ${record.second / 1000 / 60} 분"
         }.toTypedArray()
 
         AlertDialog.Builder(requireContext())
             .setTitle("$date 기록 목록")
             .setItems(items) { _, which ->
                 val selectedRecord = recordData[which]
-                showRecordDetailsPopup(
-                    Triple(date, selectedRecord.second, selectedRecord.third),
-                    useBragLayout = true
-                ) // 상세 팝업 표시
+                Log.d("CommunityFragment", "Selected Record: $selectedRecord")
+                showRecordDetailsPopup(selectedRecord, useBragLayout = true)
             }
             .setNegativeButton("취소", null)
             .show()
     }
+
 
     private fun showRecordDetailsPopup(record: Triple<String, Long, Float>, useBragLayout: Boolean) {
         val layout = if (useBragLayout) R.layout.popup_running_data_with_brag else R.layout.popup_running_data
@@ -193,24 +198,22 @@ class CommunityFragment : Fragment() {
         val popupElapsedTime = dialogView.findViewById<TextView>(R.id.popupElapsedTime)
         val popupDistance = dialogView.findViewById<TextView>(R.id.popupDistance)
 
-        // 소요 시간 및 거리 설정
         popupElapsedTime.text = "소요 시간: ${record.second / 1000 / 60} 분"
         popupDistance.text = "달린 거리: ${record.third} m"
 
-        // 이미지 설정
-        val bitmap = BitmapFactory.decodeFile(record.first)
-        if (bitmap != null) {
-            popupImage.setImageBitmap(bitmap)
+        val imagePath = record.first
+        val imageFile = File(imagePath)
+        if (imageFile.exists()) {
+            val bitmap = BitmapFactory.decodeFile(imagePath)
+            if (bitmap != null) {
+                popupImage.setImageBitmap(bitmap)
+            } else {
+                popupImage.setImageResource(R.drawable.placeholder)
+                Log.e("CommunityFragment", "Failed to decode bitmap for imagePath: $imagePath")
+            }
         } else {
             popupImage.setImageResource(R.drawable.placeholder)
-        }
-
-        if (useBragLayout) {
-            val bragButton = dialogView.findViewById<Button>(R.id.popupBragButton)
-            bragButton.setOnClickListener {
-                Toast.makeText(requireContext(), "자랑하기 기능 실행!", Toast.LENGTH_SHORT).show()
-                // 자랑하기 로직 추가
-            }
+            Log.e("CommunityFragment", "File does not exist at path: $imagePath")
         }
 
         AlertDialog.Builder(requireContext())
@@ -218,6 +221,10 @@ class CommunityFragment : Fragment() {
             .setPositiveButton("닫기", null)
             .show()
     }
+
+
+
+
 
 
     override fun onDestroyView() {
