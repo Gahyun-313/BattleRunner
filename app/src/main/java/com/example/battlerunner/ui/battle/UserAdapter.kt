@@ -30,13 +30,13 @@ class UserAdapter(private var userList: List<User>, private val activity: Fragme
         val user = userList[position]
         holder.profileImage.setImageResource(user.profileImageResId)
         holder.userId.text = user.userId
-        holder.userName.text = user.username
+        holder.userName.text = user.userName
 
         // 신청 버튼 클릭 리스너
         holder.matchButton.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, BattleApplyActivity::class.java).apply {
-                putExtra("userName", user.username)
+                putExtra("userName", user.userName)
                 putExtra("userId", user.userId)
             }
             context.startActivity(intent)

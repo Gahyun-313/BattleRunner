@@ -17,6 +17,8 @@ import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.utils.LocationUtils
 import com.google.android.gms.location.*
 
+// 러닝 중일 때, 앱이 백그라운드에서 돌게 함
+
 class LocationService : LifecycleService() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient

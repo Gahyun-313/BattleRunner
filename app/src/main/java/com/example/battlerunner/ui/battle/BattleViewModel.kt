@@ -77,7 +77,7 @@ class BattleViewModel : ViewModel() {
                     southWest.latitude + gridSize * metersToLatLng,
                     southWest.longitude + gridSize * metersToLatLng
                 )
-                // 각 꼭지점을 사용하여 폴리곤 옵션을 정의
+                // 각 꼭짓점을 사용하여 폴리곤 옵션을 정의
                 val polygonOptions = PolygonOptions()
                     .add(
                         southWest,
