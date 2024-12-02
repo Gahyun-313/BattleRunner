@@ -1,6 +1,7 @@
 package com.example.battlerunner.network
 
 import com.example.battlerunner.data.model.LoginInfo
+import com.example.battlerunner.data.model.User
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -22,4 +23,12 @@ interface LoginApi {
     // ID 중복 확인
     @POST("/api/login/check-duplicate")
     suspend fun checkDuplicateUserId(@Body userId: String): Boolean
+
+    // ID로 사용자 검색
+    @GET("/api/login/{userId}")
+    suspend fun findUserById(@Path("userId") userId: String): User?
+
+    // 모든 사용자 조회
+    @GET("/api/login/all")
+    suspend fun getAllUsers(): List<User>
 }

@@ -1,6 +1,7 @@
 package com.example.battlerunner.network
 
 import com.example.battlerunner.data.model.ApiResponse
+import com.example.battlerunner.data.model.Battle
 import com.example.battlerunner.data.model.GridOwnershipMapResponse
 import com.example.battlerunner.data.model.GridOwnershipUpdateRequest
 import com.example.battlerunner.data.model.GridStartLocationRequest
@@ -12,6 +13,12 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface BattleApi {
+    // 배틀 신청 요청
+    @GET("/api/battle/request")
+    suspend fun requestBattle(
+        @Query("user1Id") user1Id: String, // 신청자 ID
+        @Query("user2Id") user2Id: String  // 상대방 ID
+    ): Battle
 
     // 시작 위치를 서버에서 가져오기
     @GET("battle/grid/startLocation")

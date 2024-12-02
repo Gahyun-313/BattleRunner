@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var isServiceRunning = false // LocationService가 실행 중인지 확인하는 플래그
 
     // [ 배틀 매칭 ]
-    private var isInBattle = false // 배틀 중 여부를 저장
+    var isInBattle = false // 배틀 중 여부를 저장
     // isMatched 삭제 -> isInBattle과 합침
 
     var startPathDrawing: (() -> Unit)? = null  // Home 경로 그리기 시작 콜백
@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 프래그먼트 전환 메서드
-    private fun showFragment(fragment: Fragment, tag: String) {
+    fun showFragment(fragment: Fragment, tag: String) {
         val transaction = supportFragmentManager.beginTransaction()
 
         // 이미 추가된 프래그먼트인지 확인

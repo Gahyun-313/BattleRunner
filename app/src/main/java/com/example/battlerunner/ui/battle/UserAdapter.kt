@@ -2,51 +2,43 @@ package com.example.battlerunner.ui.battle
 
 import android.view.LayoutInflater
 import android.view.View
-import android.content.Intent
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.battlerunner.R
 import com.example.battlerunner.data.model.User
 
-class UserAdapter(private var userList: List<User>, private val activity: FragmentActivity) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
+class UserAdapter(
+    private val userList: List<User>, // 사용자 목록
+    private val onMatchButtonClick: (String, String) -> Unit // 버튼 클릭 콜백
+) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val profileImage: ImageView = itemView.findViewById(R.id.profile_image)
-        val userId: TextView = itemView.findViewById(R.id.user_id)
-        val userName: TextView = itemView.findViewById(R.id.user_name)
-        val matchButton: Button = itemView.findViewById(R.id.match_button)
+        val profileImage: ImageView = itemView.findViewById(R.id.profile_image) // 프로필 이미지
+        val userId: TextView = itemView.findViewById(R.id.user_id) // 사용자 ID
+        val userName: TextView = itemView.findViewById(R.id.user_name) // 사용자 이름
+        val matchButton: Button = itemView.findViewById(R.id.match_button) // 매칭 버튼
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_matching, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.recycler_view_matching, parent, false) // 뷰 생성
         return UserViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = userList[position]
-        holder.profileImage.setImageResource(user.profileImageResId)
-        holder.userId.text = user.userId
-        holder.userName.text = user.userName
+        holder.profileImage.setImageResource(user.profileImageResId) // 프로필 이미지 설정
+        holder.userId.text = user.userId // 사용자 ID 설정
+        holder.userName.text = user.userName // 사용자 이름 설정
 
-        // 신청 버튼 클릭 리스너
+        // 매칭 버튼 클릭 리스너 설정
         holder.matchButton.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, BattleApplyActivity::class.java).apply {
-                putExtra("userName", user.userName)
-                putExtra("userId", user.userId)
-            }
-            context.startActivity(intent)
+            onMatchButtonClick(user.userId, user.userName) // 클릭 시 콜백 호출
         }
     }
 
-    override fun getItemCount(): Int = userList.size
-
-    fun updateUserList(newList: List<User>) {
-        userList = newList
-        notifyDataSetChanged()
-    }
+    override fun getItemCount(): Int = userList.size // 아이템 개수 반환
 }

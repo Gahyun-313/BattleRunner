@@ -23,7 +23,6 @@ data class User(
 //배틀 상대 표현을 위해 사용자1,2로 구분
 data class Battle(
     val battleId: Long,
-    val ranking: Int,
     val isBattleStarted: Boolean,
 
     val user1Username: String,  // 사용자 1 (신청 한 사람)
