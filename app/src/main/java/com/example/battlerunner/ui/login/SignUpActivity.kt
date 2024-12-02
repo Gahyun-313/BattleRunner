@@ -7,11 +7,15 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.model.LoginInfo
 import com.example.battlerunner.data.repository.LoginRepository
+import com.example.battlerunner.network.LoginApi
+import com.example.battlerunner.network.RetrofitInstance
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 class SignUpActivity : AppCompatActivity() {
@@ -58,23 +62,27 @@ class SignUpActivity : AppCompatActivity() {
 
             if (userId.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
-
             } else {
                 if (Pattern.matches(idPattern, userId)) {
-                    // TODO 서버 아이디 중복 확인
-                    val checkUserId = true // 중복 아이디 존재: true, 미존재: false
-
-                    if (!checkUserId) { // 중복 아이디 미존재
-                        checkId = true // 중복 확인 완료
-                        Toast.makeText(this@SignUpActivity, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this@SignUpActivity, "이미 존재하는 아이디입니다.", Toast.LENGTH_SHORT).show()
+                    lifecycleScope.launch {
+                        try {
+                            val isDuplicate = RetrofitInstance.loginApi.checkDuplicateUserId(userId)
+                            if (!isDuplicate) { // 중복 아이디 미존재
+                                checkId = true // 중복 확인 완료
+                                Toast.makeText(this@SignUpActivity, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@SignUpActivity, "이미 존재하는 아이디입니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@SignUpActivity, "아이디 중복 확인 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 } else {
                     Toast.makeText(this@SignUpActivity, "아이디 형식이 옳지 않습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
 
         // 회원가입 완료 버튼 클릭 시
         btnRegister.setOnClickListener {
@@ -95,7 +103,6 @@ class SignUpActivity : AppCompatActivity() {
                     if (Pattern.matches(pwPattern, pass)) {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
-
 
                             val loginInfo = LoginInfo(userId, pass, name, loginType)
 

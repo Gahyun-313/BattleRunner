@@ -18,4 +18,8 @@ interface LoginApi {
     // userId를 경로 매개변수로 받아 특정 사용자의 LoginInfo를 조회하는 메서드
     @GET("api/login/{userId}")
     fun getLoginInfoById(@Path("userId") userId: String): Call<LoginInfo>
+
+    // ID 중복 확인
+    @POST("/api/login/check-duplicate")
+    suspend fun checkDuplicateUserId(@Body userId: String): Boolean
 }
