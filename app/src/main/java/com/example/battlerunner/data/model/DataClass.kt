@@ -11,7 +11,7 @@ data class User(
     val userId: String,         // 사용자 아이디
     val userName: String,       // 사용자 이름
     val runningTime: Long = 0L, // 현재 세션의 러닝 시간 (밀리초)
-    val timestamp: Long = 0L,   // 데이터 생성 또는 마지막 업데이트 시간 (밀리초)
+    val timeStamp: Long = 0L,   // 데이터 생성 또는 마지막 업데이트 시간 (밀리초)
     val distance: Float = 0f,   // 현재 세션의 러닝 거리 (미터)
     val totalDistance: Float = 0f, // 사용자 누적 총 러닝 거리 (미터)
     val totalTime: Float = 0f,  // 사용자 누적 총 러닝 시간 (초 또는 분)
@@ -40,3 +40,28 @@ data class BattleRecord(
     val imagePath: String
     // val result: String
 )
+
+// 배틀 소유권 - 요청 데이터 모델
+data class GridOwnershipUpdateRequest(
+    val gridId: String,    // 그리드 ID
+    val ownerId: String    // 소유자 ID
+)
+
+// 배틀 그리드 - 시작 위치를 서버에서 가져오기
+data class GridStartLocationResponse(
+    val gridStartLat: Double?,
+    val gridStartLng: Double?
+)
+
+// 배틀 그리드 - 시작 위치를 서버로 전송
+data class GridStartLocationRequest(
+    val battleId: String,
+    val gridStartLat: Double,
+    val gridStartLng: Double
+)
+
+data class GridOwnershipMapResponse(
+    val ownershipMap: Map<String, String> // <gridId, ownerId>
+)
+
+data class ApiResponse(val success: Boolean, val message: String)

@@ -1,5 +1,6 @@
 package com.example.battlerunner.network
 
+import com.example.battlerunner.data.model.Battle
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,6 +36,10 @@ object RetrofitInstance {
 
     val userApi: UserApi by lazy{
         retrofit.create(UserApi::class.java)
+    }
+
+    val battleApi: BattleApi by lazy {
+        retrofit.create(BattleApi::class.java)
     }
 
 }
