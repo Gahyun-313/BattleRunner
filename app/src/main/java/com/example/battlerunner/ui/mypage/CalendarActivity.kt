@@ -56,7 +56,8 @@ class CalendarActivity : AppCompatActivity() {
 
         // 특정 날짜 클릭 리스너 설정
         calendarView.setOnDateChangedListener(OnDateSelectedListener { _, date, _ ->
-            val dateKey = "${date.year}-${date.month + 1}-${date.day}"
+            // 날짜를 yyyy-MM-dd 형식으로 변환
+            val dateKey = formatDate(date.year, date.month + 1, date.day)
 
             // SQLite에서 해당 날짜의 모든 기록 가져오기
             val records = dbHelper.getRecordsByDate(dateKey)
@@ -76,6 +77,10 @@ class CalendarActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    private fun formatDate(year: Int, month: Int, day: Int): String {
+        return String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month, day)
     }
 
     // 해당 날짜에 기록이 여러 개일 때 -> 하나를 선택할 수 있는 팝업 표시 메서드

@@ -144,75 +144,74 @@ class CommunityFragment : Fragment() {
 
     // 자랑하기 로직
     private fun showBragRecordsPopup() {
+        // 모든 러닝 날짜를 가져옴 (yyyy-MM-dd 형식)
         val allDates = dbHelper.getAllRunningDates()
         if (allDates.isEmpty()) {
             Toast.makeText(requireContext(), "기록이 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val selectedDate = allDates.first() // 예: 첫 번째 날짜 선택
-        val recordsFromCommunity = dbHelper.getRecordsByDate(selectedDate)
-        Log.d("Comparison", "Community: $recordsFromCommunity") // 디버깅 로그 추가
-
         val items = allDates.map { date ->
             "기록 날짜: $date"
         }.toTypedArray()
 
+        // 날짜 선택 팝업 표시
         AlertDialog.Builder(requireContext())
             .setTitle("기록을 선택하세요")
             .setItems(items) { _, which ->
                 val selectedDate = allDates[which]
-                showRecordDetailsForDate(selectedDate)
+
+                // 날짜 형식 맞추기
+                val formattedDate = formatDate(selectedDate)
+
+                // 기록 세부 정보 표시
+                showRecordDetailsForDate(formattedDate)
             }
             .setNegativeButton("취소", null)
             .show()
     }
 
+    // 날짜를 yyyy-MM-dd 형식으로 변환
+    private fun formatDate(date: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-M-d", Locale.getDefault()) // 입력 형식
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // 출력 형식
+            val parsedDate = inputFormat.parse(date)
+            outputFormat.format(parsedDate ?: date)
+        } catch (e: Exception) {
+            Log.e("CommunityFragment", "Error formatting date: $date", e)
+            date // 변환 실패 시 원본 반환
+        }
+    }
+
+
+
 
     private fun showRecordDetailsForDate(date: String) {
-        val recordData = dbHelper.getRecordsByDate(date)
+        val recordData = dbHelper.getRecordsByDate(date) // 올바른 형식의 날짜 전달
 
         if (recordData.isEmpty()) {
             Toast.makeText(requireContext(), "해당 날짜에 기록이 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
-
-        // 리스트 아이템 생성
         val items = recordData.map { record ->
-            val filePath = record.first
-            val fileName = File(filePath).nameWithoutExtension // 파일 이름 추출
-            val startDate = try {
-                dateFormat.parse(fileName) // 파일 이름에서 날짜 파싱
-            } catch (e: Exception) {
-                Log.e("CommunityFragment", "Invalid date format in file name: $fileName")
-                null
-            }
-
-            if (startDate != null) {
-                val endDate = Date(startDate.time + record.second) // 종료 시각 계산
-                val endTimeFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault()) // 종료 시각 포맷
-                val formattedEndTime = endTimeFormat.format(endDate) // 종료 시각 포맷팅
-
-                // 종료 시각 및 거리 표시
-                "종료 시각: $formattedEndTime, 거리: ${String.format("%.2f", record.third)} m"
-            } else {
-                "잘못된 날짜 형식: $filePath"
-            }
+            val elapsedTime = record.second / 1000 / 60 // 소요 시간 (분 단위)
+            val distance = String.format("%.2f", record.third) // 거리
+            "소요 시간: $elapsedTime 분, 거리: $distance m"
         }.toTypedArray()
 
-        // 팝업 생성 및 표시
         AlertDialog.Builder(requireContext())
             .setTitle("$date 기록 목록")
             .setItems(items) { _, which ->
                 val selectedRecord = recordData[which]
-                Log.d("CommunityFragment", "Selected Record: $selectedRecord")
-                showRecordDetailsPopup(selectedRecord, useBragLayout = true)
+                showRecordDetailsPopup(selectedRecord, useBragLayout = true) // 기록 팝업 표시
             }
-            .setNegativeButton("취소", null)
+            .setNegativeButton("닫기", null)
             .show()
     }
+
+
 
 
 
