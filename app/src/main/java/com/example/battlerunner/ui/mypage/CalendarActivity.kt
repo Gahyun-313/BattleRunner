@@ -82,7 +82,7 @@ class CalendarActivity : AppCompatActivity() {
     private fun showRecordsPopup(records: List<Triple<String, Long, Float>>) {
         // 팝업 빌더 생성
         val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder.setTitle("기록을 선택하세요\n")
+        dialogBuilder.setTitle("\n기록을 선택하세요\n\n")
 
         // 리스트 아이템 생성 (시간 및 거리 표시)
         val items = records.map { record ->
@@ -90,7 +90,7 @@ class CalendarActivity : AppCompatActivity() {
             val time = record.first.substringAfterLast("_").substringBefore(".").split("-").let { parts ->
                 "${parts[0]}시 ${parts[1]}분" // 시간(HH시 mm분) 형식으로 변환
             }
-            "종료 시각: $time, 거리: ${String.format("%.2f", record.third)} m"
+            "종료 시각: $time, 거리: ${String.format("%.2f", record.third)} m\n"
 
 
         }.toTypedArray()
