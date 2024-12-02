@@ -137,6 +137,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             val polygonId = polygon.id.toString()
             val ownerId = ownershipMap[polygonId] // 소유자 확인
 
+            // TODO: 상대 ID 설정
+            //val opponent
+
             val fillColor = when (ownerId) {
                 "neutral" -> Color.argb(10, 0, 0, 0)
                 userId -> Color.BLUE

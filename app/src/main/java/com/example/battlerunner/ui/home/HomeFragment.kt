@@ -252,13 +252,4 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         private const val REQUEST_CODE_PERSONAL_END = 1001
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
-//            // PersonalEndActivity 종료 후 추가 초기화 작업이 필요하면 여기에 작성
-//            mapFragment.clearMapPath() // 지도에서 경로 제거
-//            homeViewModel.resetPathPoints() // ViewModel에서 경로 데이터 초기화
-//        }
-//    }
-
 }

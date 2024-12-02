@@ -11,6 +11,7 @@ interface LoginApi {
     @POST("api/login/register")
     fun addLoginInfo(@Body loginInfo: LoginInfo): Call<LoginInfo>
 
+    // 로그인 정보 확인
     @POST("api/login/login")
     fun login(@Body loginInfo: LoginInfo): Call<LoginInfo>
 
