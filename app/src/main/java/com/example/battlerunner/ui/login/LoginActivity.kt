@@ -75,6 +75,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // Google 로그인 결과 처리
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {

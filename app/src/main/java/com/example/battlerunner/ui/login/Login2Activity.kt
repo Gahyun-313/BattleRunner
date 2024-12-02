@@ -12,12 +12,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
+import com.example.battlerunner.data.repository.LoginRepository
 
 class Login2Activity : AppCompatActivity() {
 
     // xml 내의 뷰를 다룰 변수 선언
-    lateinit var editTextId: EditText
-    lateinit var editTextPassword: EditText
+    private lateinit var editTextId: EditText
+    private lateinit var editTextPassword: EditText
     private lateinit var viewModel: Login2ViewModel
 
     @SuppressLint("MissingInflatedId")
@@ -50,6 +51,7 @@ class Login2Activity : AppCompatActivity() {
             if (userId.isEmpty() || userPassword.isEmpty()) {
                 Toast.makeText(this, "아이디와 비밀번호를 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
             } else {
+                // ViewModel을 통해 자체 로그인 요청
                 viewModel.performCustomLogin(userId, userPassword)
             }
         }

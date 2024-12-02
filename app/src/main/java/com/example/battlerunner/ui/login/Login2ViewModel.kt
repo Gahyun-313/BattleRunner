@@ -10,15 +10,15 @@ class Login2ViewModel(application: Application) : AndroidViewModel(application) 
     private val repository = LoginRepository(application)
 
     val loginStatus = MutableLiveData<Boolean>()
-    val errorMessage = MutableLiveData<String>()
+    val errorMessage = MutableLiveData<String?>()
 
     // 자체 로그인 요청 메서드
     fun performCustomLogin(userId: String, userPassword: String) {
-        repository.performCustomLogin(userId, userPassword) { success, message ->
+        repository.performServerLogin(userId, userPassword) { success, message ->
             if (success) {
-                loginStatus.postValue(true)
+                loginStatus.postValue(true) // 성공 시 true 설정
             } else {
-                errorMessage.postValue(message)
+                errorMessage.postValue(message) // 실패 시 에러 메시지 설정
             }
         }
     }

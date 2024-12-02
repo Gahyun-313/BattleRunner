@@ -16,7 +16,7 @@ class FriendAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(user: User) {
-            binding.friendNameTextView.text = user.username
+            binding.friendNameTextView.text = user.userName
             binding.friendIdTextView.text = user.userId
             binding.friendProfileImage.setImageResource(user.profileImageResId)
 

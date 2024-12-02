@@ -212,7 +212,7 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
 
 
     // <회원가입> 로그인 정보 저장
-    fun saveLoginInfo(loginInfo: LoginInfo): Boolean {
+    fun saveAutoLoginInfo(loginInfo: LoginInfo): Boolean {
         val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
         val contentValues = ContentValues().apply {
             // id, password(토큰), 이름, 로그인 타입 추가

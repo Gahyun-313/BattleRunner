@@ -16,7 +16,7 @@ class CommunityUserAdapter(
 
         fun bind(user: User) {
             binding.userId.text = user.userId
-            binding.userName.text = user.username
+            binding.userName.text = user.userName
             binding.profileImage.setImageResource(user.profileImageResId)
 
             binding.addFriendButton.setOnClickListener {

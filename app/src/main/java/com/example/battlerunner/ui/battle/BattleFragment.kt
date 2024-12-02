@@ -284,14 +284,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     // TODO: 서버로 그리드 시작 위치 전송하는 메서드
     // TODO: 서버에서 그리드 시작 위치 받아오는 메서드
 
-    private fun startBattle() {
-        if (startLatLng != null) {
-            Toast.makeText(requireContext(), "배틀 시작!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(requireContext(), "그리드가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     // 위치 업데이트를 설정하는 메서드
     private fun initializeLocationUpdates() {
         locationCallback = object : LocationCallback() {

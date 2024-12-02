@@ -14,7 +14,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     // 로그인 상태와 오류 메시지를 위한 LiveData
     val loginStatus = MutableLiveData<Boolean>()
-    val errorMessage = MutableLiveData<String>()
+    val errorMessage = MutableLiveData<String?>()
 
     // 카카오 로그인
     fun handleKakaoLogin(activity: AppCompatActivity) {
@@ -25,7 +25,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Google 로그인
-    suspend fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {
+    fun handleGoogleSignInResult(task: Task<GoogleSignInAccount>) {
         repository.performGoogleLogin(task) { success, message ->
             if (success) loginStatus.postValue(true)
             else errorMessage.postValue(message)

@@ -118,8 +118,8 @@ class CommunityFragment : Fragment() {
             // 친구 추가
             friendList.add(user)
             friendAdapter.notifyDataSetChanged() // 친구 목록 업데이트
-            dbHelper.addFriend(user.userId, user.username, user.profileImageResId) // SQLite에 저장
-            Toast.makeText(requireContext(), "${user.username}님이 친구로 추가되었습니다.", Toast.LENGTH_SHORT).show()
+            dbHelper.addFriend(user.userId, user.userName, user.profileImageResId) // SQLite에 저장
+            Toast.makeText(requireContext(), "${user.userName}님이 친구로 추가되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -127,7 +127,7 @@ class CommunityFragment : Fragment() {
     private fun onDeleteFriend(user: User) {
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle("친구 삭제")
-            .setMessage("${user.username}님을 삭제하시겠습니까?")
+            .setMessage("${user.userName}님을 삭제하시겠습니까?")
             .setPositiveButton("삭제") { _, _ ->
                 // 목록에서 삭제
                 friendAdapter.removeFriend(user)
@@ -135,7 +135,7 @@ class CommunityFragment : Fragment() {
                 // 데이터베이스에서도 삭제
                 dbHelper.deleteFriend(user.userId)
 
-                Toast.makeText(requireContext(), "${user.username}님이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "${user.userName}님이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("취소", null)
             .create()

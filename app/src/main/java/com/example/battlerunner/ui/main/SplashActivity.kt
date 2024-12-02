@@ -39,23 +39,27 @@ class SplashActivity : AppCompatActivity() {
             viewModel.checkAutoLogin()  // 자동 로그인 여부 확인
         }
 
-        // 자동 로그인 여부에 따라 화면 전환
+        // 자동 로그인 상태 관찰
+        observeAutoLoginStatus()
+    }
+
+    // 자동 로그인 상태 관찰
+    private fun observeAutoLoginStatus() {
         viewModel.autoLoginStatus.observe(this) { isLoggedIn ->
             val targetIntent = if (isLoggedIn) {
                 Intent(this, MainActivity::class.java)
             } else {
                 Intent(this, LoginActivity::class.java)
             }
-            targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)  // 스택 지우기
+            targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK) // 스택 초기화
             startActivity(targetIntent)
             finish()
         }
     }
 
-    // SQLite DB 초기화 메서드
+    // 필요시 SQLite DB 초기화
     private fun deleteDatabaseFile() {
         deleteDatabase("Login.db")
     }
 
 }
-

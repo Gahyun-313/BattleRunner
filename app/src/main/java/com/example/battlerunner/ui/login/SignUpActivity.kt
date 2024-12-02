@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -12,6 +11,7 @@ import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.model.LoginInfo
+import com.example.battlerunner.data.repository.LoginRepository
 import java.util.regex.Pattern
 
 class SignUpActivity : AppCompatActivity() {
@@ -20,13 +20,13 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var dbHelper: DBHelper
 
     // xml 내의 뷰를 다룰 변수 선언
-    lateinit var editTextId: EditText
-    lateinit var editTextPassword: EditText
-    lateinit var editTextRePassword: EditText
-    lateinit var editTextNick: EditText
-    lateinit var btnRegister: Button
-    lateinit var btnCheckId: Button
-    var checkId: Boolean = false
+    private lateinit var editTextId: EditText
+    private lateinit var editTextPassword: EditText
+    private lateinit var editTextRePassword: EditText
+    private lateinit var editTextNick: EditText
+    private lateinit var btnRegister: Button
+    private lateinit var btnCheckId: Button
+    private var checkId: Boolean = false
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,16 +53,18 @@ class SignUpActivity : AppCompatActivity() {
 
         // 아이디 중복확인
         btnCheckId.setOnClickListener {
-            val user = editTextId.text.toString()
+            val userId = editTextId.text.toString()
             val idPattern = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z[0-9]]{5,15}$"
 
-            if (user.isEmpty()) {
+            if (userId.isEmpty()) {
                 Toast.makeText(this@SignUpActivity, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
+
             } else {
-                if (Pattern.matches(idPattern, user)) {
-                    val checkUsername = dbHelper.checkUser(user) // 중복 아이디 존재: true, 미존재: false
-                    Log.d("check user name", "$checkUsername")
-                    if (!checkUsername) { // 중복 아이디 미존재
+                if (Pattern.matches(idPattern, userId)) {
+                    // TODO 서버 아이디 중복 확인
+                    val checkUserId = true // 중복 아이디 존재: true, 미존재: false
+
+                    if (!checkUserId) { // 중복 아이디 미존재
                         checkId = true // 중복 확인 완료
                         Toast.makeText(this@SignUpActivity, "사용 가능한 아이디입니다.", Toast.LENGTH_SHORT).show()
                     } else {
@@ -93,24 +95,22 @@ class SignUpActivity : AppCompatActivity() {
                     if (Pattern.matches(pwPattern, pass)) {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
-                            // SQLite에 정보 저장
+
+
                             val loginInfo = LoginInfo(userId, pass, name, loginType)
-                            val insert = dbHelper.saveLoginInfo(loginInfo)
 
-                            // insert 잘 됐는지 확인
-                            if (insert) {
-                                Toast.makeText(this@SignUpActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                            // 서버에 회원가입 요청 및 SQLite에 로그인 정보 저장
+                            val repository = LoginRepository(this) // Context 전달
+                            repository.performServerSignUp(loginInfo) { success, message ->
+                                if (success) {
+                                    Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
 
-                                // 자동 로그인 정보 저장
-                                //dbHelper.saveLoginInfo(loginInfo)
-
-                                // MainActivity 이동
-                                val intent = Intent(this, MainActivity::class.java)
-                                startActivity(intent)
-                                finish()
-
-                            } else {
-                                Toast.makeText(this@SignUpActivity, "가입 실패하였습니다.", Toast.LENGTH_SHORT).show()
+                                    // MainActivity 이동
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                    finish()
+                                } else {
+                                    Toast.makeText(this, message ?: "회원가입 실패", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } else {
                             Toast.makeText(this@SignUpActivity, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
