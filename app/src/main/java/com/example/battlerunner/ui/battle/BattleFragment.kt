@@ -1,6 +1,7 @@
 package com.example.battlerunner.ui.battle
 
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -243,15 +244,42 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     // GoogleMap이 준비되었을 때 호출되는 메서드
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+        googleMap.uiSettings.isMyLocationButtonEnabled = true
 
-        // 위치 권한 확인 후 시작 위치 초기화
         if (LocationUtils.hasLocationPermission(requireContext())) {
-            enableMyLocation()
-            initializeGridStartLocation() // 그리드 시작 메서드 호출
-            updateOpponentGridOwnership() // 상대방 소유권 업데이트
+            try {
+                googleMap.isMyLocationEnabled = true
+                initializeGridStartLocation() // 그리드 시작 메서드 호출
+                updateOpponentGridOwnership() // 상대방 소유권 업데이트
+
+                moveToCurrentLocationImmediate()
+            } catch (e: SecurityException) {
+                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                LocationUtils.requestLocationPermission(this)
+            }
         } else {
-            Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-            LocationUtils.requestLocationPermission(this)
+            // 권한이 없을 경우 기본 위치로 이동
+            val defaultLocation = LatLng(37.222101, 127.187709) // 명지대 5공학관
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
+        }
+    }
+
+    // 현재 위치로 카메라를 이동하는 메서드
+    fun moveToCurrentLocationImmediate() {
+        if (LocationUtils.hasLocationPermission(requireContext())) { // 권한을 먼저 확인
+            try {
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener { location: Location? ->
+                        if (location != null) {
+                            val currentLatLng = LatLng(location.latitude, location.longitude)
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                        } else {
+                            Toast.makeText(requireContext(), "현재 위치를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+            } catch (e: SecurityException) {
+                Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -384,21 +412,30 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         Log.d("BattleFragment", "Location updates stopped.")
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!LocationUtils.hasLocationPermission(requireContext())) {
+            LocationUtils.requestLocationPermission(this)
+        } else {
+            initializeMap()
+        }
+    }
+
+    private fun initializeMap() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
+            ?: SupportMapFragment.newInstance().also {
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.mapFragmentContainer, it)
+                    .commitNow()
+            }
+        mapFragment.getMapAsync(this)
+    }
+
     // Fragment가 파괴될 때 호출되는 메서드
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
         fusedLocationClient.removeLocationUpdates(locationCallback) // 위치 업데이트 중지
-    }
-
-    // 내 위치 표시 활성화 메서드
-    private fun enableMyLocation() {
-        try {
-            googleMap.isMyLocationEnabled = true // 구글 기본 내 위치 버튼 활성화
-        } catch (e: SecurityException) {
-            Log.e("BattleFragment", "위치 권한이 필요합니다.", e)
-            Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-        }
     }
 
     companion object {

@@ -2,6 +2,7 @@ package com.example.battlerunner.data.repository
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.model.LoginInfo
@@ -42,6 +43,7 @@ class LoginRepository(private val context: Context) {
         })
     }
 
+    //TODO: 서버에 로그인 타입 안 보내짐, 로컬 테이블에는 있음
     // 서버에 로그인 요청
     fun performServerLogin(userId: String, password: String, callback: (Boolean, String?) -> Unit) {
         val loginInfo = LoginInfo(userId, password) // 로그인 정보 생성

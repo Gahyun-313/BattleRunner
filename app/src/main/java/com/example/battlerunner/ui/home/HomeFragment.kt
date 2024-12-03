@@ -23,16 +23,17 @@ import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
 
+// TODO 앱 실행 시 맵 >> 위치 못 불러옴. 기본 위치(5공)으로만 뜸
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private var mapFragment = MapFragment()
-    private lateinit var fusedLocationClient: FusedLocationProviderClient // fusedLocationClient 초기화 선언
-    private lateinit var googleMap: GoogleMap // 구글 맵 객체 저장
-    private lateinit var locationCallback: LocationCallback // 위치 업데이트 콜백
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var mapFragment: MapFragment? = null
 
     // ★ GlobalApplication에서 HomeViewModel을 가져오기
     private val homeViewModel: HomeViewModel by lazy {
@@ -54,20 +55,31 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // MapFragment 초기화 및 설정
-        mapFragment = MapFragment()
-        childFragmentManager.beginTransaction()
-            .replace(R.id.mapFragmentContainer, mapFragment)
-            .commitNow()
+        // MapFragment 초기화
+        mapFragment = MapFragment().also {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.mapFragmentContainer, it)
+                .commitNow()
+        }
 
-        // MapFragment가 추가된 후에 map 초기화를 시도
+        // MapFragment가 준비된 후 현재 위치를 이동
         childFragmentManager.executePendingTransactions()
 
-        // MapFragment의 onMapReady가 호출되었을 때 현재 위치로 이동하도록 콜백 설정
-        mapFragment.setOnMapReadyCallback {
-            mapFragment.enableMyLocation()
-            mapFragment.moveToCurrentLocationImmediate() // 내 위치 초기화 호출
+        mapFragment?.setOnMapReadyCallback {
+            if (LocationUtils.hasLocationPermission(requireContext())) {
+                mapFragment?.enableMyLocation()
+                mapFragment?.moveToCurrentLocationImmediate()
+            } else {
+                // 위치 권한 없을 경우 기본 위치 설정 (명지대 5공학관)
+                val defaultLocation = LatLng(37.222101, 127.187709)
+                mapFragment?.googleMap?.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f)
+                )
+            }
         }
+
+        setupObservers()
+        setupButtons()
 
         // MainActivity의 콜백 설정 (BattleFragment' 시작 버튼)
         (activity as? MainActivity)?.startPathDrawing = {
@@ -113,15 +125,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
             if (pathPoints.isEmpty()) {
-                mapFragment.clearMapPath() // 지도에서 경로 제거
+                mapFragment!!.clearMapPath() // 지도에서 경로 제거
             }
         }
 
         homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
             if (pathPoints.isEmpty()) {
-                mapFragment.clearMapPath() // 경로 제거
+                mapFragment!!.clearMapPath() // 경로 제거
             } else {
-                mapFragment.drawPath(pathPoints) // 경로 다시 그리기
+                mapFragment!!.drawPath(pathPoints) // 경로 다시 그리기
             }
         }
 
@@ -230,11 +242,89 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
+    private fun setupObservers() {
+        // 타이머 UI 업데이트
+        homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
+            val seconds = (elapsedTime / 1000) % 60
+            val minutes = (elapsedTime / (1000 * 60)) % 60
+            val hours = (elapsedTime / (1000 * 60 * 60))
+            binding.todayTime.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
+
+        // 거리 UI 업데이트
+        homeViewModel.distance.observe(viewLifecycleOwner) { totalDistance ->
+            binding.todayDistance.text = String.format("%.2f m", totalDistance)
+        }
+
+        // 경로 업데이트
+        homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
+            if (pathPoints.isNotEmpty()) {
+                mapFragment?.drawPath(pathPoints)
+            } else {
+                mapFragment?.clearMapPath()
+            }
+        }
+
+        // 버튼 상태 업데이트
+        homeViewModel.hasStarted.observe(viewLifecycleOwner) { hasStarted ->
+            if (hasStarted) {
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+                binding.stopBtn.visibility = View.GONE
+                binding.finishBtn.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupButtons() {
+        binding.startBtn.setOnClickListener {
+            if (LocationUtils.hasLocationPermission(requireContext())) {
+                MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
+                homeViewModel.startTimer()
+                homeViewModel.setHasStarted(true)
+                (activity as? MainActivity)?.notifyTracking(true)
+
+                binding.startBtn.visibility = View.GONE
+                binding.stopBtn.visibility = View.VISIBLE
+                binding.finishBtn.visibility = View.VISIBLE
+            } else {
+                LocationUtils.requestLocationPermission(this)
+            }
+        }
+
+        binding.stopBtn.setOnClickListener {
+            homeViewModel.stopTimer()
+            homeViewModel.setDrawingStatus(false)
+            (activity as? MainActivity)?.notifyTracking(false)
+
+            binding.startBtn.visibility = View.VISIBLE
+            binding.stopBtn.visibility = View.GONE
+            binding.finishBtn.visibility = View.GONE
+        }
+
+        binding.finishBtn.setOnClickListener {
+            homeViewModel.stopTimer()
+            homeViewModel.setDrawingStatus(false)
+            MapUtils.stopLocationUpdates(fusedLocationClient)
+            (activity as? MainActivity)?.notifyTracking(false)
+
+            val intent = Intent(requireActivity(), PersonalEndActivity::class.java).apply {
+                putExtra("elapsedTime", homeViewModel.elapsedTime.value ?: 0L)
+                putExtra("distance", homeViewModel.distance.value ?: 0f)
+            }
+            startActivityForResult(intent, REQUEST_CODE_PERSONAL_END)
+        }
+    }
+
+
     private fun observePathUpdates() {
         homeViewModel.pathPoints.observe(viewLifecycleOwner) { pathPoints ->
             if (pathPoints.isNotEmpty()) {
                 println("Observed Path Points: ${pathPoints.size}") // 로그 추가
-                mapFragment.drawPath(pathPoints)
+                mapFragment?.drawPath(pathPoints)
             }
         }
     }
@@ -244,7 +334,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PERSONAL_END && resultCode == Activity.RESULT_OK) {
             homeViewModel.resetAllData() // ViewModel 데이터 초기화
-            mapFragment.clearMapPath() // 지도 경로 초기화
+            mapFragment?.clearMapPath() // 지도 경로 초기화
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // 위치 권한 확인 및 요청
+        if (!LocationUtils.hasLocationPermission(requireContext())) {
+            LocationUtils.requestLocationPermission(this)
         }
     }
 

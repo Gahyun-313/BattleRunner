@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.battle
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -64,6 +65,7 @@ class MatchingFragment : Fragment() {
     }
 
     // 사용자 검색 요청
+    @SuppressLint("NotifyDataSetChanged")
     private fun searchUserById(userId: String) {
         lifecycleScope.launch {
             try {
