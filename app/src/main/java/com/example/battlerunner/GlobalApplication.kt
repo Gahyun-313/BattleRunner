@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.ui.battle.BattleViewModel
 import com.example.battlerunner.ui.home.HomeViewModel
+import com.google.firebase.FirebaseApp
 import com.kakao.sdk.common.KakaoSdk
 
 class GlobalApplication : Application() {
@@ -26,5 +27,6 @@ class GlobalApplication : Application() {
 
         // Kakao SDK 초기화
         KakaoSdk.init(this, "16005e7a061659542eeaf1f020717f46")
+        FirebaseApp.initializeApp(this)
     }
 }
