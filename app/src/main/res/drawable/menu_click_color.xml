@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--선택된 버튼 색깔 : blue0-->
+    <item
+        android:color="@color/blue0"
+        android:state_checked="true"/>
+
+    <!--선택 안 된 버튼 색깔 : grey_lite-->
+    <item
+        android:color="@color/grey_lite"
+        android:state_checked="false"/>
+
+</selector>

@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url 'https://repository.map.naver.com/archive/maven' }  // 변경된 URL
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://repository.map.naver.com/archive/maven' }
+        maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' } //카카오 로그인
+    }
+}
+rootProject.name = "Battle Runner"
+include ':app'
