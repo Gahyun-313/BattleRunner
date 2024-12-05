@@ -57,12 +57,12 @@ data class Battle(
 // 한 사람이 먼저 그 그리드를 떠나면 바로 소유권 업데이트.
 // 남아 있는 사람도 떠날 때 그리드 소유권을 확인하고, 다시 내 소유권으로 업데이트되는 구조.
 
-// 배틀 기록 저장
-//data class BattleRecord(
-//    val date: String,
-//    val opponentName: String,
-//    val imagePath: String
-//)
+// 배틀 기록 저장 ▶ 마이페이지 기록 저장용으로 사용하는 것 (서버에서 신경 안 써도 됨)
+data class BattleRecord(
+   val date: String,
+   val opponentName: String,
+   val imagePath: String
+)
 
 data class BattleGrid(
     val id: Int, // 인조키
