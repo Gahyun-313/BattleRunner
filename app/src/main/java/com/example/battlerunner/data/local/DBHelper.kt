@@ -13,7 +13,7 @@ import com.example.battlerunner.data.model.LoginInfo
  * 싱글턴 패턴을 사용 -> 애플리케이션 전역에서 동일한 인스턴스를 사용
  */
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 6) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 7) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴 인스턴스
@@ -31,12 +31,12 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         // login_info 테이블 생성
         db!!.execSQL("""
         CREATE TABLE IF NOT EXISTS login_info(
-            user_id TEXT PRIMARY KEY,
-            password TEXT,
-            name TEXT,
-            login_type TEXT
+            user_id TEXT PRIMARY KEY, -- 사용자 ID
+            password TEXT,            -- 비밀번호 (또는 토큰)
+            name TEXT,                -- 사용자 이름
+            login_type TEXT           -- 로그인 타입 (custom, kakao, google)
         )
-    """)
+        """)
         // running_records 테이블 생성
         db.execSQL("""
         CREATE TABLE IF NOT EXISTS running_records(
@@ -46,19 +46,24 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
             elapsed_time INTEGER NOT NULL,
             distance REAL NOT NULL
         )
-    """)
+        """)
         // battle_records 테이블 생성
-        db.execSQL("""
+        db.execSQL(
+            """
         CREATE TABLE IF NOT EXISTS battle_records(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            opponent_name TEXT NOT NULL,
-            image_path TEXT NOT NULL
+            id INTEGER PRIMARY KEY AUTOINCREMENT,   -- n번쨰
+            start_date TEXT NOT NULL,               -- 배틀 시작일
+            end_date TEXT,                          -- 배틀 종료일
+            opponent_name TEXT NOT NULL,            -- 상대 이름
+            image_path TEXT NOT NULL,               -- 결과 사진 저장 경로
+            elapsed_time INTEGER,                   -- 총 시간
+            distance REAL                           -- 총 거리
         )
-    """)
+        """
+        )
     }
 
-    // 데이터베이스 버전 업그레이드 시 호출되는 메서드 ??
+    // 데이터베이스 버전 업그레이드 시 호출되는 메서드
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         Log.d("DBHelper", "onUpgrade 호출됨: oldVersion = $oldVersion, newVersion = $newVersion")  // 업그레이드 로그 출력
         // 기존 테이블 삭제 후 새로 생성
@@ -78,6 +83,29 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
             put("distance", distance)
         }
         val result = db.insert("running_records", null, contentValues)
+        return result != -1L // 삽입 성공 여부 반환
+    }
+
+    // <배틀 기록> 배틀 기록 저장 메서드
+    fun insertBattleStartRecord(startDate: String, opponentName: String): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put("start_date", startDate) // 시작 날짜
+            put("opponent_name", opponentName) // 상대 이름
+        }
+        val result = db.insert("battle_records", null, contentValues)
+        return result != -1L // 삽입 성공 여부 반환
+    }
+    fun insertBattleRecord(endDate: String, imagePath: String, elapsedTime: Long, distance: Float): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+
+            put("end_date", endDate) // 날짜와 시간을 포함 (ex. "2023-11-26_12-45-00")
+            put("image_path", imagePath)
+            put("elapsed_time", elapsedTime)
+            put("distance", distance)
+        }
+        val result = db.insert("battle_records", null, contentValues)
         return result != -1L // 삽입 성공 여부 반환
     }
 
@@ -146,30 +174,41 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
     }
 
     // <배틀 기록> 배틀 기록 저장 메서드
-    fun insertBattleRecord(date: String, opponentName: String, imagePath: String): Boolean {
+    fun insertBattleRecord(
+        startDate: String,
+        endDate: String?,
+        opponentName: String,
+        imagePath: String,
+        elapsedTime: Long?,
+        distance: Float?
+    ): Boolean {
         val db = writableDatabase
         val contentValues = ContentValues().apply {
-            put("date", date)
-            put("opponent_name", opponentName)
-            put("image_path", imagePath)
+            put("start_date", startDate) // 시작 날짜
+            put("end_date", endDate) // 종료 날짜 (nullable)
+            put("opponent_name", opponentName) // 상대 이름
+            put("image_path", imagePath) // 이미지 경로
+            put("elapsed_time", elapsedTime) // 경과 시간 (nullable)
+            put("distance", distance) // 총 거리 (nullable)
         }
         val result = db.insert("battle_records", null, contentValues)
-        return result != -1L
+        return result != -1L // 삽입 성공 여부 반환
     }
+
 
     // <배틀 기록> 전체 배틀 기록 조회 메서드
     fun getBattleRecords(): List<BattleRecord> {
         val db = readableDatabase
-        val query = "SELECT date, opponent_name, image_path FROM battle_records"
+        val query = "SELECT start_date, opponent_name, image_path FROM battle_records"
         val cursor = db.rawQuery(query, null)
 
         val records = mutableListOf<BattleRecord>()
         if (cursor.moveToFirst()) {
             do {
-                val date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val startDate = cursor.getString(cursor.getColumnIndexOrThrow("start_date"))
                 val opponentName = cursor.getString(cursor.getColumnIndexOrThrow("opponent_name"))
                 val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
-                records.add(BattleRecord(date, opponentName, imagePath))
+                records.add(BattleRecord(startDate, opponentName, imagePath))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -194,32 +233,38 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         }
     }
 
-    // <회원가입> 로그인 정보 저장
+    // 로그인 정보 저장
     fun saveAutoLoginInfo(loginInfo: LoginInfo): Boolean {
-        val db = writableDatabase  // 쓰기 가능한 데이터베이스 인스턴스 가져오기
+        Log.d("DBHelper", "Saving login info: $loginInfo")
+        val db = writableDatabase
         val contentValues = ContentValues().apply {
-            // id, password(토큰), 이름, 로그인 타입 추가
             put("user_id", loginInfo.userId)
             put("password", loginInfo.password)
             put("name", loginInfo.name)
             put("login_type", loginInfo.loginType)
         }
-        val result = db.insertWithOnConflict("login_info", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE)
-        return result != -1L  // 삽입 성공 여부 반환
+        val result = db.insert("login_info", null, contentValues)
+        return if (result != -1L) {
+            Log.d("DBHelper", "Login info saved successfully")
+            true
+        } else {
+            Log.e("DBHelper", "Failed to save login info")
+            false
+        }
     }
 
-    // 커스텀 자동 로그인 정보 가져오는 메서드
+    // 자동 로그인 정보 조회
     fun getLoginInfo(): Pair<String, String>? {
-        val db = readableDatabase  // 읽기 가능한 데이터베이스 인스턴스 가져오기
-        val cursor = db.rawQuery("SELECT user_id, password FROM login_info LIMIT 1", null)  // 쿼리 실행하여 사용자 ID와 토큰 가져오기
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT user_id, password FROM login_info LIMIT 1", null)
         return if (cursor.moveToFirst()) {
-            val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))  // user_id 컬럼의 값 가져오기
-            val password = cursor.getString(cursor.getColumnIndexOrThrow("password"))  // password 컬럼의 값 가져오기
-            cursor.close()  // 커서 닫기
-            Pair(userId, password)  // 사용자 ID와 토큰을 Pair로 반환
+            val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
+            val password = cursor.getString(cursor.getColumnIndexOrThrow("password"))
+            cursor.close()
+            Pair(userId, password)
         } else {
-            cursor.close()  // 커서 닫기
-            null  // 저장된 로그인 정보가 없을 경우 null 반환
+            cursor.close()
+            null
         }
     }
 
@@ -242,29 +287,40 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         writableDatabase.delete("login_info", null, null)  // login_info 테이블의 모든 데이터 삭제
     }
 
-    // <마이페이지> 프로필 정보 반환 - <id, name>
-    fun getUserInfo(): Pair<String, String>? {
+    // 사용자 ID를 가져오는 메서드
+    fun getUserId(): String? {
         val db = readableDatabase
-        var userInfo: Pair<String, String>? = null
-
-        // login_info 테이블에서 user_id와 name을 가져옴
-        val cursor = db.rawQuery("SELECT user_id, name FROM login_info LIMIT 1", null)
+        val cursor = db.rawQuery("SELECT user_id FROM login_info LIMIT 1", null) // login_info 테이블에서 조회
+        var id: String? = null
         if (cursor.moveToFirst()) {
-            val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
-            val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
-            userInfo = Pair(userId, name) // id와 name을 Pair로 저장
+            id = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))  // user_id 값 가져오기
         }
-        cursor.close()
-        return userInfo
+        cursor.close()  // 커서 닫기
+        return id  // 가져온 ID 반환
     }
 
-    // ID와 비밀번호가 일치하는지 확인하는 메서드
-    fun checkUserPass(id: String, password: String): Boolean {
-        val db = readableDatabase  // 읽기 가능한 데이터베이스 인스턴스 가져오기
-        val cursor = db.rawQuery("SELECT * FROM users WHERE id = ? AND password = ?", arrayOf(id, password))  // ID와 비밀번호 일치 여부 조회
-        val exists = cursor.count > 0  // 일치하는 데이터가 있는지 확인
+    // 사용자 이름 가져오는 메서드
+    fun getUserName(): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT name FROM login_info LIMIT 1", null) // login_info 테이블에서 조회
+        var userName: String? = null
+        if (cursor.moveToFirst()) {
+            userName = cursor.getString(cursor.getColumnIndexOrThrow("name"))  // name 값 가져오기
+        }
         cursor.close()  // 커서 닫기
-        return exists  // 결과 반환
+        return userName  // 가져온 ID 반환
+    }
+
+    // 배틀 상대 이름 가져오는 메서드
+    fun getOpponenetName(): String? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT opponent_name FROM battle_records LIMIT 1", null) // battle_records 테이블에서 조회
+        var opponentName: String? = null
+        if (cursor.moveToFirst()) {
+            opponentName = cursor.getString(cursor.getColumnIndexOrThrow("opponent_name"))  // name 값 가져오기
+        }
+        cursor.close()  // 커서 닫기
+        return opponentName  // 가져온 ID 반환
     }
 
 }

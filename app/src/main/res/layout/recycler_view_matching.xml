@@ -56,6 +56,8 @@
         android:text="@string/matching_searchBtn"
         android:textColor="@color/white"
         android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:focusable="false"
+        android:focusableInTouchMode="false"/>
 
 </LinearLayout>

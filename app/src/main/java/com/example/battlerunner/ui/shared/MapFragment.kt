@@ -56,7 +56,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // DBHelper 싱글턴 인스턴스 초기화
         dbHelper = DBHelper.getInstance(requireContext())
-        userId = dbHelper.getUserInfo()?.first.toString() // 사용자 ID
+        userId = dbHelper.getUserId().toString() // 사용자 ID
 
         // 지도 프래그먼트 설정 및 콜백
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer)

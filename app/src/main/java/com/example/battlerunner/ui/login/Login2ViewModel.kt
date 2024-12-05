@@ -14,7 +14,7 @@ class Login2ViewModel(application: Application) : AndroidViewModel(application) 
 
     // 자체 로그인 요청 메서드
     fun performCustomLogin(userId: String, userPassword: String) {
-        repository.performServerLogin(userId, userPassword) { success, message ->
+        repository.performServerLogin(userId, userPassword, loginType = "custom") { success, message ->
             if (success) {
                 loginStatus.postValue(true) // 성공 시 true 설정
             } else {

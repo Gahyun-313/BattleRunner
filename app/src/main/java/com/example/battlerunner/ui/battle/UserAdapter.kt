@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.battle
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,8 +12,8 @@ import com.example.battlerunner.R
 import com.example.battlerunner.data.model.User
 
 class UserAdapter(
-    private val userList: List<User>, // 사용자 목록
-    private val onMatchButtonClick: (String, String) -> Unit // 버튼 클릭 콜백
+    private var userList: MutableList<User>, // 사용자 목록
+    private val onMatchButtonClick: (String) -> Unit // 버튼 클릭 콜백
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,14 +31,20 @@ class UserAdapter(
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = userList[position]
-        holder.profileImage.setImageResource(user.profileImageResId) // 프로필 이미지 설정
+        holder.profileImage.setImageResource(R.drawable.user_profile3) // 프로필 이미지 설정
         holder.userId.text = user.userId // 사용자 ID 설정
-        holder.userName.text = user.userName // 사용자 이름 설정
+        holder.userName.text = user.username // 사용자 이름 설정
 
         // 매칭 버튼 클릭 리스너 설정
         holder.matchButton.setOnClickListener {
-            onMatchButtonClick(user.userId, user.userName) // 클릭 시 콜백 호출
+            onMatchButtonClick(user.userId) // 클릭 시 콜백 호출
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateUserList(newList: List<User>) {
+        userList = newList.toMutableList()
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = userList.size // 아이템 개수 반환

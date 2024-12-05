@@ -26,7 +26,7 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
                 _autoLoginStatus.postValue(true)
             } else {
                 _autoLoginStatus.postValue(false)
-                _errorStatus.postValue(errorMessage) // 에러 메시지 설정
+                _errorStatus.postValue(errorMessage)
             }
         }
     }

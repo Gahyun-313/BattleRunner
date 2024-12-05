@@ -28,7 +28,7 @@ interface LoginApi {
     @GET("/api/login/{userId}")
     suspend fun findUserById(@Path("userId") userId: String): User?
 
-    // 모든 사용자 조회
+    // 모든 userId 조회. 친구 목록에 사용하면 될듯
     @GET("/api/login/all")
     suspend fun getAllUsers(): List<User>
 }

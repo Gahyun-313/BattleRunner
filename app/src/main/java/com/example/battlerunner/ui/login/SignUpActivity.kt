@@ -104,11 +104,9 @@ class SignUpActivity : AppCompatActivity() {
                         // 비밀번호 재확인 성공
                         if (pass == repass) {
 
-                            val loginInfo = LoginInfo(userId, pass, name, loginType)
-
                             // 서버에 회원가입 요청 및 SQLite에 로그인 정보 저장
                             val repository = LoginRepository(this) // Context 전달
-                            repository.performServerSignUp(loginInfo) { success, message ->
+                            repository.performServerSignUp(userId, pass, name, loginType) { success, message ->
                                 if (success) {
                                     Toast.makeText(this, "회원가입 성공", Toast.LENGTH_SHORT).show()
 

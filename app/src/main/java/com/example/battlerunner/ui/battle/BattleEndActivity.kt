@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
@@ -13,9 +12,6 @@ import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityBattleEndBinding
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
-import com.example.battlerunner.utils.MapUtils
-import com.google.common.collect.Table
-import com.google.gson.Gson
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -54,9 +50,11 @@ class BattleEndActivity : AppCompatActivity() {
             // 데이터베이스에 저장
             val dbHelper = DBHelper.getInstance(this)
             val success = dbHelper.insertBattleRecord(
-                date = dateKey,
-                opponentName = opponentName,
-                imagePath = imageFile.absolutePath
+                endDate = dateKey,
+                imagePath = imageFile.absolutePath,
+                //TODO 수정
+                elapsedTime = 0,
+                distance = 0f
             )
             if (success) {
                 Log.d("BattleEndActivity", "데이터베이스 저장 성공")

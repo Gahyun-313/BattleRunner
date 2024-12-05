@@ -1,5 +1,6 @@
 package com.example.battlerunner.ui.battle
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
@@ -49,6 +50,9 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private var trackingActive = false // 소유권 추적 활성화 상태
     private var startLatLng: LatLng? = null // 그리드 시작 위치 저장
 
+    private var opponentName: String? = "배틀 상대" // 상대 이름
+    private var battleId: Long? = null // 배틀 ID
+
     // viewModel 초기화
     // ★ GlobalApplication에서 HomeViewModel을 가져오기
     private val homeViewModel: HomeViewModel by lazy {
@@ -63,13 +67,21 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBattleBinding.inflate(inflater, container, false)
+
+        // Arguments에서 데이터 가져오기
+        arguments?.let {
+            opponentName = it.getString("opponentName") // 상대 이름 가져오기
+            battleId = it.getLong("battleId") // 배틀 ID 가져오기
+        }
+
         return binding.root
     }
 
     // 뷰가 생성된 후 호출되는 메서드
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("BattleViewModel", "BattleEndAㅗctivity ViewModel instance: $this")
+        Log.d("BattleViewModel", "BattleEndActivity ViewModel instance: $this")
 
         // 위치 서비스 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -97,12 +109,8 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         binding.finishBtn.visibility = View.GONE
 
         // 배틀 상대 이름 설정
-        val user2Name = arguments?.getString("userName") ?: battleViewModel.user2Name.value ?: ""
-        binding.title.text = "$user2Name 님과의 배틀"
-        battleViewModel.setUser2Name(user2Name)
-        battleViewModel.user2Name.observe(viewLifecycleOwner) { name ->
-            binding.appliedUserName.text = name
-        }
+        binding.title.text = "$opponentName 님과의 배틀"
+        opponentName?.let { battleViewModel.setUser2Name(it) }
 
         // 타이머 UI 업데이트
         homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
@@ -233,8 +241,8 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             } else {
                 // BattleEndActivity 실행
                 val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
-                    putExtra("oppositeName", user2Name) // 배틀 상대 이름
-                    putExtra("userName", dbHelper.getUserInfo()?.second) // 유저 이름
+                    putExtra("oppositeName", opponentName) // 배틀 상대 이름
+                    putExtra("userName", dbHelper.getUserName()) // 유저 이름
                 }
                 //battleViewModel.clearGrid() // 그리드 초기화
                 startActivity(intent)
@@ -285,31 +293,27 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
     // 그리드 시작 메서드 (그리스 시작 위치 설정)
     private fun initializeGridStartLocation() {
-        // Battle ID를 Argument에서 가져오거나 기본 값으로 설정
-        // TODO: battleId 매칭
-        val battleId = arguments?.getString("battleId") ?: run {
-            Toast.makeText(requireContext(), "Battle ID가 없습니다.", Toast.LENGTH_SHORT).show()
-            return
-        }
 
         // 현재 위치를 가져오고, 서버에서 시작 위치 확인
         fetchCurrentLocation { currentLocation ->
-            battleViewModel.getGridStartLocationFromServer(battleId) { serverStartLocation ->
-                val startLatLng = serverStartLocation ?: currentLocation // 서버 시작 위치 없으면 현재 위치 사용
+            battleId?.let {
+                battleViewModel.getGridStartLocationFromServer(it) { serverStartLocation ->
+                    val startLatLng = serverStartLocation ?: currentLocation // 서버 시작 위치 없으면 현재 위치 사용
 
-                // 지도 카메라를 시작 위치로 이동
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f))
+                    // 지도 카메라를 시작 위치로 이동
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f))
 
-                // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
-                initializeGrid(startLatLng)
+                    // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
+                    initializeGrid(startLatLng)
 
-                // 서버에 시작 위치가 없으면 현재 위치를 서버에 저장
-                if (serverStartLocation == null) {
-                    battleViewModel.setGridStartLocationToServer(battleId, currentLocation) { success ->
-                        if (success) {
-                            Log.d("BattleFragment", "Start location successfully set to server.")
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to set start location to server.", Toast.LENGTH_SHORT).show()
+                    // 서버에 시작 위치가 없으면 현재 위치를 서버에 저장
+                    if (serverStartLocation == null) {
+                        battleViewModel.setGridStartLocationToServer(battleId!!, currentLocation) { success ->
+                            if (success) {
+                                Log.d("BattleFragment", "Start location successfully set to server.")
+                            } else {
+                                Toast.makeText(requireContext(), "Failed to set start location to server.", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
@@ -319,7 +323,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
     // 상대의 그리드 소유권 업데이트
     private fun updateOpponentGridOwnership() {
-        val battleId = arguments?.getString("battleId") ?: return
+        val battleId = arguments?.getLong("battleId") ?: return
 
         // 서버에서 소유권 정보 가져오기
         RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
@@ -375,8 +379,12 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                     Log.d("BattleFragment", "User location updated: $userLocation")
 
                     if (trackingActive) {
-                        dbHelper.getUserInfo()?.let { userInfo ->
-                            battleViewModel.updateOwnership(userLocation, userInfo.first) // 소유권 업데이트
+                        dbHelper.getUserId()?.let { userId ->
+                            battleId?.let {
+                                battleViewModel.updateOwnership(userLocation, userId,
+                                    it
+                                )
+                            } // 소유권 업데이트
                         }
                     }
                 }
