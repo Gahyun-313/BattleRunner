@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "819529848405",
+    "project_id": "battlerunner",
+    "storage_bucket": "battlerunner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819529848405:android:43f8b511f90332dd7626dc",
+        "android_client_info": {
+          "package_name": "com.example.battlerunner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819529848405-r1o7m77suctqd1m80kdkmqlkfff67ovi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.battlerunner",
+            "certificate_hash": "9d2f8a1710f853d8ec87a446f93cdb7bc9c21dd5"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtJycW4r6y4IPbZyIXq6WOVu64KD6F30E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
