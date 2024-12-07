@@ -21,8 +21,13 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
 
     // 자동 로그인 여부 확인
     fun checkAutoLogin() {
+        Log.d("SplashViewModel", "자동 로그인 상태 확인 중..")
         repository.performAutoLogin { isLoggedIn, errorMessage ->
-            _autoLoginStatus.postValue(isLoggedIn)
+            if (!isLoggedIn) {
+                Log.e("SplashViewModel", "자동 로그인 실패: $errorMessage")
+            }
+            _autoLoginStatus.postValue(isLoggedIn) // 상태 업데이트
         }
     }
+
 }

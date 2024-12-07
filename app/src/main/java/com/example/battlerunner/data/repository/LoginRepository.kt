@@ -65,10 +65,12 @@ class LoginRepository(private val context: Context) {
 
         RetrofitInstance.loginApi.login(loginInfo).enqueue(object : Callback<LoginInfo> {
             override fun onResponse(call: Call<LoginInfo>, response: Response<LoginInfo>) {
-                if (response.isSuccessful) {
-                    Log.d("Login", "서버 응답 성공: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    val serverResponse = response.body()!!
+                    dbHelper.saveAutoLoginInfo(serverResponse) // 자동 로그인 정보 저장
+                    callback(true, null) // 성공 콜백 호출
                 } else {
-                    Log.e("Login", "서버 응답 실패: ${response.errorBody()?.string()}")
+                    callback(false, "로그인 실패: ${response.message()}") // 실패 콜백 호출
                 }
             }
 
@@ -183,7 +185,7 @@ class LoginRepository(private val context: Context) {
         if (loginInfo != null) {
             performServerLogin(loginInfo.first, loginInfo.second, dbHelper.getLoginType() ?: "custom", callback)
         } else {
-            callback(false, "저장된 로그인 정보가 없습니다.")
+            callback(false, "저장된 로그인 정보가 없습니다.") // SQLite에 데이터가 없을 경우
         }
     }
 }
