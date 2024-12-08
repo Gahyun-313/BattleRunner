@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/battle"
+        android:title="@string/homeBar_title_battle"
+        android:icon="@drawable/home_bar_battle"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/home"
+        android:title="@string/homeBar_title_home"
+        android:icon="@drawable/home_bar_home"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/community"
+        android:title="@string/homeBar_title_community"
+        android:icon="@drawable/home_bar_community"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/myPage"
+        android:title="@string/homeBar_title_myPage"
+        android:icon="@drawable/home_bar_menu"
+        app:showAsAction="ifRoom"/>
+
+</menu>
