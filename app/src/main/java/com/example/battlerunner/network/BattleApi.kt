@@ -54,7 +54,7 @@ interface BattleApi {
 
 
     // 배틀 시작 위치를 서버에서 가져오기. 시작위치만 가져다가 쓸 거라 필요함.
-    @GET("/api/battles/{battleId}/getstartLocation")
+    @GET("/api/battle/{battleId}/getstartLocation")
     fun getGridStartLocation(
         @Path("battleId") battleId: Long
     ): Call<GridStartLocationResponse>

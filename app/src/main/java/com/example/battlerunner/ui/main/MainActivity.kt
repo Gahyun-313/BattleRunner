@@ -18,7 +18,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
+import com.example.battlerunner.data.model.Battle
 import com.example.battlerunner.databinding.ActivityMainBinding
+import com.example.battlerunner.network.RetrofitInstance
 import com.example.battlerunner.service.LocationService
 import com.example.battlerunner.ui.battle.BattleFragment
 import com.example.battlerunner.ui.battle.BattleViewModel
@@ -27,6 +29,9 @@ import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.mypage.MyPageFragment
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     // [ 배틀 매칭 ]
     var isInBattle = false // 배틀 중 여부를 저장
+    private var currentBattle: Battle? = null // 현재 진행 중인 배틀 정보를 저장하는 변수
 
     var startPathDrawing: (() -> Unit)? = null  // Home 경로 그리기 시작 콜백
     var stopPathDrawing: (() -> Unit)? = null   // Home 경로 그리기 중지 콜백
@@ -133,26 +139,55 @@ class MainActivity : AppCompatActivity() {
 
     // 배틀 상태에 따라 Battle Fragment 또는 Matching Fragment로 이동
     private fun navigateToBattleOrMatchingFragment() {
-        val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
-
-        val fragment = if (isInBattle) { // 배틀 중인지 확인
-            if (existingBattleFragment != null) {
-                existingBattleFragment as BattleFragment // 기존 BattleFragment 재사용
+        synchronizeBattleState { isInBattle ->
+            val fragment = if (isInBattle) {
+                val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
+                if (existingBattleFragment != null) {
+                    existingBattleFragment as BattleFragment // 기존 BattleFragment 재사용
+                } else {
+                    currentBattle?.let { battle ->
+                        BattleFragment().apply { // 새 BattleFragment 생성
+                            arguments = Bundle().apply {
+                                putLong("battleId", battle.battleId!!)
+                                putString("opponentName", battle.user2Id) // 상대 이름 전달
+                            }
+                        }
+                    } ?: matchingFragment // 만약 currentBattle이 null이라면 MatchingFragment로 이동
+                }
             } else {
-                BattleFragment().apply { // 새 BattleFragment 생성
-                    arguments = Bundle().apply {
-                        putString("userName", intent.getStringExtra("userName")) // 배틀 상대 이름 전달
-                    }
+                matchingFragment // MatchingFragment 사용
+            }
+
+            showFragment(fragment, if (isInBattle) "BattleFragment" else "MatchingFragment")
+        }
+    }
+
+    private fun synchronizeBattleState(callback: (Boolean) -> Unit) {
+        val userId = DBHelper.getInstance(this).getUserId() ?: return callback(false) // 사용자 ID 가져오기
+
+        // 서버에서 사용자와 관련된 배틀 정보 조회
+        RetrofitInstance.battleApi.getBattlesByUserId(userId).enqueue(object :
+            Callback<List<Battle>> {
+            override fun onResponse(call: Call<List<Battle>>, response: Response<List<Battle>>) {
+                if (response.isSuccessful) {
+                    val battles = response.body() ?: emptyList()
+
+                    // 진행 중인 배틀 확인
+                    currentBattle = battles.find { it.isBattleStarted }
+                    isInBattle = currentBattle != null
+
+                    callback(isInBattle)
+                } else {
+                    Log.e("MainActivity", "Failed to fetch battles: ${response.errorBody()?.string()}")
+                    callback(false)
                 }
             }
-        } else {
-            matchingFragment // MatchingFragment 사용
-        }
 
-        showFragment(fragment,
-            if (isInBattle) "BattleFragment"
-            else "MatchingFragment"
-        )
+            override fun onFailure(call: Call<List<Battle>>, t: Throwable) {
+                Log.e("MainActivity", "Error fetching battles", t)
+                callback(false)
+            }
+        })
     }
 
     // 상태바 투명 설정 함수

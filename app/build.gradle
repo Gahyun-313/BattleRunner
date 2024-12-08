@@ -64,6 +64,8 @@ dependencies {
 
     // Naver Maps SDK
     implementation 'com.naver.maps:map-sdk:3.19.1'
+    implementation 'androidx.test:monitor:1.7.2'
+    implementation 'androidx.test.ext:junit-ktx:1.2.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

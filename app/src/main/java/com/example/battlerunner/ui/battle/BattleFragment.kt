@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.logging.Handler
 
 class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
@@ -52,6 +53,8 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
     private var opponentName: String? = "배틀 상대" // 상대 이름
     private var battleId: Long? = null // 배틀 ID
+    private val handler = android.os.Handler(Looper.getMainLooper())
+    private val updateInterval = 5000L // 5초마다 소유권 갱신
 
     // viewModel 초기화
     // ★ GlobalApplication에서 HomeViewModel을 가져오기
@@ -249,6 +252,18 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        startOwnershipSync() //소유권 동기화 주기적 호출
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopOwnershipSync() // 주기적 작업 종료
+    }
+
+
     // GoogleMap이 준비되었을 때 호출되는 메서드
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
@@ -291,13 +306,13 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         }
     }
 
-    // 그리드 시작 메서드 (그리스 시작 위치 설정)
+    // 그리드 시작 메서드 (그리드 시작 위치 설정)
     private fun initializeGridStartLocation() {
-
         // 현재 위치를 가져오고, 서버에서 시작 위치 확인
         fetchCurrentLocation { currentLocation ->
-            battleId?.let {
-                battleViewModel.getGridStartLocationFromServer(it) { serverStartLocation ->
+            battleId?.let { battleId ->
+                // 서버에서 그리드 시작 위치 가져오기
+                battleViewModel.getGridStartLocationFromServer(battleId) { serverStartLocation ->
                     val startLatLng = serverStartLocation ?: currentLocation // 서버 시작 위치 없으면 현재 위치 사용
 
                     // 지도 카메라를 시작 위치로 이동
@@ -306,20 +321,65 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                     // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
                     initializeGrid(startLatLng)
 
-                    // 서버에 시작 위치가 없으면 현재 위치를 서버에 저장
+                    // 서버에 시작 위치를 저장 (시작 위치가 없는 경우에만 저장)
                     if (serverStartLocation == null) {
-                        battleViewModel.setGridStartLocationToServer(battleId!!, currentLocation) { success ->
+                        battleViewModel.setGridStartLocationToServer(battleId, currentLocation) { success ->
                             if (success) {
                                 Log.d("BattleFragment", "Start location successfully set to server.")
                             } else {
-                                Toast.makeText(requireContext(), "Failed to set start location to server.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to set start location to server.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
+                    } else {
+                        Log.d("BattleFragment", "Start location already exists on the server.")
                     }
                 }
             }
         }
     }
+
+    private fun startOwnershipSync() {
+        handler.post(object : Runnable {
+            override fun run() {
+                battleId?.let { fetchOpponentOwnership(it) }
+                handler.postDelayed(this, updateInterval) // 5초 간격 호출
+            }
+        })
+    }
+
+    private fun stopOwnershipSync() {
+        handler.removeCallbacksAndMessages(null) // 모든 핸들러 작업 제거
+    }
+
+    // **추가: 서버에서 상대방 소유권 정보 가져오기**
+    private fun fetchOpponentOwnership(battleId: Long) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
+            override fun onResponse(
+                call: Call<GridOwnershipMapResponse>,
+                response: Response<GridOwnershipMapResponse>
+            ) {
+                if (response.isSuccessful) {
+                    // GridOwnershipMapResponse에서 ownershipMap 추출
+                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
+                    ownershipMap.forEach { (gridId, ownerId) ->
+                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
+                    }
+                    Log.d("BattleFragment", "소유권 정보 업데이트 성공")
+                } else {
+                    Log.e("BattleFragment", "소유권 정보를 가져오는 데 실패했습니다: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+                Log.e("BattleFragment", "소유권 정보를 가져오는 중 오류 발생", t)
+            }
+        })
+    }
+
 
     // 상대의 그리드 소유권 업데이트
     private fun updateOpponentGridOwnership() {
@@ -420,15 +480,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         Log.d("BattleFragment", "Location updates stopped.")
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!LocationUtils.hasLocationPermission(requireContext())) {
-            LocationUtils.requestLocationPermission(this)
-        } else {
-            initializeMap()
-        }
-    }
-
     private fun initializeMap() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
             ?: SupportMapFragment.newInstance().also {
@@ -442,6 +493,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     // Fragment가 파괴될 때 호출되는 메서드
     override fun onDestroyView() {
         super.onDestroyView()
+        stopOwnershipSync() // 주기적 작업 종료
         _binding = null
         fusedLocationClient.removeLocationUpdates(locationCallback) // 위치 업데이트 중지
     }
