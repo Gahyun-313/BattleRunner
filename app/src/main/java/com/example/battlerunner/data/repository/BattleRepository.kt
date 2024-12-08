@@ -2,11 +2,13 @@ package com.example.battlerunner.data.repository
 
 import com.example.battlerunner.data.model.ApiResponse
 import com.example.battlerunner.data.model.Battle
+import com.example.battlerunner.data.model.GridOwnership
 import com.example.battlerunner.data.model.GridOwnershipMapResponse
 import com.example.battlerunner.data.model.GridOwnershipUpdateRequest
 import com.example.battlerunner.data.model.GridStartLocationRequest
 import com.example.battlerunner.data.model.GridStartLocationResponse
 import com.example.battlerunner.network.BattleApi
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 
@@ -44,7 +46,7 @@ class BattleRepository(private val battleApi: BattleApi) {
     fun setGridStartLocation(
         battleId: Long,
         startLocationRequest: GridStartLocationRequest
-    ): Call<ApiResponse> {
+    ): Call<ResponseBody> {
         return battleApi.setGridStartLocation(battleId, startLocationRequest)
     }
 
@@ -56,7 +58,7 @@ class BattleRepository(private val battleApi: BattleApi) {
         return battleApi.updateGridOwnership(battleId, gridId, userId)
     }
 
-    fun getGridOwnership(battleId: Long): Call<GridOwnershipMapResponse> {
+    fun getGridOwnership(battleId: Long): Call<Map<String, String>> {
         return battleApi.getGridOwnership(battleId)
     }
 }

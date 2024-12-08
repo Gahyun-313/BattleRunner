@@ -75,15 +75,17 @@ data class GridOwnershipUpdateRequest(
     val gridId: String,    // 그리드 ID
     val userId: String    // 소유자 ID
 )
+
+data class GridOwnership(
+    val gridId: String,
+    val userId: String
+)
+
 data class GridOwnershipMapResponse(
     val ownershipMap: Map<String, String> // <gridId, userId>
 )
 
-// 시작 위치 관련해서는 따로 데이터 클래스랑 레트로핏 코드 작성할 필요 없어 보임.
-// 어짜피 시작 위치는 battleGrid 테이블이 아니라 battle 테이블에 저장하고 다시는 수정 안할 것이므로 전송할 땐 user1, user2, isbattlestarted와 함께 Battle class에 한꺼번에 전송.
-// 나중에 battle 테이블에서 startLat이랑 startLng를 가져와서 사용만 함.
-// 일단 사용 중인 코드라 냅둘게. 수정 필요
-//TODO └> 필요한 이유:
+
 //	① 배틀 매칭(생성) 시 시작 그리드를 같이 전송하는 것이 불가능.
 //		(아직 map관련 메서드가 활성화되지 않은 상태(배틀 매칭은 되었으나 실제 배틀이 시작되지 않은 상태)이기 때문)
 //	② "배틀 매칭 -> 맵 프래그먼트 활성화 -> 그리드 그리기" 순서임.

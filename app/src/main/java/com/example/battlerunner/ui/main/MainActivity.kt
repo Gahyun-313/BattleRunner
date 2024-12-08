@@ -18,7 +18,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
+import com.example.battlerunner.data.model.Battle
 import com.example.battlerunner.databinding.ActivityMainBinding
+import com.example.battlerunner.network.RetrofitInstance
 import com.example.battlerunner.service.LocationService
 import com.example.battlerunner.ui.battle.BattleFragment
 import com.example.battlerunner.ui.battle.BattleViewModel
@@ -27,12 +29,15 @@ import com.example.battlerunner.ui.community.CommunityFragment
 import com.example.battlerunner.ui.home.HomeFragment
 import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.mypage.MyPageFragment
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val homeFragment by lazy { HomeFragment() }
-    private val battleFragment by lazy { BattleFragment() }
+    private var battleFragment: BattleFragment? = null // null로 초기화
     private val matchingFragment by lazy { MatchingFragment() }
     private val myPageFragment by lazy { MyPageFragment() }
     private val communityFragment by lazy { CommunityFragment() }
@@ -45,11 +50,8 @@ class MainActivity : AppCompatActivity() {
         (application as GlobalApplication).battleViewModel
     }
 
-    private var isServiceRunning = false // LocationService가 실행 중인지 확인하는 플래그
-
-    // [ 배틀 매칭 ]
-    var isInBattle = false // 배틀 중 여부를 저장
-    // isMatched 삭제 -> isInBattle과 합침
+    private var isServiceRunning = false // LocationService 실행 상태 플래그
+    var isInBattle = false // 배틀 중 여부
 
     var startPathDrawing: (() -> Unit)? = null  // Home 경로 그리기 시작 콜백
     var stopPathDrawing: (() -> Unit)? = null   // Home 경로 그리기 중지 콜백
@@ -71,7 +73,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setStatusBarTransparent() // 상태바를 투명하게 설정
+        setStatusBarTransparent() // 상태바 투명 설정
+
+        // Intent에서 showMatchingFragment 플래그 확인
+        if (intent.getBooleanExtra("showMatchingFragment", false)) {
+            isInBattle = false // 배틀 상태 초기화
+            showFragment(matchingFragment, "MatchingFragment") // MatchingFragment 표시
+            binding.bottomNavigationMenu.selectedItemId = R.id.battle // 네비게이션 메뉴 업데이트
+            return // 초기화를 멈추고 MatchingFragment를 로드
+        }
 
         // BattleApplyActivity 에서 데이터 전달 시 처리
         if (intent.getBooleanExtra("loadBattleFragment", false)) {
@@ -103,11 +113,11 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        // 네비게이션 클릭에 따른 프래그먼트 화면 전환
-        binding.bottomNavigationMenu.setOnItemSelectedListener{
-            when(it.itemId) {
+        // 네비게이션 바 설정
+        binding.bottomNavigationMenu.setOnItemSelectedListener {
+            when (it.itemId) {
                 R.id.home -> showFragment(homeFragment, "HomeFragment")
-                R.id.battle -> navigateToBattleOrMatchingFragment() // 배틀 여부 및 매칭 상태에 따른 이동 설정
+                R.id.battle -> navigateToBattleOrMatchingFragment()
                 R.id.community -> showFragment(communityFragment, "CommunityFragment")
                 R.id.myPage -> showFragment(myPageFragment, "MyPageFragment")
             }
@@ -134,26 +144,28 @@ class MainActivity : AppCompatActivity() {
 
     // 배틀 상태에 따라 Battle Fragment 또는 Matching Fragment로 이동
     private fun navigateToBattleOrMatchingFragment() {
-        val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment")
-
-        val fragment = if (isInBattle) { // 배틀 중인지 확인
-            if (existingBattleFragment != null) {
-                existingBattleFragment as BattleFragment // 기존 BattleFragment 재사용
-            } else {
-                BattleFragment().apply { // 새 BattleFragment 생성
-                    arguments = Bundle().apply {
-                        putString("userName", intent.getStringExtra("userName")) // 배틀 상대 이름 전달
+        val fragment = if (isInBattle) {
+            val existingBattleFragment = supportFragmentManager.findFragmentByTag("BattleFragment") as? BattleFragment
+            existingBattleFragment ?: BattleFragment().apply {
+                arguments = Bundle().apply {
+                    putLong("battleId", battleViewModel.battleId.value ?: -1L)
+                    putString("opponentName", battleViewModel.user2Name.value ?: "Unknown")
+                }
+                battleViewModel.battleId.value?.let { battleId ->
+                    battleViewModel.getGridStartLocationFromServer(battleId) { startLatLng ->
+                        startLatLng?.let { initializeGrid(it) }
+                    }
+                    battleViewModel.getGridOwnershipFromServer(battleId) { ownershipMap ->
+                        ownershipMap.forEach { (gridId, ownerId) ->
+                            battleViewModel.updateOpponentOwnership(gridId, ownerId)
+                        }
                     }
                 }
             }
         } else {
-            matchingFragment // MatchingFragment 사용
+            matchingFragment
         }
-
-        showFragment(fragment,
-            if (isInBattle) "BattleFragment"
-            else "MatchingFragment"
-        )
+        showFragment(fragment, if (isInBattle) "BattleFragment" else "MatchingFragment")
     }
 
     // 상태바 투명 설정 함수
@@ -207,4 +219,5 @@ class MainActivity : AppCompatActivity() {
     fun isLocationServiceRunning(): Boolean {
         return isServiceRunning // 서비스 실행 상태 반환
     }
+
 }

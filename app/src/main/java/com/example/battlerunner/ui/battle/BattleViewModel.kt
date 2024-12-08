@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.gson.Gson
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,6 +33,17 @@ class BattleViewModel : ViewModel() {
     private val _gridStartLocation = MutableLiveData<LatLng>() // 시작 위치 정보 저장
     val gridStartLocation: LiveData<LatLng> get() = _gridStartLocation // 외부에서 읽기 가능하도록 제공
 
+    // 배틀 ID를 저장하는 LiveData
+    private val _battleId = MutableLiveData<Long>()
+    val battleId: LiveData<Long> get() = _battleId
+
+    private var isRequestPending = false
+
+    // 배틀 ID 설정 메서드
+    fun setBattleId(id: Long) {
+        _battleId.value = id
+    }
+
     // 배틀 상대 이름을 저장하는 LiveData
     private val _user2Name = MutableLiveData<String>() // 배틀 상대 이름 정보 저장
     val user2Name: LiveData<String> get() = _user2Name // 외부에서 읽기 가능하도록 제공
@@ -42,33 +54,35 @@ class BattleViewModel : ViewModel() {
      * @param battleId 배틀 ID
      * @param onLocationReceived 콜백으로 위치 반환
      */
+    // BattleViewModel.kt
     fun getGridStartLocationFromServer(
         battleId: Long,
         onLocationReceived: (LatLng?) -> Unit
     ) {
         RetrofitInstance.battleApi.getGridStartLocation(battleId).enqueue(object : Callback<GridStartLocationResponse> {
             override fun onResponse(call: Call<GridStartLocationResponse>, response: Response<GridStartLocationResponse>) {
-                if (response.isSuccessful) { // 서버 요청 성공 여부 확인
-                    response.body()?.let { body -> // 응답 본문 확인
-                        if (body.gridStartLat != null && body.gridStartLng != null) { // 시작 위치가 존재하면
-                            onLocationReceived(LatLng(body.gridStartLat, body.gridStartLng)) // 위치 반환
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        if (body.gridStartLat != null && body.gridStartLng != null) {
+                            onLocationReceived(LatLng(body.gridStartLat, body.gridStartLng))
                         } else {
-                            Log.w("BattleViewModel", "그리드 시작 위치 정보가 없음") // 로그 출력
-                            onLocationReceived(null) // 위치가 없으면 null 반환
+                            Log.w("BattleViewModel", "서버에 시작 위치가 없습니다.")
+                            onLocationReceived(null)
                         }
                     }
                 } else {
-                    Log.e("BattleViewModel", "시작 위치 가져오기 실패: ${response.errorBody()?.string()}") // 실패 로그 출력
-                    onLocationReceived(null) // 실패 시 null 반환
+                    Log.e("BattleViewModel", "시작 위치 가져오기 실패: ${response.errorBody()?.string()}")
+                    onLocationReceived(null)
                 }
             }
 
             override fun onFailure(call: Call<GridStartLocationResponse>, t: Throwable) {
-                Log.e("BattleViewModel", "서버 통신 실패", t) // 통신 오류 로그 출력
-                onLocationReceived(null) // 오류 시 null 반환
+                Log.e("BattleViewModel", "서버 통신 실패", t)
+                onLocationReceived(null)
             }
         })
     }
+
 
     /**
      * 서버에 그리드 시작 위치를 저장하는 함수
@@ -82,24 +96,25 @@ class BattleViewModel : ViewModel() {
         location: LatLng,
         onComplete: (Boolean) -> Unit
     ) {
-        val request = GridStartLocationRequest(battleId, location.latitude, location.longitude) // 요청 객체 생성
-        RetrofitInstance.battleApi.setGridStartLocation(battleId, request).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) { // 서버 요청 성공 여부 확인
-                    Log.d("BattleViewModel", "그리드 시작 위치 저장 성공") // 성공 로그 출력
-                    onComplete(true) // 성공 시 true 반환
+        val request = GridStartLocationRequest(battleId, location.latitude, location.longitude)
+        RetrofitInstance.battleApi.setGridStartLocation(battleId, request).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    Log.d("BattleViewModel", "서버 응답 성공: ${response.body()?.string()}")
+                    onComplete(true)
                 } else {
-                    Log.e("BattleViewModel", "그리드 시작 위치 저장 실패: ${response.errorBody()?.string()}") // 실패 로그 출력
-                    onComplete(false) // 실패 시 false 반환
+                    Log.e("BattleViewModel", "서버 응답 실패: ${response.code()}, Error Body: ${response.errorBody()?.string()}")
+                    onComplete(false)
                 }
             }
 
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Log.e("BattleViewModel", "서버 통신 실패", t) // 통신 오류 로그 출력
-                onComplete(false) // 오류 시 false 반환
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("BattleViewModel", "서버 통신 실패", t)
+                onComplete(false)
             }
         })
     }
+
 
     /**
      * 소유권 추적 활성화/비활성화 설정
@@ -198,12 +213,12 @@ class BattleViewModel : ViewModel() {
 
         // 폴리곤 리스트에서 사용자가 위치한 폴리곤 찾기
         _gridPolygons.value?.forEach { polygon ->
-            if (polygon.isPointInside(userLocation)) { // 사용자의 위치가 폴리곤 내부인지 확인
-                val gridId = polygon.tag.toString() // 폴리곤의 태그에서 그리드 ID 가져오기
-                if (ownershipMap[gridId] != userId) { // 소유자가 변경된 경우에만 처리
-                    ownershipMap[gridId] = userId // 소유권 업데이트
-                    polygon.fillColor = Color.BLUE // 폴리곤 색상을 사용자 소유 색상으로 변경
-                    sendOwnershipToServer(battleId, gridId, userId) // 소유권 데이터를 서버로 전송
+            if (polygon.isPointInside(userLocation)) { // 사용자가 그리드 내부에 있는지 확인
+                val gridId = polygon.tag.toString() // 그리드 Id 가져오기
+                if (ownershipMap[gridId] != userId) { // 소유권 변경 발생
+                    ownershipMap[gridId] = userId
+                    polygon.fillColor = Color.BLUE // 내 소유권 색상 변경
+                    sendOwnershipToServer(battleId, gridId, userId) // 서버에 업데이트
                 }
             }
         }
@@ -226,11 +241,56 @@ class BattleViewModel : ViewModel() {
         })
     }
 
+    // 서버에서 그리드 소유권 가져와 업데이트
+    fun getGridOwnershipFromServer(battleId: Long, onComplete: (List<GridOwnership>) -> Unit) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<Map<String, String>> {
+            override fun onResponse(call: Call<Map<String, String>>, response: Response<Map<String, String>>) {
+                if (response.isSuccessful) {
+                    Log.d("BattleViewModel", "서버 응답 데이터: ${response.body()}")
+                    val ownershipList = response.body()?.let { convertMapToList(it) } ?: emptyList()
+                    onComplete(ownershipList)
+                } else {
+                    Log.e("BattleViewModel", "응답 실패: ${response.code()}, ${response.errorBody()?.string()}")
+                    onComplete(emptyList())
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                Log.e("BattleViewModel", "서버 통신 실패", t)
+                onComplete(emptyList())
+            }
+        })
+    }
+
+
+
+
+    // 배틀 종료를 서버에 알리는 메서드
+    fun endBattle(battleId: Long, onComplete: (Boolean) -> Unit) {
+        RetrofitInstance.battleApi.endBattle(battleId).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    onComplete(true)
+                    Log.d("BattleViewModel", "배틀 종료 성공")
+                } else {
+                    onComplete(false)
+                    Log.e("BattleViewModel", "배틀 종료 실패: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                onComplete(false)
+                Log.e("BattleViewModel", "서버 통신 실패", t)
+            }
+        })
+    }
+
+
     // 상대 소유권 업데이트
     fun updateOpponentOwnership(gridId: String, opponentId: String) {
         _gridPolygons.value?.find { it.tag.toString() == gridId }?.let { polygon ->
             ownershipMap[gridId] = opponentId
-            polygon.fillColor = Color.RED // 상대 소유권을 빨간색으로 표시
+            polygon.fillColor = Color.RED // 상대 소유권 색상으로 변경
         }
     }
 
@@ -241,6 +301,38 @@ class BattleViewModel : ViewModel() {
         }
         return Gson().toJson(gridData)
     }
+
+    // 서버에서 가져온 Map<String, String> 데이터를 List<GridOwnership>로 변환하는 함수
+    fun convertMapToList(ownershipMap: Map<String, String>): List<GridOwnership> {
+        return ownershipMap.map { (gridId, userId) -> GridOwnership(gridId, userId) }
+    }
+
+    fun updateOwnershipFromServer(battleId: Long) {
+        getGridOwnershipFromServer(battleId) { ownershipMap ->
+            ownershipMap.forEach { (gridId, userId) ->
+                if (this.ownershipMap[gridId] != userId) { // 소유권 변경 감지
+                    this.ownershipMap[gridId] = userId
+                    updateGridPolygon(gridId, userId) // UI 업데이트
+                }
+            }
+        }
+    }
+
+
+
+    // 그리드 색상 업데이트 메서드
+    private fun updateGridPolygon(gridId: String, userId: String) {
+        _gridPolygons.value?.find { it.tag == gridId }?.let { polygon ->
+            polygon.fillColor = when (userId) {
+                userId -> Color.BLUE // 현재 사용자의 소유권일 경우
+                //TODO 상대 ID 가져와야 함
+                "상대 사용자 ID" -> Color.RED  // 상대 사용자의 소유권일 경우
+                else -> Color.argb(10, 0, 0, 0) // 중립 상태일 경우
+            }
+        }
+    }
+
+
 
     // 그리드 초기화
     fun clearGrid() {

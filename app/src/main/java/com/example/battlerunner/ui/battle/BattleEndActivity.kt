@@ -121,4 +121,14 @@ class BattleEndActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("showMatchingFragment", true) // MatchingFragment를 로드하도록 전달
+        }
+        startActivity(intent)
+        finish()
+    }
+
 }

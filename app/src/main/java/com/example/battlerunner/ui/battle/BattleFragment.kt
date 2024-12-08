@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
@@ -82,6 +83,14 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("BattleViewModel", "BattleEndActivity ViewModel instance: $this")
+
+        battleViewModel.battleId.observe(viewLifecycleOwner) { id ->
+            if (id != null && id != -1L) {
+                initializeBattleData() // 배틀 데이터 초기화
+            } else {
+                Log.e("BattleFragment", "Invalid battle ID.")
+            }
+        }
 
         // 위치 서비스 초기화
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -234,19 +243,20 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 배틀 종료 버튼 클릭 리스너
         binding.BattlefinishBtn.setOnClickListener {
-            if (homeViewModel.hasStarted.value == true) {
-                // 러닝 중이라면 경고 안내 후 무시
-                Toast.makeText(requireContext(), "러닝 중에는 배틀을 종료할 수 없습니다", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            } else {
-                // BattleEndActivity 실행
-                val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
-                    putExtra("oppositeName", opponentName) // 배틀 상대 이름
-                    putExtra("userName", dbHelper.getUserName()) // 유저 이름
+            battleId?.let { id ->
+                battleViewModel.endBattle(id) { success ->
+                    if (success) {
+                        Toast.makeText(requireContext(), "배틀을 종료합니다.", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
+                            putExtra("opponentName", opponentName) // 상대 이름 전달
+                        }
+                        startActivity(intent)
+                        requireActivity().finish() // MainActivity로 돌아감
+                    } else {
+                        Toast.makeText(requireContext(), "배틀 종료에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                //battleViewModel.clearGrid() // 그리드 초기화
-                startActivity(intent)
-            }
+            } ?: Toast.makeText(requireContext(), "유효하지 않은 배틀입니다.", Toast.LENGTH_SHORT).show()
         }
     }
     // GoogleMap이 준비되었을 때 호출되는 메서드
@@ -257,10 +267,9 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         if (LocationUtils.hasLocationPermission(requireContext())) {
             try {
                 googleMap.isMyLocationEnabled = true
-                initializeGridStartLocation() // 그리드 시작 메서드 호출
-                updateOpponentGridOwnership() // 상대방 소유권 업데이트
-
-                moveToCurrentLocationImmediate()
+                initializeBattleData() // 배틀 데이터 초기화
+                moveToCurrentLocationImmediate() // 내 위치로 카메라 이동
+                startOwnershipUpdate() // 실시간 소유권 업데이트 시작
             } catch (e: SecurityException) {
                 Toast.makeText(requireContext(), "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
                 LocationUtils.requestLocationPermission(this)
@@ -271,6 +280,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
         }
     }
+
 
     // 현재 위치로 카메라를 이동하는 메서드
     fun moveToCurrentLocationImmediate() {
@@ -291,63 +301,45 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         }
     }
 
-    // 그리드 시작 메서드 (그리스 시작 위치 설정)
-    private fun initializeGridStartLocation() {
-
-        // 현재 위치를 가져오고, 서버에서 시작 위치 확인
-        fetchCurrentLocation { currentLocation ->
-            battleId?.let {
-                battleViewModel.getGridStartLocationFromServer(it) { serverStartLocation ->
-                    val startLatLng = serverStartLocation ?: currentLocation // 서버 시작 위치 없으면 현재 위치 사용
-
-                    // 지도 카메라를 시작 위치로 이동
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f))
-
-                    // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
+    // 배틀 데이터 초기화
+    private fun initializeBattleData() {
+        battleId?.let { battleId ->
+            battleViewModel.getGridStartLocationFromServer(battleId) { startLatLng ->
+                if (startLatLng != null) {
                     initializeGrid(startLatLng)
-
-                    // 서버에 시작 위치가 없으면 현재 위치를 서버에 저장
-                    if (serverStartLocation == null) {
-                        battleViewModel.setGridStartLocationToServer(battleId!!, currentLocation) { success ->
-                            if (success) {
-                                Log.d("BattleFragment", "Start location successfully set to server.")
-                            } else {
-                                Toast.makeText(requireContext(), "Failed to set start location to server.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
+                }
+            }
+            // 서버에서 소유권 가져오기
+            battleViewModel.getGridOwnershipFromServer(battleId) { ownershipMap ->
+                ownershipMap.forEach { (gridId, ownerId) ->
+                    battleViewModel.updateOpponentOwnership(gridId, ownerId)
                 }
             }
         }
     }
 
-    // 상대의 그리드 소유권 업데이트
-    private fun updateOpponentGridOwnership() {
-        val battleId = arguments?.getLong("battleId") ?: return
 
-        // 서버에서 소유권 정보 가져오기
-        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
-            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
-                if (response.isSuccessful) {
-                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
+    // 실시간 소유권 업데이트
+    private fun startOwnershipUpdate() {
+        val interval = 5000L // 5초 주기
+        val handler = Handler(Looper.getMainLooper())
 
-                    // 소유권 정보 업데이트
-                    ownershipMap.forEach { (gridId, ownerId) ->
-                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
+        val runnable = object : Runnable {
+            override fun run() {
+                battleId?.let { id ->
+                    battleViewModel.getGridOwnershipFromServer(id) { ownershipList ->
+                        ownershipList.forEach { gridOwnership ->
+                            battleViewModel.updateOpponentOwnership(gridOwnership.gridId, gridOwnership.userId)
+                        }
                     }
-
-                    Log.d("BattleFragment", "상대방의 소유권 정보가 성공적으로 업데이트되었습니다.")
-                } else {
-                    Log.e("BattleFragment", "서버에서 소유권 정보를 가져오는데 실패했습니다: ${response.errorBody()?.string()}")
                 }
+                // 지정된 간격 후 다시 실행
+                handler.postDelayed(this, interval)
             }
-
-            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
-                Log.e("BattleFragment", "서버와 통신에 실패했습니다.", t)
-                Toast.makeText(requireContext(), "상대방의 소유권 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-        })
+        }
+        handler.post(runnable)
     }
+
 
     // 현재 위치 가져오기 메서드
     private fun fetchCurrentLocation(onLocationReady: (LatLng) -> Unit) {
@@ -361,7 +353,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     }
 
     // 그리드 초기화 메서드
-    private fun initializeGrid(startLatLng: LatLng) {
+    fun initializeGrid(startLatLng: LatLng) {
         if (!gridInitialized) {
             // 그리드를 고정 ID로 초기화하는 메서드 호출
             battleViewModel.createFixedGrid(googleMap, startLatLng, rows = 29, cols = 29)
@@ -422,11 +414,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
     override fun onResume() {
         super.onResume()
-        if (!LocationUtils.hasLocationPermission(requireContext())) {
-            LocationUtils.requestLocationPermission(this)
-        } else {
-            initializeMap()
-        }
+        startOwnershipUpdate() // 배틀 화면이 다시 활성화될 때 소유권 업데이트 시작
     }
 
     private fun initializeMap() {
@@ -445,6 +433,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         _binding = null
         fusedLocationClient.removeLocationUpdates(locationCallback) // 위치 업데이트 중지
     }
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000

@@ -42,6 +42,8 @@ class MatchingFragment : Fragment() {
     // 검색된 사용자 목록을 저장할 리스트
     private val userList = mutableListOf<User>()
 
+    private lateinit var opponentName: String //배틀 상대 이름
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -105,6 +107,7 @@ class MatchingFragment : Fragment() {
                     // 요청이 성공적이고 사용자 정보가 존재하면 리스트에 추가
                     val user = response.body()!!
                     val filteredList = listOf(user)
+                    opponentName = user.username
 
                     // UI 업데이트는 메인 스레드에서 실행
                     CoroutineScope(Dispatchers.Main).launch {
@@ -143,7 +146,7 @@ class MatchingFragment : Fragment() {
                             user1Id = user1Id, // 현재 사용자 ID
                             user2Id = user2Id, // 상대 사용자 ID
                             isBattleStarted = true, // 배틀 시작 상태
-                            gridStartLat = null, // 초기 Grid 위치
+                            gridStartLat = null, // 초기 Grid 위치 -> 매칭 시에는 null, 이후 배틀 시작 시 생성
                             gridStartLng = null
                         )
                     )
@@ -154,9 +157,10 @@ class MatchingFragment : Fragment() {
                     val battle = response.body()
                     if (battle != null) {
                         val battleId = battle.battleId
+                        val opponentName = opponentName
                         if (battleId != null) {
                             Toast.makeText(requireContext(), "배틀 신청 성공: $battleId", Toast.LENGTH_SHORT).show()
-                            navigateToBattleFragment(user2Id, battleId) // BattleFragment로 이동
+                            navigateToBattleFragment(opponentName, battleId) // BattleFragment로 이동
                         }
                     } else {
                         // 응답 데이터가 없을 경우
