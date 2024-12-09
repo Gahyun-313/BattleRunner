@@ -20,7 +20,7 @@
         android:orientation="vertical"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:layout_marginHorizontal="30dp">
+        android:layout_marginHorizontal="15dp">
 
         <TextView
             android:id="@+id/user_id"
@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:text="@string/userID"
             android:singleLine="false"
+            android:maxLines="2"
             tools:ignore="NestedWeights"
             android:textSize="16sp"
             android:textColor="@color/black"

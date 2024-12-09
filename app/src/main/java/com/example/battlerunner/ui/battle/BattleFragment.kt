@@ -52,7 +52,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private var battleId: Long? = null // 배틀 ID
 
     private val handler = android.os.Handler(Looper.getMainLooper())
-    private val updateInterval = 5000L // 5초마다 소유권 갱신
+    private val updateInterval = 10000L // 5초마다 소유권 갱신
 
     // viewModel 초기화
     // ★ GlobalApplication에서 HomeViewModel을 가져오기
@@ -340,11 +340,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                             if (success) {
                                 Log.d("BattleFragment", "Start location successfully set to server.")
                             } else {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Failed to set start location to server.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Log.e("BattleFragment", "Failed to set start location to server.")
                             }
                         }
                     } else {
@@ -356,6 +352,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     }
 
     private fun startOwnershipSync() {
+        Log.d("BattleFragment", "startOwnershipSync called")
         handler.post(object : Runnable {
             override fun run() {
                 battleId?.let { fetchOwnershipFromServer(it) }
@@ -369,13 +366,13 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     }
 
     private fun fetchOwnershipFromServer(battleId: Long) {
+        Log.d("Retrofit Request", "URL: /api/battle-flags/$battleId/grid/ownership")
         RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
             override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
                 if (response.isSuccessful) {
                     val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
-                    ownershipMap.forEach { (gridId, userId) ->
-                        // 소유권 정보 업데이트 (뷰모델 또는 UI 갱신)
-                        battleViewModel.updateOpponentOwnership(gridId, userId)
+                    ownershipMap.forEach { (gridId, ownerId) ->
+                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
                     }
                     Log.d("BattleFragment", "소유권 정보가 성공적으로 업데이트되었습니다.")
                 } else {

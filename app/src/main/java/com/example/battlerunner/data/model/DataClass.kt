@@ -76,6 +76,7 @@ data class GridOwnershipUpdateRequest(
     val userId: String    // 소유자 ID
 )
 data class GridOwnershipMapResponse(
+//    val ownershipMap: Map<Int, String> // <gridId, userId>
     val ownershipMap: Map<Int, String> // <gridId, userId>
 )
 

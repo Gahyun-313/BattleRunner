@@ -139,9 +139,9 @@ class BattleViewModel : ViewModel() {
      * @return 생성된 그리드 ID
      */
     private fun generateGridId(row: Int, col: Int, cols: Int): Int {
-        val cols = 29 // 서버에서 전달된 값으로 동적 설정 가능
-        return row * cols + col
+        return row * cols + col // 동적으로 cols를 받아서 사용
     }
+
 
     /**
      * 고정된 크기의 그리드를 생성하는 함수
@@ -245,44 +245,61 @@ class BattleViewModel : ViewModel() {
         RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
             override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
                 if (response.isSuccessful) {
-                    val ownershipMapFromServer = response.body()?.ownershipMap ?: emptyMap()
-                    ownershipMap.clear()
-                    ownershipMap.putAll(ownershipMapFromServer) // 서버에서 받은 데이터로 소유권 갱신
-                    updateGridColors() // 지도에 반영
-                    Log.d("BattleViewModel", "서버에서 받은 소유권 데이터: $ownershipMapFromServer")
-                    onComplete(true) // 성공 콜백
+                    val responseBody = response.body()
+                    Log.d("BattleViewModel", "Server Response Body: $responseBody") // 서버 응답 전체 출력
+
+                    val ownershipMapFromServer = responseBody?.ownershipMap ?: emptyMap()
+                    if (ownershipMapFromServer.isEmpty()) {
+                        Log.w("BattleViewModel", "서버에서 빈 소유권 데이터 반환")
+                    } else {
+                        Log.d("BattleViewModel", "Received ownership map: $ownershipMapFromServer") // 각 GridId와 OwnerId 출력
+                        ownershipMap.clear()
+                        ownershipMapFromServer.forEach { (gridId, userId) ->
+                            Log.d("BattleViewModel", "Grid ID: $gridId, Owner ID: $userId")
+                            ownershipMap[gridId] = userId
+                        }
+                        updateGridColors()
+                    }
+                    onComplete(true)
                 } else {
                     Log.e("BattleViewModel", "소유권 동기화 실패: ${response.errorBody()?.string()}")
-                    onComplete(false) // 실패 콜백
+                    onComplete(false)
                 }
             }
 
             override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
                 Log.e("BattleViewModel", "소유권 동기화 중 오류 발생", t)
-                onComplete(false) // 실패 콜백
+                onComplete(false)
             }
         })
     }
 
+
+
     // 지도에 소유권 정보 반영
     private fun updateGridColors() {
         _gridPolygons.value?.forEach { polygon ->
-            val gridId = polygon.tag as Int
-            val ownerId = ownershipMap[gridId]
-
-            polygon.fillColor = when (ownerId) {
-                userId -> Color.BLUE // 현재 사용자
-                opponentId -> Color.RED // 상대 사용자
-                else -> Color.argb(10, 0, 0, 0) // 중립 상태
+            val gridId = polygon.tag as? Int // 폴리곤 태그에서 Grid ID 가져오기
+            if (gridId != null) {
+                val ownerId = ownershipMap[gridId] // Grid ID로 소유권 확인
+                polygon.fillColor = when (ownerId) {
+                    userId -> Color.BLUE // 내 소유
+                    opponentId -> Color.RED // 상대 소유
+                    else -> Color.argb(10, 0, 0, 0) // 중립
+                }
+                Log.d("BattleViewModel", "Grid $gridId 색상 업데이트: $ownerId")
+            } else {
+                Log.e("BattleViewModel", "Polygon 태그에서 gridId를 가져올 수 없음: $polygon")
             }
         }
         Log.d("BattleViewModel", "지도 색상 업데이트 완료")
     }
 
 
+
     // 상대 소유권 업데이트
     fun updateOpponentOwnership(gridId: Int, opponentId: String) {
-        _gridPolygons.value?.find { it.tag as Int == gridId }?.let { polygon ->
+        _gridPolygons.value?.find { it.tag as? Int == gridId }?.let { polygon ->
             ownershipMap[gridId] = opponentId
             polygon.fillColor = Color.RED // 상대 소유권을 빨간색으로 표시
         }
