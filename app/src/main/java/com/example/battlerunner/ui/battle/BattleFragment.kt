@@ -15,7 +15,6 @@ import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.ui.home.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
-import com.example.battlerunner.data.model.GridOwnershipMapResponse
 import com.example.battlerunner.databinding.FragmentBattleBinding
 import com.example.battlerunner.network.RetrofitInstance
 import com.example.battlerunner.service.LocationService
@@ -367,12 +366,12 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
     private fun fetchOwnershipFromServer(battleId: Long) {
         Log.d("Retrofit Request", "URL: /api/battle-flags/$battleId/grid/ownership")
-        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
-            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<Map<Int, String>> {
+            override fun onResponse(call: Call<Map<Int, String>>, response: Response<Map<Int, String>>) {
                 if (response.isSuccessful) {
-                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
+                    val ownershipMap = response.body() ?: emptyMap() // Map<Int, String> 바로 사용
                     ownershipMap.forEach { (gridId, ownerId) ->
-                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
+                        battleViewModel.updateGridOwnership_Real(gridId, ownerId)
                     }
                     Log.d("BattleFragment", "소유권 정보가 성공적으로 업데이트되었습니다.")
                 } else {
@@ -380,7 +379,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                 }
             }
 
-            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+            override fun onFailure(call: Call<Map<Int, String>>, t: Throwable) {
                 Log.e("BattleFragment", "서버와 통신에 실패했습니다.", t)
             }
         })
@@ -392,14 +391,14 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         val battleId = arguments?.getLong("battleId") ?: return
 
         // 서버에서 소유권 정보 가져오기
-        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
-            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<Map<Int, String>> {
+            override fun onResponse(call: Call<Map<Int, String>>, response: Response<Map<Int, String>>) {
                 if (response.isSuccessful) {
-                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
+                    val ownershipMap = response.body() ?: emptyMap()
 
                     // 소유권 정보 업데이트
                     ownershipMap.forEach { (gridId, ownerId) ->
-                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
+                        battleViewModel.updateGridOwnership_Real(gridId, ownerId)
                     }
 
                     Log.d("BattleFragment", "상대방의 소유권 정보가 성공적으로 업데이트되었습니다.")
@@ -408,7 +407,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                 }
             }
 
-            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+            override fun onFailure(call: Call<Map<Int, String>>, t: Throwable) {
                 Log.e("BattleFragment", "서버와 통신에 실패했습니다.", t)
                 Toast.makeText(requireContext(), "상대방의 소유권 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }

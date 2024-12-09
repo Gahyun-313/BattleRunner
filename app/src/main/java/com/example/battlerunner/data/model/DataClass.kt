@@ -1,5 +1,7 @@
 package com.example.battlerunner.data.model
 
+import com.google.gson.annotations.SerializedName
+
 
 // 데이터 송수신에 필요한 데이터를 담은 클래스를 모두 만들어 주거나
 // http요청시 @query문을 이용하셔 spring boot의 레포지토리에서 처리
@@ -75,10 +77,11 @@ data class GridOwnershipUpdateRequest(
     val gridId: Int,    // 그리드 ID
     val userId: String    // 소유자 ID
 )
-data class GridOwnershipMapResponse(
+//data class GridOwnershipMapResponse(
+//    @SerializedName("ownershipMap")
 //    val ownershipMap: Map<Int, String> // <gridId, userId>
-    val ownershipMap: Map<Int, String> // <gridId, userId>
-)
+//)
+typealias GridOwnershipMapResponse = Map<String, String>
 
 // 시작 위치 관련해서는 따로 데이터 클래스랑 레트로핏 코드 작성할 필요 없어 보임.
 // 어짜피 시작 위치는 battleGrid 테이블이 아니라 battle 테이블에 저장하고 다시는 수정 안할 것이므로 전송할 땐 user1, user2, isbattlestarted와 함께 Battle class에 한꺼번에 전송.

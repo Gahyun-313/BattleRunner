@@ -73,10 +73,8 @@ interface BattleApi {
         //): Call<ApiResponse>
 
     // 소유권 가져오기.
-//    @GET("api/battle-flags/{battleId}/grid/ownership")
-//    fun getGridOwnership(@Path("battleId") battleId: Long): Call<GridOwnershipMapResponse>
     @GET("api/battle-flags/{battleId}/grid/ownership")
-    fun getGridOwnership(@Path("battleId") battleId: Long): Call<GridOwnershipMapResponse>
+    fun getGridOwnership(@Path("battleId") battleId: Long): Call<Map<Int, String>>
 
     // 배틀 삭제 (battleId로)
     @DELETE("/api/battle/{battleId}/delete")

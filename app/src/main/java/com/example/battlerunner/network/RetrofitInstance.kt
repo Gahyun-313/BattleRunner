@@ -25,11 +25,11 @@ object RetrofitInstance {
     val gson = GsonBuilder()
         .setLenient()
         .serializeNulls()
+        .enableComplexMapKeySerialization() // Map 키를 Int로 처리 가능
         .create()
 
     val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
-        .client(client)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 

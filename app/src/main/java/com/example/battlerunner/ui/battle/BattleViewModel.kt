@@ -2,23 +2,19 @@ package com.example.battlerunner.ui.battle
 
 import android.graphics.Color
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.model.*
 import com.example.battlerunner.network.RetrofitInstance
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
-import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.math.log
 
 class BattleViewModel : ViewModel() {
 
@@ -242,13 +238,13 @@ class BattleViewModel : ViewModel() {
 
     // 서버에서 소유권 데이터를 가져오는 함수
     fun fetchGridOwnership(battleId: Long, onComplete: (Boolean) -> Unit) {
-        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
-            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<Map<Int, String>> {
+            override fun onResponse(call: Call<Map<Int, String>>, response: Response<Map<Int, String>>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
                     Log.d("BattleViewModel", "Server Response Body: $responseBody") // 서버 응답 전체 출력
 
-                    val ownershipMapFromServer = responseBody?.ownershipMap ?: emptyMap()
+                    val ownershipMapFromServer = response.body() ?: emptyMap()
                     if (ownershipMapFromServer.isEmpty()) {
                         Log.w("BattleViewModel", "서버에서 빈 소유권 데이터 반환")
                     } else {
@@ -267,7 +263,7 @@ class BattleViewModel : ViewModel() {
                 }
             }
 
-            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+            override fun onFailure(call: Call<Map<Int, String>>, t: Throwable) {
                 Log.e("BattleViewModel", "소유권 동기화 중 오류 발생", t)
                 onComplete(false)
             }
@@ -283,8 +279,9 @@ class BattleViewModel : ViewModel() {
             if (gridId != null) {
                 val ownerId = ownershipMap[gridId] // Grid ID로 소유권 확인
                 polygon.fillColor = when (ownerId) {
-                    userId -> Color.BLUE // 내 소유
-                    opponentId -> Color.RED // 상대 소유
+                    // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
+                    "gu20313@naver.com" -> Color.BLUE // 내 소유
+                    "gus20313@gmail.com" -> Color.RED // 상대 소유
                     else -> Color.argb(10, 0, 0, 0) // 중립
                 }
                 Log.d("BattleViewModel", "Grid $gridId 색상 업데이트: $ownerId")
@@ -298,10 +295,15 @@ class BattleViewModel : ViewModel() {
 
 
     // 상대 소유권 업데이트
-    fun updateOpponentOwnership(gridId: Int, opponentId: String) {
+    fun updateGridOwnership_Real(gridId: Int, ownerId: String) {
         _gridPolygons.value?.find { it.tag as? Int == gridId }?.let { polygon ->
-            ownershipMap[gridId] = opponentId
-            polygon.fillColor = Color.RED // 상대 소유권을 빨간색으로 표시
+            ownershipMap[gridId] = ownerId
+            polygon.fillColor = when (ownerId) {
+                // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
+                "gu20313@naver.com" -> Color.BLUE // 내 소유
+                "gus20313@gmail.com" -> Color.RED // 상대 소유
+                else -> Color.argb(10, 0, 0, 0) // 중립
+            }
         }
     }
 
