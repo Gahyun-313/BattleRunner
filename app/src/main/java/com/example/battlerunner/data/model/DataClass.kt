@@ -17,7 +17,9 @@ data class User(
     val username: String,       // 유저 이름
     val totalDistance: Float = 0f,   // 현재 세션의 러닝 거리
     val totalTime: Long = 0L, // 현재 세션의 러닝 시간
-    val averageSpeed: Float?   // 평균 속도
+    val averageSpeed: Float = 0f,   // 평균 속도
+
+    val profileImageResId: Int // 프로필 사진 <배틀 매칭>
 )
 
 // running 데이터 전송. 러닝 관련 데이터 저장하기 위한 클래스
