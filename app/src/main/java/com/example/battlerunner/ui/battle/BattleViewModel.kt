@@ -2,9 +2,11 @@ package com.example.battlerunner.ui.battle
 
 import android.graphics.Color
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.data.model.*
 import com.example.battlerunner.network.RetrofitInstance
 import com.google.android.gms.maps.GoogleMap
@@ -12,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.gson.Gson
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,6 +39,12 @@ class BattleViewModel : ViewModel() {
     // 배틀 상대 이름을 저장하는 LiveData
     private val _opponentName = MutableLiveData<String>() // 배틀 상대 이름 정보 저장
     val opponentName: LiveData<String> get() = _opponentName // 외부에서 읽기 가능하도록 제공
+
+    val userId: String = "gu20313@gmail.com"
+    val opponentId: String = "gus20313@gmail.com"
+    //TODO 작동 가능하게 변경해야 함
+
+    // DBHelper 싱글턴 인스턴스 초기화
 
     /**
      * 서버에서 그리드 시작 위치를 가져오는 함수
@@ -185,8 +194,7 @@ class BattleViewModel : ViewModel() {
                 val polygon = map.addPolygon(polygonOptions) // 지도에 폴리곤 추가
                 val gridId = generateGridId(row, col, cols) // 그리드 ID 생성
                 polygon.tag = gridId // 폴리곤에 태그 설정
-                Log.d("battleViewModel", "그리드 ID : {$gridId}")
-                ownershipMap[gridId] = "neutral" // 기본 소유권 설정
+                //ownershipMap[gridId] = "neutral" // 기본 소유권 설정
                 polygons.add(polygon) // 폴리곤 리스트에 추가
             }
         }
@@ -204,8 +212,9 @@ class BattleViewModel : ViewModel() {
             if (polygon.isPointInside(userLocation)) { // 사용자의 위치가 폴리곤 내부인지 확인
                 val gridId = polygon.tag as Int // 폴리곤의 태그에서 그리드 ID 가져오기
                 if (ownershipMap[gridId] != userId) { // 소유자가 변경된 경우에만 처리
-                    ownershipMap[gridId as Int] = userId // 소유권 업데이트
+                    ownershipMap[gridId] = userId // 소유권 업데이트
                     polygon.fillColor = Color.BLUE // 폴리곤 색상을 사용자 소유 색상으로 변경
+                    Log.d("BattleViewModel", "소유권 업데이트 - Grid ID: $gridId, User ID: $userId")
                     sendOwnershipToServer(battleId, gridId, userId) // 소유권 데이터를 서버로 전송
                 }
             }
@@ -215,8 +224,9 @@ class BattleViewModel : ViewModel() {
     // 서버로 소유권 데이터 전송
     private fun sendOwnershipToServer(battleId: Long, gridId: Int, ownerId: String) {
         Log.d("BattleViewModel", "서버로 소유권 업데이트 : battleId=$battleId, gridId=$gridId, ownerId=$ownerId")
-        RetrofitInstance.battleApi.updateGridOwnership(battleId, gridId, ownerId).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+
+        RetrofitInstance.battleApi.updateGridOwnership(battleId, gridId, ownerId).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     Log.d("BattleViewModel", "소유권 서버 업데이트 성공")
                 } else {
@@ -224,11 +234,51 @@ class BattleViewModel : ViewModel() {
                 }
             }
 
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("BattleViewModel", "서버 통신 실패", t)
             }
         })
     }
+
+    // 서버에서 소유권 데이터를 가져오는 함수
+    fun fetchGridOwnership(battleId: Long, onComplete: (Boolean) -> Unit) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
+            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
+                if (response.isSuccessful) {
+                    val ownershipMapFromServer = response.body()?.ownershipMap ?: emptyMap()
+                    ownershipMap.clear()
+                    ownershipMap.putAll(ownershipMapFromServer) // 서버에서 받은 데이터로 소유권 갱신
+                    updateGridColors() // 지도에 반영
+                    Log.d("BattleViewModel", "서버에서 받은 소유권 데이터: $ownershipMapFromServer")
+                    onComplete(true) // 성공 콜백
+                } else {
+                    Log.e("BattleViewModel", "소유권 동기화 실패: ${response.errorBody()?.string()}")
+                    onComplete(false) // 실패 콜백
+                }
+            }
+
+            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+                Log.e("BattleViewModel", "소유권 동기화 중 오류 발생", t)
+                onComplete(false) // 실패 콜백
+            }
+        })
+    }
+
+    // 지도에 소유권 정보 반영
+    private fun updateGridColors() {
+        _gridPolygons.value?.forEach { polygon ->
+            val gridId = polygon.tag as Int
+            val ownerId = ownershipMap[gridId]
+
+            polygon.fillColor = when (ownerId) {
+                userId -> Color.BLUE // 현재 사용자
+                opponentId -> Color.RED // 상대 사용자
+                else -> Color.argb(10, 0, 0, 0) // 중립 상태
+            }
+        }
+        Log.d("BattleViewModel", "지도 색상 업데이트 완료")
+    }
+
 
     // 상대 소유권 업데이트
     fun updateOpponentOwnership(gridId: Int, opponentId: String) {
@@ -236,14 +286,6 @@ class BattleViewModel : ViewModel() {
             ownershipMap[gridId] = opponentId
             polygon.fillColor = Color.RED // 상대 소유권을 빨간색으로 표시
         }
-    }
-
-    // 그리드 데이터를 JSON 형식으로 변환
-    fun getGridDataAsJson(): String {
-        val gridData = ownershipMap.map { (gridId, owner) ->
-            mapOf("id" to gridId, "owner" to owner)
-        }
-        return Gson().toJson(gridData)
     }
 
     // 그리드 초기화

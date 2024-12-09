@@ -43,6 +43,7 @@ class MatchingFragment : Fragment() {
     private val userList = mutableListOf<User>()
 
     private lateinit var opponentName: String //배틀 상대 이름
+    private lateinit var opponentId: String //배틀 상대 이름
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -108,6 +109,7 @@ class MatchingFragment : Fragment() {
                     val user = response.body()!!
                     val filteredList = listOf(user)
                     opponentName = user.username
+                    opponentId = user.userId
 
                     // UI 업데이트는 메인 스레드에서 실행
                     CoroutineScope(Dispatchers.Main).launch {
@@ -159,7 +161,7 @@ class MatchingFragment : Fragment() {
                         val battleId = battle.battleId
                         if (battleId != null) {
                             Toast.makeText(requireContext(), "배틀 신청 성공: $battleId", Toast.LENGTH_SHORT).show()
-                            navigateToBattleFragment(opponentName, battleId) // BattleFragment로 이동
+                            navigateToBattleFragment(opponentName, opponentId, battleId) // BattleFragment로 이동
                         }
                     } else {
                         // 응답 데이터가 없을 경우
@@ -177,13 +179,14 @@ class MatchingFragment : Fragment() {
     }
 
     // BattleFragment로 이동하는 메서드
-    private fun navigateToBattleFragment(opponentName: String, battleId: Long) {
+    private fun navigateToBattleFragment(opponentName: String, opponentId: String, battleId: Long) {
         // MainActivity의 showFragment 메서드를 통해 프래그먼트 전환
         (activity as? MainActivity)?.let {
             it.isInBattle = true // 배틀 상태를 활성화
             val newBattleFragment = BattleFragment().apply {
                 arguments = Bundle().apply {
                     putString("opponentName", opponentName) // BattleFragment로 상대 이름 전달
+                    putString("opponentId", opponentId)
                     putLong("battleId", battleId) // BattleFragment로 배틀 ID 전달
                 }
             }

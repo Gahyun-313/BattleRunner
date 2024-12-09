@@ -45,8 +45,12 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private var trackingActive = false // 소유권 추적 활성화 상태
     private var startLatLng: LatLng? = null // 그리드 시작 위치 저장
 
-    private var opponentName: String? = "배틀 상대" // 상대 이름
+    private var opponentName: String? = "배틀 상대 이름"
+    private var opponentID: String? = "배틀 상대 ID"
+    private var userName: String? = "내 이름"
+    private var userId: String? = "내 ID"
     private var battleId: Long? = null // 배틀 ID
+
     private val handler = android.os.Handler(Looper.getMainLooper())
     private val updateInterval = 5000L // 5초마다 소유권 갱신
 
@@ -68,6 +72,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         // Arguments에서 데이터 가져오기
         arguments?.let {
             opponentName = it.getString("opponentName") // 상대 이름 가져오기
+            opponentID = it.getString("opponentId") // 상대 ID 가져오기
             battleId = it.getLong("battleId") // 배틀 ID 가져오기
         }
 
@@ -85,6 +90,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // DBHelper 싱글턴 인스턴스 초기화
         dbHelper = DBHelper.getInstance(requireContext())
+        userId = dbHelper.getUserId().toString() // 사용자 ID
 
         // MapFragment 초기화 (SupportMapFragment 동적으로 추가)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
@@ -248,9 +254,23 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         }
     }
 
+    // 서버에서 소유권 정보 가져오기 및 지도 반영
+    private fun syncOwnershipFromServer() {
+        battleId?.let { battleId ->
+            battleViewModel.fetchGridOwnership(battleId) { success ->
+                if (success) {
+                    Log.d("BattleFragment", "소유권 정보 동기화 성공")
+                } else {
+                    Log.e("BattleFragment", "소유권 정보 동기화 실패")
+                }
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         startOwnershipSync() //소유권 동기화 주기적 호출
+        syncOwnershipFromServer() // 서버에서 소유권 정보 동기화
     }
 
     override fun onPause() {
@@ -268,6 +288,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             try {
                 googleMap.isMyLocationEnabled = true
                 initializeGridStartLocation() // 그리드 시작 메서드 호출
+                syncOwnershipFromServer() // 소유권 데이터 동기화
                 updateOpponentGridOwnership() // 상대방 소유권 업데이트
 
                 moveToCurrentLocationImmediate()
@@ -337,7 +358,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     private fun startOwnershipSync() {
         handler.post(object : Runnable {
             override fun run() {
-                battleId?.let { fetchOpponentOwnership(it) }
+                battleId?.let { fetchOwnershipFromServer(it) }
                 handler.postDelayed(this, updateInterval) // 5초 간격 호출
             }
         })
@@ -368,33 +389,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         })
 
     }
-
-
-    // 서버에서 상대방 소유권 정보 가져오기
-    private fun fetchOpponentOwnership(battleId: Long) {
-        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
-            override fun onResponse(
-                call: Call<GridOwnershipMapResponse>,
-                response: Response<GridOwnershipMapResponse>
-            ) {
-                if (response.isSuccessful) {
-                    // GridOwnershipMapResponse에서 ownershipMap 추출
-                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
-                    ownershipMap.forEach { (gridId, ownerId) ->
-                        battleViewModel.updateOpponentOwnership(gridId, ownerId)
-                    }
-                    Log.d("BattleFragment", "소유권 정보 업데이트 성공")
-                } else {
-                    Log.e("BattleFragment", "소유권 정보를 가져오는 데 실패했습니다: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
-                Log.e("BattleFragment", "소유권 정보를 가져오는 중 오류 발생", t)
-            }
-        })
-    }
-
 
     // 상대의 그리드 소유권 업데이트
     private fun updateOpponentGridOwnership() {

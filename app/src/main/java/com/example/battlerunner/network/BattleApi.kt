@@ -6,6 +6,7 @@ import com.example.battlerunner.data.model.GridOwnershipMapResponse
 import com.example.battlerunner.data.model.GridOwnershipUpdateRequest
 import com.example.battlerunner.data.model.GridStartLocationRequest
 import com.example.battlerunner.data.model.GridStartLocationResponse
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -55,8 +56,7 @@ interface BattleApi {
     @POST("/api/battle-flags/{battleId}/initialize")
     fun initializeBattleFlags(@Path("battleId") battleId: Long): Call<String>
 
-
-    // 배틀 시작 위치를 서버에서 가져오기. 시작위치만 가져다가 쓸 거라 필요함.
+    // 배틀 시작 위치를 서버에서 가져오기
     @GET("/api/battle/{battleId}/getstartLocation")
     fun getGridStartLocation(
         @Path("battleId") battleId: Long
@@ -69,13 +69,12 @@ interface BattleApi {
         @Path("gridId") gridId: Int,
         @Query("userId") userId: String // 소유자 ID를 쿼리 파라미터로 전달
         // @Body request: GridOwnershipUpdateRequest
-    ): Call<ApiResponse>
+    ): Call<ResponseBody>
+        //): Call<ApiResponse>
 
     // 소유권 가져오기.
-    @GET("/api/grid/{battleId}/grid/ownership")
-    fun getGridOwnership(
-        @Path("battleId") battleId: Long
-    ): Call<GridOwnershipMapResponse>
+    @GET("api/battle-flags/{battleId}/grid/ownership")
+    fun getGridOwnership(@Path("battleId") battleId: Long): Call<GridOwnershipMapResponse>
 
     // 배틀 삭제 (battleId로)
     @DELETE("/api/battle/{battleId}/delete")

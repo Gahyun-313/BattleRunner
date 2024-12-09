@@ -138,10 +138,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             //val opponent
 
             val fillColor = when (ownerId) {
-                "neutral" -> Color.argb(10, 0, 0, 0)
                 userId -> Color.BLUE
                 "opponent" -> Color.RED
-                else -> Color.argb(0, 0, 0, 0)
+                else -> Color.argb(10, 0, 0, 0)
             }
 
             Log.d("MapFragment", "Polygon ID: ${polygonId}, Owner: $ownerId, userId: $userId")
