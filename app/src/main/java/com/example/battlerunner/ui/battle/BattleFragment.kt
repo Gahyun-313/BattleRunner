@@ -11,23 +11,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.example.battlerunner.GlobalApplication
 import com.example.battlerunner.ui.home.PersonalEndActivity
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
-import com.example.battlerunner.data.model.ApiResponse
 import com.example.battlerunner.data.model.GridOwnershipMapResponse
 import com.example.battlerunner.databinding.FragmentBattleBinding
 import com.example.battlerunner.network.RetrofitInstance
 import com.example.battlerunner.service.LocationService
-import com.example.battlerunner.ui.home.HomeFragment
-import com.example.battlerunner.ui.home.HomeFragment.Companion
 import com.example.battlerunner.ui.home.HomeViewModel
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.utils.LocationUtils
 import com.example.battlerunner.utils.MapUtils
-import com.example.battlerunner.utils.MapUtils.stopLocationUpdates
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -37,7 +32,6 @@ import com.google.android.gms.maps.model.LatLng
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.logging.Handler
 
 class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback {
 
@@ -105,6 +99,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         MapUtils.startLocationUpdates(requireContext(), fusedLocationClient, homeViewModel)
 
         initializeLocationUpdates() // 위치 업데이트 콜백 초기화
+        initializeBattleFlags(battleId!!)
 
         // 초기 버튼 상태 설정: 시작 버튼만 보이도록
         binding.startBtn.visibility = View.VISIBLE
@@ -113,7 +108,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
 
         // 배틀 상대 이름 설정
         binding.title.text = "$opponentName 님과의 배틀"
-        opponentName?.let { battleViewModel.setUser2Name(it) }
+        opponentName?.let { battleViewModel.setOpponentName(it) }
 
         // 타이머 UI 업데이트
         homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
@@ -315,10 +310,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                 battleViewModel.getGridStartLocationFromServer(battleId) { serverStartLocation ->
                     val startLatLng = serverStartLocation ?: currentLocation // 서버 시작 위치 없으면 현재 위치 사용
 
-                    // 지도 카메라를 시작 위치로 이동
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15f))
-
-                    // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
+                     // 서버 시작 위치 또는 현재 위치를 기준으로 그리드 초기화
                     initializeGrid(startLatLng)
 
                     // 서버에 시작 위치를 저장 (시작 위치가 없는 경우에만 저장)
@@ -355,7 +347,30 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         handler.removeCallbacksAndMessages(null) // 모든 핸들러 작업 제거
     }
 
-    // **추가: 서버에서 상대방 소유권 정보 가져오기**
+    private fun fetchOwnershipFromServer(battleId: Long) {
+        RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
+            override fun onResponse(call: Call<GridOwnershipMapResponse>, response: Response<GridOwnershipMapResponse>) {
+                if (response.isSuccessful) {
+                    val ownershipMap = response.body()?.ownershipMap ?: emptyMap()
+                    ownershipMap.forEach { (gridId, userId) ->
+                        // 소유권 정보 업데이트 (뷰모델 또는 UI 갱신)
+                        battleViewModel.updateOpponentOwnership(gridId, userId)
+                    }
+                    Log.d("BattleFragment", "소유권 정보가 성공적으로 업데이트되었습니다.")
+                } else {
+                    Log.e("BattleFragment", "소유권 정보를 가져오는데 실패했습니다: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<GridOwnershipMapResponse>, t: Throwable) {
+                Log.e("BattleFragment", "서버와 통신에 실패했습니다.", t)
+            }
+        })
+
+    }
+
+
+    // 서버에서 상대방 소유권 정보 가져오기
     private fun fetchOpponentOwnership(battleId: Long) {
         RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<GridOwnershipMapResponse> {
             override fun onResponse(
@@ -441,9 +456,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                     if (trackingActive) {
                         dbHelper.getUserId()?.let { userId ->
                             battleId?.let {
-                                battleViewModel.updateOwnership(userLocation, userId,
-                                    it
-                                )
+                                battleViewModel.updateOwnership(userLocation, userId, it)
                             } // 소유권 업데이트
                         }
                     }
@@ -489,6 +502,25 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             }
         mapFragment.getMapAsync(this)
     }
+
+    // 그리드 소유권
+    private fun initializeBattleFlags(battleId: Long) {
+        RetrofitInstance.battleApi.initializeBattleFlags(battleId).enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    Log.d("BattleFragment", "Battle flags initialized: ${response.body()}")
+                    fetchOwnershipFromServer(battleId) // 소유권 데이터 조회
+                } else {
+                    Log.e("BattleFragment", "Failed to initialize battle flags: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.e("BattleFragment", "Error initializing battle flags", t)
+            }
+        })
+    }
+
 
     // Fragment가 파괴될 때 호출되는 메서드
     override fun onDestroyView() {

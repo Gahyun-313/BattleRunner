@@ -72,11 +72,11 @@ data class BattleGrid(
 // TODO 그리드 소유권은 계속해서 변경되므로 따로 데이터 클래스를 생성해서 다루는 게 좋은듯.
 // 배틀 소유권 - 요청 데이터 모델
 data class GridOwnershipUpdateRequest(
-    val gridId: String,    // 그리드 ID
+    val gridId: Int,    // 그리드 ID
     val userId: String    // 소유자 ID
 )
 data class GridOwnershipMapResponse(
-    val ownershipMap: Map<String, String> // <gridId, userId>
+    val ownershipMap: Map<Int, String> // <gridId, userId>
 )
 
 // 시작 위치 관련해서는 따로 데이터 클래스랑 레트로핏 코드 작성할 필요 없어 보임.

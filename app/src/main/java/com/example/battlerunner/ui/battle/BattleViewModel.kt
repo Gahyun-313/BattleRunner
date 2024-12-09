@@ -15,6 +15,7 @@ import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.math.log
 
 class BattleViewModel : ViewModel() {
 
@@ -23,7 +24,7 @@ class BattleViewModel : ViewModel() {
     val gridPolygons: LiveData<List<Polygon>> get() = _gridPolygons // 외부에서 읽기 가능하도록 제공
 
     // 각 그리드 ID와 소유자 ID를 매핑
-    val ownershipMap = mutableMapOf<String, String>() // 그리드 ID와 소유자의 맵
+    val ownershipMap = mutableMapOf<Int, String>() // 그리드 ID와 소유자의 맵
 
     // 소유권 추적 상태 플래그
     private var isTrackingActive = false // 소유권 추적 활성화 여부를 나타냄
@@ -33,8 +34,8 @@ class BattleViewModel : ViewModel() {
     val gridStartLocation: LiveData<LatLng> get() = _gridStartLocation // 외부에서 읽기 가능하도록 제공
 
     // 배틀 상대 이름을 저장하는 LiveData
-    private val _user2Name = MutableLiveData<String>() // 배틀 상대 이름 정보 저장
-    val user2Name: LiveData<String> get() = _user2Name // 외부에서 읽기 가능하도록 제공
+    private val _opponentName = MutableLiveData<String>() // 배틀 상대 이름 정보 저장
+    val opponentName: LiveData<String> get() = _opponentName // 외부에서 읽기 가능하도록 제공
 
     /**
      * 서버에서 그리드 시작 위치를 가져오는 함수
@@ -115,9 +116,9 @@ class BattleViewModel : ViewModel() {
      *
      * @param name 배틀 상대 이름
      */
-    fun setUser2Name(name: String) {
-        if (_user2Name.value != name) { // 이름이 변경된 경우에만
-            _user2Name.postValue(name) // LiveData 업데이트
+    fun setOpponentName(name: String) {
+        if (_opponentName.value != name) { // 이름이 변경된 경우에만
+            _opponentName.postValue(name) // LiveData 업데이트
         }
     }
 
@@ -128,8 +129,9 @@ class BattleViewModel : ViewModel() {
      * @param col 열 번호
      * @return 생성된 그리드 ID
      */
-    private fun generateGridId(row: Int, col: Int): String {
-        return "grid_${row}_${col}" // 그리드 ID를 행, 열 번호로 생성
+    private fun generateGridId(row: Int, col: Int, cols: Int): Int {
+        val cols = 29 // 서버에서 전달된 값으로 동적 설정 가능
+        return row * cols + col
     }
 
     /**
@@ -181,8 +183,9 @@ class BattleViewModel : ViewModel() {
                     .fillColor(Color.argb(10, 0, 0, 0)) // 채우기 색상 설정
 
                 val polygon = map.addPolygon(polygonOptions) // 지도에 폴리곤 추가
-                val gridId = generateGridId(row, col) // 그리드 ID 생성
+                val gridId = generateGridId(row, col, cols) // 그리드 ID 생성
                 polygon.tag = gridId // 폴리곤에 태그 설정
+                Log.d("battleViewModel", "그리드 ID : {$gridId}")
                 ownershipMap[gridId] = "neutral" // 기본 소유권 설정
                 polygons.add(polygon) // 폴리곤 리스트에 추가
             }
@@ -199,9 +202,9 @@ class BattleViewModel : ViewModel() {
         // 폴리곤 리스트에서 사용자가 위치한 폴리곤 찾기
         _gridPolygons.value?.forEach { polygon ->
             if (polygon.isPointInside(userLocation)) { // 사용자의 위치가 폴리곤 내부인지 확인
-                val gridId = polygon.tag.toString() // 폴리곤의 태그에서 그리드 ID 가져오기
+                val gridId = polygon.tag as Int // 폴리곤의 태그에서 그리드 ID 가져오기
                 if (ownershipMap[gridId] != userId) { // 소유자가 변경된 경우에만 처리
-                    ownershipMap[gridId] = userId // 소유권 업데이트
+                    ownershipMap[gridId as Int] = userId // 소유권 업데이트
                     polygon.fillColor = Color.BLUE // 폴리곤 색상을 사용자 소유 색상으로 변경
                     sendOwnershipToServer(battleId, gridId, userId) // 소유권 데이터를 서버로 전송
                 }
@@ -210,7 +213,8 @@ class BattleViewModel : ViewModel() {
     }
 
     // 서버로 소유권 데이터 전송
-    private fun sendOwnershipToServer(battleId: Long, gridId: String, ownerId: String) {
+    private fun sendOwnershipToServer(battleId: Long, gridId: Int, ownerId: String) {
+        Log.d("BattleViewModel", "서버로 소유권 업데이트 : battleId=$battleId, gridId=$gridId, ownerId=$ownerId")
         RetrofitInstance.battleApi.updateGridOwnership(battleId, gridId, ownerId).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
@@ -227,8 +231,8 @@ class BattleViewModel : ViewModel() {
     }
 
     // 상대 소유권 업데이트
-    fun updateOpponentOwnership(gridId: String, opponentId: String) {
-        _gridPolygons.value?.find { it.tag.toString() == gridId }?.let { polygon ->
+    fun updateOpponentOwnership(gridId: Int, opponentId: String) {
+        _gridPolygons.value?.find { it.tag as Int == gridId }?.let { polygon ->
             ownershipMap[gridId] = opponentId
             polygon.fillColor = Color.RED // 상대 소유권을 빨간색으로 표시
         }

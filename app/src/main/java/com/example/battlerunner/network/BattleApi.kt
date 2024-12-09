@@ -52,6 +52,9 @@ interface BattleApi {
         @Body startLocationRequest: GridStartLocationRequest
     ): Call<ApiResponse>
 
+    @POST("/api/battle-flags/{battleId}/initialize")
+    fun initializeBattleFlags(@Path("battleId") battleId: Long): Call<String>
+
 
     // 배틀 시작 위치를 서버에서 가져오기. 시작위치만 가져다가 쓸 거라 필요함.
     @GET("/api/battle/{battleId}/getstartLocation")
@@ -60,10 +63,10 @@ interface BattleApi {
     ): Call<GridStartLocationResponse>
 
     // 소유권 업데이트. battlegrid 테이블 업데이트
-    @PUT("/api/grid/{battleId}/{gridId}/update")
+    @PUT("/api/battle-flags/{battleId}/{gridId}/update")
     fun updateGridOwnership(
         @Path("battleId") battleId: Long,
-        @Path("gridId") gridId: String,
+        @Path("gridId") gridId: Int,
         @Query("userId") userId: String // 소유자 ID를 쿼리 파라미터로 전달
         // @Body request: GridOwnershipUpdateRequest
     ): Call<ApiResponse>

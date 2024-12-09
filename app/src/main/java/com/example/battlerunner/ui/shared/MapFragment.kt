@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import com.example.battlerunner.R
 import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.FragmentMapBinding
@@ -26,8 +25,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
-import com.google.common.collect.Table
-import com.google.gson.Gson
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -130,11 +127,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // BattleEndActivity에서 그리드 복원
-    fun drawGridFromPolygons(polygons: List<Polygon>, ownershipMap: Map<String, String>) {
+    fun drawGridFromPolygons(polygons: List<Polygon>, ownershipMap: MutableMap<Int, String>) {
 
         polygons.forEach { polygon ->
 
-            val polygonId = polygon.id.toString()
+            val polygonId = polygon.id as Int
             val ownerId = ownershipMap[polygonId] // 소유자 확인
 
             // TODO: 상대 ID 설정
