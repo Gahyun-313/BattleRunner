@@ -1,0 +1,74 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <!-- 친구 프로필 이미지 -->
+    <ImageView
+        android:id="@+id/friend_profile_image"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:src="@drawable/user_profile3"
+        android:contentDescription="@string/user_profile_image"
+        android:layout_gravity="center_vertical" />
+
+    <!-- 친구 정보 (이름과 ID) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:layout_marginHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/friendNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="친구 이름"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/friendIdTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="친구 아이디"
+            android:textSize="14sp"
+            android:textColor="@color/grey_dark" />
+    </LinearLayout>
+
+    <!-- 버튼 영역 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- 자랑하기 버튼
+        <Button
+            android:id="@+id/brag_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/button"
+            android:text="자랑하기"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />-->
+
+        <!-- 삭제 버튼 -->
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/button"
+            android:text="친구삭제"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>
