@@ -87,9 +87,9 @@ class BattleEndActivity : AppCompatActivity() {
 //        val userId = intent.getStringExtra("userId")
 
         // 문자 설정
-        binding.title.text = "김세현님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
+        binding.title.text = "김가현님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
         // TODO: 승리, 패배 문구 설정!!!!!!!!!!!!!!!!!
-        binding.result.text = "김세현님의 승리"   // "{$userName}님의 승리/패배"
+        binding.result.text = "sh kim님의 승리"   // "{$userName}님의 승리/패배"
 
         // MapFragment 준비 후 그리드 표시
         mapFragment.setOnMapReadyCallback {
@@ -107,7 +107,7 @@ class BattleEndActivity : AppCompatActivity() {
         binding.closeBtn.setOnClickListener {
             mapFragment.takeMapSnapshot { bitmap ->
                 if (bitmap != null) {
-                    saveBattleData(bitmap, "김세현")
+                    saveBattleData(bitmap, "김가현")
                     Log.d("BattleEndActivity", "배틀 데이터 저장 완료")
                 } else {
                     Log.e("BattleEndActivity", "스냅샷 생성 실패 또는 상대 이름 없음")

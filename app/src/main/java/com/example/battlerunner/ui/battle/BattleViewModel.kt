@@ -280,8 +280,8 @@ class BattleViewModel : ViewModel() {
                 val ownerId = ownershipMap[gridId] // Grid ID로 소유권 확인
                 polygon.fillColor = when (ownerId) {
                     // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
-                    "gu20313@naver.com" -> Color.BLUE // 내 소유
-                    "gus20313@gmail.com" -> Color.RED // 상대 소유
+                    "shhk2100@gmail.com" -> Color.BLUE // 내 소유
+                    "gu20313@naver.com" -> Color.RED // 상대 소유
                     else -> Color.argb(10, 0, 0, 0) // 중립
                 }
                 Log.d("BattleViewModel", "Grid $gridId 색상 업데이트: $ownerId")
@@ -300,8 +300,8 @@ class BattleViewModel : ViewModel() {
             ownershipMap[gridId] = ownerId
             polygon.fillColor = when (ownerId) {
                 // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
-                "gu20313@naver.com" -> Color.BLUE // 내 소유
-                "gus20313@gmail.com" -> Color.RED // 상대 소유
+                "shhk2100@gmail.com" -> Color.BLUE // 내 소유
+                "gu20313@naver.com" -> Color.RED // 상대 소유
                 else -> Color.argb(10, 0, 0, 0) // 중립
             }
         }

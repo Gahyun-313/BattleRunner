@@ -112,7 +112,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         binding.finishBtn.visibility = View.GONE
 
         // 배틀 상대 이름 설정
-        //TODO └> 배틀 상대 이름 하드코딩 해둠 : 수정 필요
         //binding.title.text = "$opponentName 님과의 배틀"
         //opponentName?.let { battleViewModel.setOpponentName(it) }
 

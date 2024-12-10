@@ -54,7 +54,7 @@ class CommunityFragment : Fragment() {
         userList.add(User("gu20313@naver.com", "김가현", profileImageResId = R.drawable.user_profile3))
         userList.add(User("gus20313@gmail.com", "김가현", profileImageResId = R.drawable.user_profile3))
         userList.add(User("hyunindia0@gmail.com", "김가현", profileImageResId = R.drawable.user_profile3))
-        userList.add(User("shhk2100@gmail.com", "sh kim", profileImageResId = R.drawable.user_profile3))
+        //userList.add(User("shhk2100@gmail.com", "sh kim", profileImageResId = R.drawable.user_profile3))
         userList.add(User("kkdi8393@gmail.com", "kkdi", profileImageResId = R.drawable.user_profile3))
 
         // 검색 결과 RecyclerView 설정

@@ -135,8 +135,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
             val fillColor = when (ownerId) {
                 // Todo: 아이디 하드코딩!!!!!!!!!!!!!!!!!!!
-                "gu20313@naver.com" -> Color.BLUE
-                "gus20313@gmail.com" -> Color.RED
+                "shhk2100@gmail.com" -> Color.BLUE
+                "gu20313@naver.com" -> Color.RED
                 else -> Color.argb(10, 0, 0, 0)
             }
 
