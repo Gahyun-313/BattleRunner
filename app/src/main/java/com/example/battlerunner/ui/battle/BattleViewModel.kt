@@ -242,7 +242,7 @@ class BattleViewModel : ViewModel() {
             override fun onResponse(call: Call<Map<Int, String>>, response: Response<Map<Int, String>>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
-                    Log.d("BattleViewModel", "Server Response Body: $responseBody") // 서버 응답 전체 출력
+                    //Log.d("BattleViewModel", "Server Response Body: $responseBody") // 서버 응답 전체 출력
 
                     val ownershipMapFromServer = response.body() ?: emptyMap()
                     if (ownershipMapFromServer.isEmpty()) {
@@ -251,7 +251,7 @@ class BattleViewModel : ViewModel() {
                         Log.d("BattleViewModel", "Received ownership map: $ownershipMapFromServer") // 각 GridId와 OwnerId 출력
                         ownershipMap.clear()
                         ownershipMapFromServer.forEach { (gridId, userId) ->
-                            Log.d("BattleViewModel", "Grid ID: $gridId, Owner ID: $userId")
+                            //Log.d("BattleViewModel", "Grid ID: $gridId, Owner ID: $userId")
                             ownershipMap[gridId] = userId
                         }
                         updateGridColors()

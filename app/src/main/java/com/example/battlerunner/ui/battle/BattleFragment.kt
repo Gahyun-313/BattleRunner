@@ -112,8 +112,9 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         binding.finishBtn.visibility = View.GONE
 
         // 배틀 상대 이름 설정
-        binding.title.text = "$opponentName 님과의 배틀"
-        opponentName?.let { battleViewModel.setOpponentName(it) }
+        //TODO └> 배틀 상대 이름 하드코딩 해둠 : 수정 필요
+        //binding.title.text = "$opponentName 님과의 배틀"
+        //opponentName?.let { battleViewModel.setOpponentName(it) }
 
         // 타이머 UI 업데이트
         homeViewModel.elapsedTime.observe(viewLifecycleOwner) { elapsedTime ->
@@ -343,7 +344,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                             }
                         }
                     } else {
-                        Log.d("BattleFragment", "Start location already exists on the server.")
+                        //Log.d("BattleFragment", "Start location already exists on the server.")
                     }
                 }
             }
@@ -365,7 +366,6 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
     }
 
     private fun fetchOwnershipFromServer(battleId: Long) {
-        Log.d("Retrofit Request", "URL: /api/battle-flags/$battleId/grid/ownership")
         RetrofitInstance.battleApi.getGridOwnership(battleId).enqueue(object : Callback<Map<Int, String>> {
             override fun onResponse(call: Call<Map<Int, String>>, response: Response<Map<Int, String>>) {
                 if (response.isSuccessful) {
@@ -441,7 +441,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
                     val userLocation = LatLng(location.latitude, location.longitude)
-                    Log.d("BattleFragment", "User location updated: $userLocation")
+                    //Log.d("BattleFragment", "User location updated: $userLocation")
 
                     if (trackingActive) {
                         dbHelper.getUserId()?.let { userId ->
