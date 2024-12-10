@@ -12,6 +12,7 @@ import com.example.battlerunner.data.local.DBHelper
 import com.example.battlerunner.databinding.ActivityBattleEndBinding
 import com.example.battlerunner.ui.main.MainActivity
 import com.example.battlerunner.ui.shared.MapFragment
+import com.google.android.gms.maps.model.Polygon
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -52,7 +53,7 @@ class BattleEndActivity : AppCompatActivity() {
             val success = dbHelper.insertBattleRecord(
                 endDate = dateKey,
                 imagePath = imageFile.absolutePath,
-                //TODO 수정
+                //TODO 실제 데이터로 대체
                 elapsedTime = 0,
                 distance = 0f
             )
@@ -73,38 +74,40 @@ class BattleEndActivity : AppCompatActivity() {
 
         binding = ActivityBattleEndBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        Log.d("BattleViewModel", "BattleEndActivity ViewModel instance: $this")
+
+        val battleId = intent.getLongExtra("battleId", -1) // 배틀 Id 받아옴
 
         // MapFragment 초기화 및 설정
         supportFragmentManager.beginTransaction()
             .replace(R.id.mapFragmentContainer, mapFragment)
             .commitNow()
 
-        val oppositeName = intent.getStringExtra("oppositeName")
-        val userName = intent.getStringExtra("userName")
-        val userId = intent.getStringExtra("userId")
+//        val oppositeName = intent.getStringExtra("oppositeName")
+//        val userName = intent.getStringExtra("userName")
+//        val userId = intent.getStringExtra("userId")
 
         // 문자 설정
-        binding.title.text = oppositeName + "님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
-        // TODO: 승리, 패배 문구 설정
-        binding.result.text = userName + "님의 승리"   // "{$userName}님의 승리/패배"
+        binding.title.text = "김세현님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
+        // TODO: 승리, 패배 문구 설정!!!!!!!!!!!!!!!!!
+        binding.result.text = "김세현님의 승리"   // "{$userName}님의 승리/패배"
 
         // MapFragment 준비 후 그리드 표시
         mapFragment.setOnMapReadyCallback {
             mapFragment.enableMyLocation()
             mapFragment.moveToCurrentLocationImmediate()
 
-            // BattleViewModel에서 소유권 데이터를 가져와 그리드 표시
-            val gridData = battleViewModel.gridPolygons.value ?: emptyList()
-            mapFragment.drawGridFromPolygons(gridData, battleViewModel.ownershipMap)
+            battleViewModel.fetchGridOwnership(battleId) { success ->
+                if (success) {
+                    mapFragment.drawGrid(battleViewModel.gridPolygons.value ?: emptyList(), battleViewModel.ownershipMap)
+                }
+            }
         }
 
         // 창닫기 버튼 클릭 리스너
         binding.closeBtn.setOnClickListener {
-
             mapFragment.takeMapSnapshot { bitmap ->
-                if (bitmap != null && oppositeName != null) {
-                    saveBattleData(bitmap, oppositeName)
+                if (bitmap != null) {
+                    saveBattleData(bitmap, "김세현")
                     Log.d("BattleEndActivity", "배틀 데이터 저장 완료")
                 } else {
                     Log.e("BattleEndActivity", "스냅샷 생성 실패 또는 상대 이름 없음")

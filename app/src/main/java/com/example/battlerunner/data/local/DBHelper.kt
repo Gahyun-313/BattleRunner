@@ -7,13 +7,14 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.battlerunner.data.model.BattleRecord
 import com.example.battlerunner.data.model.LoginInfo
+import com.example.battlerunner.data.model.User
 
 /**
  * SQLite 데이터베이스 관리 클래스
  * 싱글턴 패턴을 사용 -> 애플리케이션 전역에서 동일한 인스턴스를 사용
  */
 
-class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 7) {
+class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 8) {
 
     companion object {
         @Volatile private var instance: DBHelper? = null  // 싱글턴 인스턴스
@@ -61,6 +62,15 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         )
         """
         )
+
+        // friends 테이블 생성
+        db.execSQL("""
+        CREATE TABLE IF NOT EXISTS friends(
+            user_id TEXT PRIMARY KEY,
+            username TEXT,
+            profile_image INTEGER
+        )
+    """)
     }
 
     // 데이터베이스 버전 업그레이드 시 호출되는 메서드
@@ -322,6 +332,42 @@ class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context,
         }
         cursor.close()  // 커서 닫기
         return opponentName  // 가져온 ID 반환
+    }
+
+    // 친구 추가 메서드
+    fun addFriend(userId: String, username: String, profileImage: Int): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put("user_id", userId)
+            put("username", username)
+            put("profile_image", profileImage)
+        }
+        val result = db.insertWithOnConflict("friends", null, contentValues, SQLiteDatabase.CONFLICT_IGNORE)
+        return result != -1L // 삽입 성공 여부 반환
+    }
+
+    // 친구 목록 가져오기 메서드
+    fun getFriends(): List<User> {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM friends", null)
+        val friends = mutableListOf<User>()
+        if (cursor.moveToFirst()) {
+            do {
+                val userId = cursor.getString(cursor.getColumnIndexOrThrow("user_id"))
+                val username = cursor.getString(cursor.getColumnIndexOrThrow("username"))
+                val profileImage = cursor.getInt(cursor.getColumnIndexOrThrow("profile_image"))
+                friends.add(User(userId, username, profileImageResId = profileImage))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return friends
+    }
+
+    // 친구 삭제
+    fun deleteFriend(userId: String): Boolean {
+        val db = writableDatabase
+        val result = db.delete("friends", "user_id = ?", arrayOf(userId))
+        return result > 0 // 삭제 성공 여부 반환
     }
 
 }

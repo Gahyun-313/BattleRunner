@@ -63,7 +63,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this) // Map 준비가 완료되면 onMapReady 호출
 
         // custom 내 위치 버튼 리스너
-        // TODO: 버튼은 눌리는데 내 위치로 이동이 안 됨 // 일단 앱 실행에는 문제 없으니 기본 내 위치 버튼으로 구현하고 여유 생기면 고치기
         binding.customLocationButton.setOnClickListener {
             enableMyLocation()
             moveToCurrentLocationImmediate()
@@ -127,19 +126,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     // BattleEndActivity에서 그리드 복원
-    fun drawGridFromPolygons(polygons: List<Polygon>, ownershipMap: MutableMap<Int, String>) {
+    fun drawGrid(polygons: List<Polygon>, ownershipMap: MutableMap<Int, String>) {
 
         polygons.forEach { polygon ->
 
-            val polygonId = polygon.id as Int
+            val polygonId = polygon.tag?.toString()?.toIntOrNull() // 안전하게 변환
             val ownerId = ownershipMap[polygonId] // 소유자 확인
 
-            // TODO: 상대 ID 설정
-            //val opponent
-
             val fillColor = when (ownerId) {
-                userId -> Color.BLUE
-                "opponent" -> Color.RED
+                // Todo: 아이디 하드코딩!!!!!!!!!!!!!!!!!!!
+                "gu20313@naver.com" -> Color.BLUE
+                "gus20313@gmail.com" -> Color.RED
                 else -> Color.argb(10, 0, 0, 0)
             }
 
@@ -190,5 +187,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         }
     }
+
+
 
 }

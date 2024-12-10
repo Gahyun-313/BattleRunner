@@ -245,8 +245,11 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
             } else {
                 // BattleEndActivity 실행
                 val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
-                    putExtra("oppositeName", opponentName) // 배틀 상대 이름
-                    putExtra("userName", dbHelper.getUserName()) // 유저 이름
+
+                   putExtra("battleId", battleId) // 배틀 Id 전달
+
+//                    putExtra("oppositeName", opponentName) // 배틀 상대 이름
+//                    putExtra("userName", dbHelper.getUserName()) // 유저 이름
                 }
                 //battleViewModel.clearGrid() // 그리드 초기화
                 startActivity(intent)
