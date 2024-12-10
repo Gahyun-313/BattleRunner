@@ -20,7 +20,7 @@
             android:layout_height="48dp"
             android:paddingHorizontal="5dp"
 
-            android:text="김가현님과의 배틀"
+            android:text="sh kim님과의 배틀"
 
             android:textSize="21sp"
             android:textColor="@color/black"

@@ -62,37 +62,5 @@
         android:gravity="center"
         android:layout_marginBottom="15dp"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="50dp"
-        android:paddingVertical="15dp"
-        android:background="@drawable/button"
-        android:backgroundTint="@color/blue0"
-        android:orientation="vertical"
-        android:layout_marginBottom="20dp">
-
-        <TextView
-            android:id="@+id/today_distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/personalEnd_distance"
-            android:textColor="@color/white"
-            android:fontFamily="@font/pretendard_medium"
-            android:textSize="18sp"
-            android:layout_gravity="center"/>
-
-        <TextView
-            android:id="@+id/today_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/personalEnd_time"
-            android:textColor="@color/white"
-            android:fontFamily="@font/pretendard_medium"
-            android:textSize="18sp"
-            android:layout_gravity="center"/>
-
-    </LinearLayout>
-
 
 </LinearLayout>

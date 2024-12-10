@@ -88,8 +88,8 @@ class BattleEndActivity : AppCompatActivity() {
 
         // 문자 설정
         // TODO: 승리, 패배 문구 하드코딩 설정!!!!!!!!!!!!!!!!!
-        binding.title.text = "김가현님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
-        binding.result.text = "sh kim님의 승리"   // "{$userName}님의 승리/패배"
+        binding.title.text = "sh kim님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
+        binding.result.text = "김가현님의 승리"   // "{$userName}님의 승리/패배"
 
         // MapFragment 준비 후 그리드 표시
         mapFragment.setOnMapReadyCallback {
@@ -108,7 +108,7 @@ class BattleEndActivity : AppCompatActivity() {
             mapFragment.takeMapSnapshot { bitmap ->
                 if (bitmap != null) {
                     // TODO 하드코딩 상대방 이름
-                    saveBattleData(bitmap, "김가현")
+                    saveBattleData(bitmap, "sh kim")
                     Log.d("BattleEndActivity", "배틀 데이터 저장 완료")
                 } else {
                     Log.e("BattleEndActivity", "스냅샷 생성 실패 또는 상대 이름 없음")
