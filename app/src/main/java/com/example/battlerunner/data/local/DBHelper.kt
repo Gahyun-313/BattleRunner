@@ -11,7 +11,7 @@ import com.example.battlerunner.data.model.User
 
 /**
  * SQLite 데이터베이스 관리 클래스
- * 싱글턴 패턴을 사용 -> 애플리케이션 전역에서 동일한 인스턴스를 사용
+ * 싱글턴 패턴을 사용 -> 애플리케이션 전역에서 동일한 인스턴스를 사용!
  */
 
 class DBHelper private constructor(context: Context) : SQLiteOpenHelper(context, "Login.db", null, 8) {
