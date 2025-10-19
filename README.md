@@ -9,7 +9,7 @@
 
 | 메인 화면 | 배틀 지도 | 결과 화면 |
 |:--:|:--:|:--:|
-//| ![메인](./assets/main_screen.png) | ![맵](./assets/map_grid.png) | ![결과](./assets/result_screen.png) |
+| ![메인](./assets/main_screen.png) | ![맵](./assets/map_grid.png) | ![결과](./assets/result_screen.png) |
 
 ---
 
