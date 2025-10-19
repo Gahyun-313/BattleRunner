@@ -42,3 +42,19 @@
 | Kotlin (MVVM), Compose, Retrofit, Google Maps | Spring Boot, JPA, MySQL, Swagger |
 | SQLite 로컬 저장 | REST API 기반 데이터 통신 |
 | 로그인/배틀/맵 관리 UI | Controller-Service-Entity 구조 |
+
+## ⚙️ 기술 스택
+
+| 분야 | 기술 |
+|------|------|
+| **Frontend (Android)** | Kotlin, Jetpack Compose, MVVM, Retrofit2, Google Maps API, SQLite |
+| **Backend (Server)** | Spring Boot, JPA, MySQL, Lombok, Gradle |
+| **Infra / Tools** | IntelliJ IDEA, Android Studio, Docker(MySQL), Swagger |
+
+---
+
+## 📱 앱 UI 플로우
+
+![App Flow](./assets/app_flow_diagram.png)
+
+
