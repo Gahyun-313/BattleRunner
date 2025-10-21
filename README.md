@@ -1,6 +1,6 @@
-# 🏃‍♀️ BattleRunner (배틀러너)
+# 🏃‍♀️ 배틀러너
 
-> **“달리며 영토를 점령하는 러닝 배틀 앱”**  
+> **“땅따먹기 기반 러닝 배틀 앱”**  
 > 실제 달리기 데이터를 기반으로 맵을 점령하고, 다른 러너와 경쟁하세요.
 
 ![메인배너이미지](https://private-user-images.githubusercontent.com/78289372/503502666-725a4367-53d7-4795-9105-ad84820612e5.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjEwMjQ3NjQsIm5iZiI6MTc2MTAyNDQ2NCwicGF0aCI6Ii83ODI4OTM3Mi81MDM1MDI2NjYtNzI1YTQzNjctNTNkNy00Nzk1LTkxMDUtYWQ4NDgyMDYxMmU1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIxVDA1Mjc0NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTllOTc0NDRmOGRmZjc1YzY3YzBkNjE0MDdlZDRhNDliNTUxY2ZiNzdjOTRhZjU0MDQ0YTgyOTcxNmJmOWM2Y2EmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ICUYx2sOlJNngzcwCgXdfC7p_St3gO3DtjZ7ZGyUbuA)
@@ -52,6 +52,9 @@
 | **Frontend (Android)** | Kotlin, Jetpack Compose, MVVM, Retrofit2, Google Maps API, SQLite |
 | **Backend (Server)** | Spring Boot, JPA, MySQL, Lombok, Gradle |
 | **Infra / Tools** | IntelliJ IDEA, Android Studio, Docker(MySQL), Swagger |
+
+🛠️ Tech Stack  
+`Java` `Kotlin` `Spring Boot` `MySQL` `SQLite` `Retrofit` `Google Maps API` `JWT` `Swagger` `Gradle`
 
 ---
 
