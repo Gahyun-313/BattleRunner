@@ -1,17 +1,20 @@
 # 🏃‍♀️ 배틀러너
 
 > **“땅따먹기 기반 러닝 배틀 앱”**  
-> 실제 달리기 데이터를 기반으로 맵을 점령하고, 다른 러너와 경쟁하세요.
+> 혼자서! 둘이서! 러너를 위한 러닝 앱
 
 ![메인배너이미지](https://private-user-images.githubusercontent.com/78289372/503502666-725a4367-53d7-4795-9105-ad84820612e5.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjEwMjQ3NjQsIm5iZiI6MTc2MTAyNDQ2NCwicGF0aCI6Ii83ODI4OTM3Mi81MDM1MDI2NjYtNzI1YTQzNjctNTNkNy00Nzk1LTkxMDUtYWQ4NDgyMDYxMmU1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIxVDA1Mjc0NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTllOTc0NDRmOGRmZjc1YzY3YzBkNjE0MDdlZDRhNDliNTUxY2ZiNzdjOTRhZjU0MDQ0YTgyOTcxNmJmOWM2Y2EmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ICUYx2sOlJNngzcwCgXdfC7p_St3gO3DtjZ7ZGyUbuA)
 
+***표에 이미지 넣는 법
+| 개인러닝 | 개인러닝 결과 화면 | 배틀러닝 | 배틀러닝 결과 화면 |
+|:--:|:--:|:--:|:--:|
+| ![메인](./assets/main_screen.png) | ![맵](./assets/map_grid.png) | ![결과](./assets/result_screen.png) |
+
 ---
 
-## 🎨 프로젝트 미리보기
+## 🎨 프로젝트 프리뷰
 
-| 메인 화면 | 배틀 지도 | 결과 화면 |
-|:--:|:--:|:--:|
-| ![메인](./assets/main_screen.png) | ![맵](./assets/map_grid.png) | ![결과](./assets/result_screen.png) |
+
 
 ---
 
@@ -23,7 +26,6 @@
 
 > **“전투가 아닌 배틀, 경쟁이 아닌 운동의 즐거움.”**
 
----
 
 ## ✨ 핵심 기능
 
@@ -35,7 +37,6 @@
 | 💾 **기록 저장** | 러닝/배틀 기록을 SQLite 및 서버(MySQL)에 저장 | ![History](./assets/record_list.png) |
 | 📊 **결과 리포트** | 점령률, 거리, 시간 기반 결과 리포트 표시 | ![Report](./assets/battle_report.png) |
 
----
 
 ## 🧩 시스템 구조
 
@@ -56,10 +57,17 @@
 🛠️ Tech Stack  
 `Java` `Kotlin` `Spring Boot` `MySQL` `SQLite` `Retrofit` `Google Maps API` `JWT` `Swagger` `Gradle`
 
----
+
 
 ## 📱 앱 UI 플로우
 
 ![App Flow](./assets/app_flow_diagram.png)
 
+
+## ✨ 팀원 
+
+| 김가현 | 김세현 | 황유석 |
+|-------|-------|-------|
+| FE, 기획, 디자인 | BE | FE |
+| 
 
