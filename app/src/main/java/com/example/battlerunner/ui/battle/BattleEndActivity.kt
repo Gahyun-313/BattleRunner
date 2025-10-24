@@ -46,50 +46,9 @@ class BattleEndActivity : AppCompatActivity() {
             FileOutputStream(imageFile).use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
             }
-            Log.d("BattleEndActivity", "이미지 저장 성공: ${imageFile.absolutePath}")
-
-            // 데이터베이스에 저장
-            val dbHelper = DBHelper.getInstance(this)
-            val success = dbHelper.insertBattleRecord(
-                endDate = dateKey,
-                imagePath = imageFile.absolutePath,
-                //TODO 실제 데이터로 대체
-                elapsedTime = 0,
-                distance = 0f
-            )
-            if (success) {
-                Log.d("BattleEndActivity", "데이터베이스 저장 성공")
-            } else {
-                Log.e("BattleEndActivity", "데이터베이스 저장 실패")
-            }
-        } catch (e: Exception) {
-            Log.e("BattleEndActivity", "이미지 저장 실패", e)
-        }
-    }
-
-
-    @SuppressLint("DefaultLocale", "SetTextI18n")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = ActivityBattleEndBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val battleId = intent.getLongExtra("battleId", -1) // 배틀 Id 받아옴
-
-        // MapFragment 초기화 및 설정
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.mapFragmentContainer, mapFragment)
-            .commitNow()
-
-//        val oppositeName = intent.getStringExtra("oppositeName")
-//        val userName = intent.getStringExtra("userName")
-//        val userId = intent.getStringExtra("userId")
-
-        // 문자 설정
-        binding.title.text = "김세현님과의 배틀 결과" // "{$oppositeName}님과의 배틀 결과"
-        // TODO: 승리, 패배 문구 설정!!!!!!!!!!!!!!!!!
-        binding.result.text = "김세현님의 승리"   // "{$userName}님의 승리/패배"
+            Log.d("BattleEndActivity", "이미지 저장 성공: ${imageFile.absolutePath}"구 설정
+        binding.title.text = "{$oppositeName}님과의 배틀 결과" // 
+        binding.result.text = "{$userName}님의 승리/패배"   // 
 
         // MapFragment 준비 후 그리드 표시
         mapFragment.setOnMapReadyCallback {
