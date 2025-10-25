@@ -91,12 +91,13 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         dbHelper = DBHelper.getInstance(requireContext())
         userId = dbHelper.getUserId().toString() // 사용자 ID
 
-         battleId?.let { id ->
+        // 배틀 상대 로드 -> 타이틀에 상대 이름 반영
+        battleId?.let { id ->
             val myId = userId ?: ""
             battleViewModel.loadBattleParticipants(id, myId) { ok ->
                 if (ok) {
                     battleViewModel.opponentName.observe(viewLifecycleOwner) { oppName ->
-                        binding.title.text = "$oppName 님과의 배틀" //
+                        binding.title.text = "$oppName 님과의 배틀" 
                     }
                 } else {
                     Toast.makeText(requireContext(), "배틀 참가자 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
