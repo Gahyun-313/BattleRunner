@@ -3,7 +3,7 @@
 > **“땅따먹기 기반 러닝 배틀 앱”**  
 > 혼자서! 둘이서! 러너를 위한 러닝 앱
 
-![메인배너이미지](https://private-user-images.githubusercontent.com/78289372/503502666-725a4367-53d7-4795-9105-ad84820612e5.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjEwMjQ3NjQsIm5iZiI6MTc2MTAyNDQ2NCwicGF0aCI6Ii83ODI4OTM3Mi81MDM1MDI2NjYtNzI1YTQzNjctNTNkNy00Nzk1LTkxMDUtYWQ4NDgyMDYxMmU1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIxVDA1Mjc0NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTllOTc0NDRmOGRmZjc1YzY3YzBkNjE0MDdlZDRhNDliNTUxY2ZiNzdjOTRhZjU0MDQ0YTgyOTcxNmJmOWM2Y2EmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ICUYx2sOlJNngzcwCgXdfC7p_St3gO3DtjZ7ZGyUbuA)
+![메인배너이미지]()
 
 ## 🎨 프로젝트 프리뷰
 
@@ -21,41 +21,44 @@
 | 💾 **기록 저장** | 러닝/배틀 기록을 SQLite 및 서버(MySQL)에 저장 | ![History](./assets/record_list.png) |
 | 📊 **결과 리포트** | 점령률, 거리, 시간 기반 결과 리포트 표시 | ![Report](./assets/battle_report.png) |
 
-핵심 기능 이미지
-| 로그인 |
-|-------|-------|
-|
+
 
 ## 🧩 시스템 구조
 
 | Android App | Spring Boot Server |
 |--------------|-------------------|
-| Kotlin (MVVM), Compose, Retrofit, Google Maps | Spring Boot, JPA, MySQL, Swagger |
+| Kotlin (MVVM), XML, Retrofit, Google Maps | Spring Boot, JPA, MySQL, Swagger |
 | SQLite 로컬 저장 | REST API 기반 데이터 통신 |
 | 로그인/배틀/맵 관리 UI | Controller-Service-Entity 구조 |
 
+
 ## ⚙️ 기술 스택
 
-| 분야 | 기술 |
-|------|------|
-| **Frontend (Android)** | Kotlin, Jetpack Compose, MVVM, Retrofit2, Google Maps API, SQLite |
-| **Backend (Server)** | Spring Boot, JPA, MySQL, Lombok, Gradle |
-| **Infra / Tools** | IntelliJ IDEA, Android Studio, Docker(MySQL), Swagger |
+### 📱 Android (Client)
 
-🛠️ Tech Stack  
-`Java` `Kotlin` `Spring Boot` `MySQL` `SQLite` `Retrofit` `Google Maps API` `JWT` `Swagger` `Gradle`
+| 구분 | 기술 | 설명 |
+|------|------|------|
+| **언어 / 구조** | `Kotlin`, `MVVM`, `ViewModel`, `LiveData`, `ViewBinding` | 구조적 상태 관리 및 UI 자동 갱신 |
+| **지도 / 위치 추적** | `Google Maps SDK`, `FusedLocationProviderClient`, `Polyline`, `Marker` | GPS 기반 실시간 위치 추적 및 경로 표시 |
+| **네트워크 통신** | `Retrofit2`, `OkHttp3`, `Gson`, `Coroutine` | 서버와 비동기 REST API 통신 |
+| **로컬 데이터 저장** | `SQLite`, `DBHelper`, `SharedPreferences` | 자동 로그인 / 러닝 기록 로컬 저장 |
+| **백그라운드 서비스** | `Foreground Service`, `NotificationManager` | 러닝 중 거리·시간 실시간 표시 |
+| **기타** | `Logcat`, `Gradle`, `Google Play Services` | 디버깅, 빌드, 권한 관리 |
 
 
+### 🌐 공통 / 협업 환경
 
-## 📱 앱 UI 플로우
+| 구분 | 도구 | 설명 |
+|------|------|------|
+| **버전 관리** | `Git`, `GitHub` | 브랜치 전략 및 포트폴리오 공개 |
+| **테스트 / 디버깅** | `Postman`, `Swagger UI`, `ADB Logcat` | API 검증 및 통신 점검 |
+| **디자인 / 문서화** | `Figma`, `draw.io`, `Excalidraw` | UI 디자인 및 시스템 구조 다이어그램 제작 |
 
-![App Flow](./assets/app_flow_diagram.png)
-
+---
 
 ## ✨ 팀원 
 
 | 김가현 | 김세현 | 황유석 |
 |-------|-------|-------|
-| FE, 기획, 디자인 | BE | FE |
-| 
+| FE, 기획, 디자인, BE | BE | FE |
 
