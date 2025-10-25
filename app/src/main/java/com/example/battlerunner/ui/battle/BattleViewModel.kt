@@ -32,15 +32,64 @@ class BattleViewModel : ViewModel() {
     private val _gridStartLocation = MutableLiveData<LatLng>() // 시작 위치 정보 저장
     val gridStartLocation: LiveData<LatLng> get() = _gridStartLocation // 외부에서 읽기 가능하도록 제공
 
-    // 배틀 상대 이름을 저장하는 LiveData
-    private val _opponentName = MutableLiveData<String>() // 배틀 상대 이름 정보 저장
-    val opponentName: LiveData<String> get() = _opponentName // 외부에서 읽기 가능하도록 제공
+    // 배틀 상대 정보 LiveData
+    private val _opponentId = MutableLiveData<String>()
+    val opponentId: LiveData<String> get() = _opponentId
+    
+    private val _opponentName = MutableLiveData<String>() 
+    val opponentName: LiveData<String> get() = _opponentName 
 
-    val userId: String = "gu20313@gmail.com"
-    val opponentId: String = "gus20313@gmail.com"
-    //TODO 작동 가능하게 변경해야 함
+    // 유저 정보 LiveData
+    private val _myUserId = MutableLiveData<String>()
+    val myUserId: LiveData<String> get() = _myUserId
 
-    // DBHelper 싱글턴 인스턴스 초기화
+    private val _myName = MutableLiveData<String>()
+    val myName: LiveData<String> get() = _myName
+
+    /**
+     * 유저와 상대 정보 할당
+     *
+     * 배틀 참가자(나 & 상대) 정보를 서버에서 받아 LiveData로 보관
+     * @param battleId 배틀 ID
+     * @param myId 로컬(DBHelper)에서 읽은 내 사용자 ID
+     */
+    fun loadBattleParticipants(
+        battleId: Long,
+        myId: String,
+        onComplete: (Boolean) -> Unit = {}
+    ) {
+        RetrofitInstance.battleApi.getBattleInfo(battleId).enqueue(object : Callback<BattleInfoResponse> {
+            override fun onResponse(call: Call<BattleInfoResponse>, response: Response<BattleInfoResponse>) {
+                if (!response.isSuccessful) {
+                    Log.e("BattleViewModel", "getBattleInfo 실패: ${response.errorBody()?.string()}")
+                    onComplete(false); return
+                }
+                val info = response.body() ?: run { onComplete(false); return }
+                // 내/상대 매핑
+                if (info.userAId == myId) {
+                    _myUserId.postValue(info.userAId)
+                    _myName.postValue(info.userAName)
+                    _opponentId.postValue(info.userBId)
+                    _opponentName.postValue(info.userBName)
+                } else if (info.userBId == myId) {
+                    _myUserId.postValue(info.userBId)
+                    _myName.postValue(info.userBName)
+                    _opponentId.postValue(info.userAId)
+                    _opponentName.postValue(info.userAName)
+                } else {
+                    // 유저 ID가 목록에 없을 경우
+                    Log.e("BattleViewModel", "내 ID가 목록에 없음: myId=$myId, info=$info")
+                    onComplete(false); return
+                }
+                onComplete(true)
+            }
+
+            override fun onFailure(call: Call<BattleInfoResponse>, t: Throwable) {
+                Log.e("BattleViewModel", "getBattleInfo 통신 실패", t)
+                onComplete(false)
+            }
+        })
+    }
 
     /**
      * 서버에서 그리드 시작 위치를 가져오는 함수
@@ -274,14 +323,16 @@ class BattleViewModel : ViewModel() {
 
     // 지도에 소유권 정보 반영
     private fun updateGridColors() {
+        val myId = _myUserId.value
+        val oppId = _opponentId.value
+        
         _gridPolygons.value?.forEach { polygon ->
-            val gridId = polygon.tag as? Int // 폴리곤 태그에서 Grid ID 가져오기
+            val gridId = polygon.tag as? Int ?: return@forEach // 폴리곤 태그에서 Grid ID 가져오기
             if (gridId != null) {
                 val ownerId = ownershipMap[gridId] // Grid ID로 소유권 확인
                 polygon.fillColor = when (ownerId) {
-                    // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
-                    "gu20313@naver.com" -> Color.BLUE // 내 소유
-                    "gus20313@gmail.com" -> Color.RED // 상대 소유
+                    myId -> Color.BLUE // 내 소유
+                    oppId -> Color.RED // 상대 소유
                     else -> Color.argb(10, 0, 0, 0) // 중립
                 }
                 Log.d("BattleViewModel", "Grid $gridId 색상 업데이트: $ownerId")
@@ -292,16 +343,17 @@ class BattleViewModel : ViewModel() {
         Log.d("BattleViewModel", "지도 색상 업데이트 완료")
     }
 
-
-
     // 상대 소유권 업데이트
     fun updateGridOwnership_Real(gridId: Int, ownerId: String) {
         _gridPolygons.value?.find { it.tag as? Int == gridId }?.let { polygon ->
             ownershipMap[gridId] = ownerId
+
+            val myId = _myUserId.value
+            val oppId = _opponentId.value
+            
             polygon.fillColor = when (ownerId) {
-                // TODO: !!!!!!!!!!!!!!!아이디 하드코딩!!!!!!!!!!!!!!!!!!!!!!!
-                "gu20313@naver.com" -> Color.BLUE // 내 소유
-                "gus20313@gmail.com" -> Color.RED // 상대 소유
+                myId -> Color.BLUE // 내 소유
+                oppId -> Color.RED // 상대 소유
                 else -> Color.argb(10, 0, 0, 0) // 중립
             }
         }
