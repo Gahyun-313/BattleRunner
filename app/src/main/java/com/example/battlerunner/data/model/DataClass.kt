@@ -49,7 +49,9 @@ data class UserResponse(
 data class Battle(
     val battleId: Long?, // 서버에서 생성
     val user1Id: String,  // 사용자 1 (신청 한 사람)
+    val user1Name: String,
     val user2Id: String,  // 사용자 2 (신청 받은 사람)
+    val user2Name: String,
     val isBattleStarted: Boolean,
     val gridStartLat: Double?,   // 그리드 시작(중심) 위도
     val gridStartLng: Double?    // 그리드 시작(중심) 경도
