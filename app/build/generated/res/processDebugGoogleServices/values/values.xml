@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">819529848405</string>
+    <string name="google_api_key" translatable="false">AIzaSyDtJycW4r6y4IPbZyIXq6WOVu64KD6F30E</string>
+    <string name="google_app_id" translatable="false">1:819529848405:android:43f8b511f90332dd7626dc</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDtJycW4r6y4IPbZyIXq6WOVu64KD6F30E</string>
+    <string name="google_storage_bucket" translatable="false">battlerunner.appspot.com</string>
+    <string name="project_id" translatable="false">battlerunner</string>
+</resources>

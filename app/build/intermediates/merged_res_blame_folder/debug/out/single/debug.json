@@ -1,0 +1,294 @@
+[
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_user_profile1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/user_profile1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_close.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/close.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_splash.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-mdpi_battler_unner_foreground.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-mdpi/battler_unner_foreground.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_battle_detail.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_detail.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_border.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/border.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxhdpi_battler_unner.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxhdpi/battler_unner.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_home_bar_battle.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/home_bar_battle.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_flag1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/flag1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_ic_share_icon.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/ic_share_icon.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_login_google.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/login_google.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/menu_bottom_navigation_menu.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/menu/bottom_navigation_menu.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_home1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/home1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_logo1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/logo1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_bottom_sheet.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/bottom_sheet.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_sign_up.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_sign_up.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_google_login_image.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/google_login_image.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_popup_running_data.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/popup_running_data.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_placeholder.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/placeholder.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/font_pretendard_extrabold.ttf.flat",
+        "source": "com.example.battlerunner.app-main-7:/font/pretendard_extrabold.ttf"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_item_friend.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_friend.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_home.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_menu_click_color.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/menu_click_color.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_mypage.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_mypage.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_ic_goal_icon.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/ic_goal_icon.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_dot.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/dot.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-hdpi_battler_unner.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-hdpi/battler_unner.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_kakao_login_large_wide.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/kakao_login_large_wide.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_popup_battle_records.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/popup_battle_records.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/xml_backup_rules.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_battle.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_battle.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-mdpi_battler_unner_round.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-mdpi/battler_unner_round.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_login_kakao.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/login_kakao.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_home_bar_community.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/home_bar_community.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_main.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxxhdpi_battler_unner_round.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxxhdpi/battler_unner_round.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxhdpi_battler_unner_round.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxhdpi/battler_unner_round.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_login.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_home_bar_menu.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/home_bar_menu.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_map.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_map.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_rounded_border.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/rounded_border.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_personal_end.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_personal_end.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_community.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_community.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xhdpi_battler_unner.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xhdpi/battler_unner.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-hdpi_battler_unner_foreground.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-hdpi/battler_unner_foreground.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_ic_calendar_icon.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/ic_calendar_icon.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-anydpi-v26_battler_unner_round.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-anydpi-v26/battler_unner_round.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/xml_data_extraction_rules.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/font_pretendard_medium.ttf.flat",
+        "source": "com.example.battlerunner.app-main-7:/font/pretendard_medium.ttf"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_home_goal.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_home_goal.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_menu1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/menu1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_battle_end.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_end.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_login2.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_login2.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_calendar.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_calendar.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xhdpi_battler_unner_round.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xhdpi/battler_unner_round.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-mdpi_battler_unner.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-mdpi/battler_unner.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_item_user.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_user.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_battle_request.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_request.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_activity_battle_apply.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_apply.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_ic_record_icon.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/ic_record_icon.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-hdpi_battler_unner_round.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-hdpi/battler_unner_round.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-anydpi-v26_battler_unner.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-anydpi-v26/battler_unner.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_item_battle_record.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_battle_record.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_battle1.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/battle1.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xhdpi_battler_unner_foreground.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xhdpi/battler_unner_foreground.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_home_bar_home.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/home_bar_home.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxhdpi_battler_unner_foreground.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxhdpi/battler_unner_foreground.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_recycler_view_matching.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/recycler_view_matching.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/layout_fragment_matching.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_matching.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_button.xml.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/button.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/drawable_user_profile3.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/drawable/user_profile3.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxxhdpi_battler_unner.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxxhdpi/battler_unner.png"
+    },
+    {
+        "merged": "com.example.battlerunner.app-merged_res-5:/mipmap-xxxhdpi_battler_unner_foreground.png.flat",
+        "source": "com.example.battlerunner.app-main-7:/mipmap-xxxhdpi/battler_unner_foreground.png"
+    }
+]

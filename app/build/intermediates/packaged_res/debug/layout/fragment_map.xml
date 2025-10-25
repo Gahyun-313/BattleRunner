@@ -1,0 +1,28 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 현재 위치 버튼 -->
+    <Button
+        android:id="@+id/customLocationButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|left"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:backgroundTint="@color/white"
+        android:background="@drawable/button"
+        android:textColor="@color/grey_dark"
+        android:elevation="5dp"
+        android:text="●"
+        tools:ignore="RtlHardcoded" />
+
+    <!-- SupportMapFragment를 위한 FragmentContainerView -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

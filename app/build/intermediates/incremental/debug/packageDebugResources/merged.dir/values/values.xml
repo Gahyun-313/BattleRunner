@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="battler_unner_background">#485FF0</color>
+    <color name="black">#FF000000</color>
+    <color name="blue0">#485ff0</color>
+    <color name="grey_dark">#8c8c8c</color>
+    <color name="grey_dark2">#383838</color>
+    <color name="grey_lite">#cdcdcd</color>
+    <color name="orange0">#FE9820</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="red0">#DF0101</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">BATTLE RUNNER</string>
+    <string name="battleApply_applyBtn">배틀 신청</string>
+    <string name="battleApply_monthRecord">이달의 기록</string>
+    <string name="battleEnd_closeBtn">창 닫기 버튼</string>
+    <string name="battleEnd_line_lose">수고하셨습니다!</string>
+    <string name="battleEnd_line_win">축하합니다!</string>
+    <string name="battleEnd_title">님과의 배틀 결과</string>
+    <string name="battleEnd_win">님의 승리</string>
+    <string name="battleRequest_allow">수락</string>
+    <string name="battleRequest_deny">거절</string>
+    <string name="battleRequest_line">배틀 신청이 도착했습니다</string>
+    <string name="battle_distance">거리</string>
+    <string name="battle_end">수고하셨습니다!</string>
+    <string name="battle_finish">finish</string>
+    <string name="battle_record">오늘의 러닝</string>
+    <string name="battle_time">시간</string>
+    <string name="battle_title">님과의 배틀</string>
+    <string name="confirmBtn">확인</string>
+    <string name="default_web_client_id">819529848405-r1o7m77suctqd1m80kdkmqlkfff67ovi.apps.googleusercontent.com</string>
+    <string name="endBtn">종료</string>
+    <string name="gcm_defaultSenderId" translatable="false">819529848405</string>
+    <string name="google_api_key" translatable="false">AIzaSyDtJycW4r6y4IPbZyIXq6WOVu64KD6F30E</string>
+    <string name="google_app_id" translatable="false">1:819529848405:android:43f8b511f90332dd7626dc</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDtJycW4r6y4IPbZyIXq6WOVu64KD6F30E</string>
+    <string name="google_storage_bucket" translatable="false">battlerunner.appspot.com</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="homeBar_title_battle">배틀</string>
+    <string name="homeBar_title_community">커뮤니티</string>
+    <string name="homeBar_title_home">개인</string>
+    <string name="homeBar_title_myPage">마이페이지</string>
+    <string name="home_GOAL">GOAL</string>
+    <string name="home_distance">거리</string>
+    <string name="home_record">현재 기록</string>
+    <string name="home_time">시간</string>
+    <string name="home_title">오늘의 러닝</string>
+    <string name="icon">logo icon</string>
+    <string name="km">km</string>
+    <string name="login2_id">ID</string>
+    <string name="login2_password">비밀번호</string>
+    <string name="login2_signup">회원가입</string>
+    <string name="login_login">로그인</string>
+    <string name="login_temp">temp</string>
+    <string name="matching_search">ID로 검색하기</string>
+    <string name="matching_searchBtn">신청</string>
+    <string name="matching_subtitle">함께 뛸 러너가 매칭되기 전이에요!</string>
+    <string name="matching_title">배틀 상대 매칭</string>
+    <string name="myPage_age">나이</string>
+    <string name="myPage_battle">배틀</string>
+    <string name="myPage_calendar">캘린더</string>
+    <string name="myPage_grade">전적</string>
+    <string name="myPage_logout">로그아웃</string>
+    <string name="myPage_logout_text">로그인/로그아웃</string>
+    <string name="myPage_longestDistance">최장거리</string>
+    <string name="myPage_personalRunning">개인 러닝</string>
+    <string name="myPage_record">기록</string>
+    <string name="myPage_sex">성별</string>
+    <string name="myPage_userID">userID</string>
+    <string name="myPage_userName">이름</string>
+    <string name="myPage_weekGoal">이번주 목표</string>
+    <string name="personalEnd_distance">달린 거리</string>
+    <string name="personalEnd_line">수고하셨습니다!</string>
+    <string name="personalEnd_time">소요 시간</string>
+    <string name="personalEnd_title">오늘의 러닝 기록</string>
+    <string name="project_id" translatable="false">battlerunner</string>
+    <string name="search_hint">ID로 검색하기</string>
+    <string name="startBtn">시작</string>
+    <string name="stopBtn">정지</string>
+    <string name="temp_distance">10.19</string>
+    <string name="temp_time">13:34:49</string>
+    <string name="today_running_record">오늘의 러닝 기록</string>
+    <string name="userID">userID</string>
+    <string name="userName">userName</string>
+    <string name="user_profile_image">user profile image</string>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+    </style>
+    <style name="CustomSearchView" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/blue0</item> 
+        <item name="android:textColorPrimary">@color/white</item> 
+        <item name="android:textColorHint">@color/white</item> 
+        <item name="colorControlNormal">@color/white</item> 
+    </style>
+    <style name="PopupTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item> 
+        <item name="android:windowBackground">@android:color/transparent</item> 
+        <item name="android:windowIsFloating">true</item> 
+        <item name="android:windowMinWidthMajor">90%</item> 
+        <item name="android:windowMinWidthMinor">90%</item> 
+
+    </style>
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/blue0</item>
+    </style>
+    <style name="Theme.BattleRunner" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        
+        <item name="colorPrimary">@color/blue0</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        
+
+        
+        <item name="windowNoTitle">true</item>
+        
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+
+    </style>
+</resources>

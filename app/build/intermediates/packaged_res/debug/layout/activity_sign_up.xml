@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingHorizontal="30dp">
+
+    <Button
+        android:id="@+id/goBackBtn"
+        android:layout_width="70dp"
+        android:layout_height="40dp"
+        android:text="Back"
+        android:textSize="13sp"
+        android:background="@drawable/button"
+        android:backgroundTint="@color/blue0"
+        android:textColor="@color/white"
+        android:layout_gravity="left" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="회원가입"
+        android:textSize="30sp"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:padding="15dp"
+        android:layout_marginBottom="60dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="ID"
+            android:textSize="20sp"
+            android:paddingLeft="10dp"
+            android:textColor="@color/black"
+            android:gravity="center_vertical"/>
+        <Button
+            android:id="@+id/btnCheckId"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/grey_dark"
+            android:text="중복확인"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/pretendard_medium"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editTextId"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:ems="10"
+        android:layout_gravity="bottom"
+        android:hint="6~15자 영문/숫자 조합으로 입력"
+        android:textSize="16sp"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="비밀번호"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical"/>
+    <EditText
+        android:id="@+id/editTextPassword"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:ems="10"
+        android:layout_gravity="bottom"
+        android:hint="8~15자의 영문/숫자 조합으로 입력"
+        android:textSize="16sp"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="비밀번호 확인"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical"/>
+    <EditText
+        android:id="@+id/editTextRePassword"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:ems="10"
+        android:layout_gravity="bottom"
+        android:hint="8~15자의 영문/숫자 조합으로 입력"
+        android:textSize="16sp"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="닉네임"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical"/>
+    <EditText
+        android:id="@+id/editTextNick"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="10dp"
+        android:ems="10"
+        android:layout_gravity="bottom"
+        android:hint="닉네임을 입력하세요"
+        android:textSize="16sp"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:text="완료"
+        android:textSize="20sp"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:background="@drawable/button"
+        android:backgroundTint="@color/blue0"
+        android:textColor="@color/white"
+        android:paddingHorizontal="40dp"
+        android:paddingVertical="15dp"
+        android:layout_marginVertical="30dp"/>
+
+</LinearLayout>

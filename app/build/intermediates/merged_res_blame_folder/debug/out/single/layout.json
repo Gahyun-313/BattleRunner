@@ -1,0 +1,98 @@
+[
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_map.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_map.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/popup_battle_records.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/popup_battle_records.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_battle_apply.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_apply.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_mypage.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_mypage.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_home.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/item_user.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_user.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_personal_end.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_personal_end.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/item_friend.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_friend.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_splash.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_login.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_battle_end.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_end.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_battle_request.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_request.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_home_goal.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_home_goal.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_community.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_community.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_matching.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_matching.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/fragment_battle.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/fragment_battle.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_login2.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_login2.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_main.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_calendar.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_calendar.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_sign_up.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_sign_up.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/recycler_view_matching.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/recycler_view_matching.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/activity_battle_detail.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/activity_battle_detail.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/popup_running_data.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/popup_running_data.xml"
+    },
+    {
+        "merged": "com.example.battlerunner.app-mergeDebugResources-4:/layout/item_battle_record.xml",
+        "source": "com.example.battlerunner.app-main-7:/layout/item_battle_record.xml"
+    }
+]
