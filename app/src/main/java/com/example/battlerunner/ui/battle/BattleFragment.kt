@@ -91,6 +91,19 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
         dbHelper = DBHelper.getInstance(requireContext())
         userId = dbHelper.getUserId().toString() // 사용자 ID
 
+         battleId?.let { id ->
+            val myId = userId ?: ""
+            battleViewModel.loadBattleParticipants(id, myId) { ok ->
+                if (ok) {
+                    battleViewModel.opponentName.observe(viewLifecycleOwner) { oppName ->
+                        binding.title.text = "$oppName 님과의 배틀" //
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "배틀 참가자 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        
         // MapFragment 초기화 (SupportMapFragment 동적으로 추가)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragmentContainer) as? SupportMapFragment
             ?: SupportMapFragment.newInstance().also {
@@ -247,11 +260,7 @@ class BattleFragment() : Fragment(R.layout.fragment_battle), OnMapReadyCallback 
                 val intent = Intent(requireActivity(), BattleEndActivity::class.java).apply {
 
                    putExtra("battleId", battleId) // 배틀 Id 전달
-
-//                    putExtra("oppositeName", opponentName) // 배틀 상대 이름
-//                    putExtra("userName", dbHelper.getUserName()) // 유저 이름
                 }
-                //battleViewModel.clearGrid() // 그리드 초기화
                 startActivity(intent)
             }
         }
