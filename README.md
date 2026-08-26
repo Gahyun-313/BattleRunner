@@ -57,8 +57,6 @@ BattleRunner는 사용자의 이동 시간과 거리만 기록하는 러닝 앱�
 - 마이페이지와 러닝·Battle 기록 조회
 - 친구 검색·추가·삭제 UI와 SQLite 연동 로직 구현 (Backend API 미구현으로 기능 미완성)
 
-Directions API 기반 길 추천은 Android 팀원이 구현했으며 본인의 담당 범위에서 제외합니다.
-
 <br>
 
 ## 🛠️ Tech Stack
